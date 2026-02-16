@@ -1,0 +1,323 @@
+/* ===================================================================
+   FBLA Business Boost - Professional Stylesheet
+   Modern, clean design with professional color scheme
+   =================================================================== */
+
+/* ==================== Root and Global Styles ==================== */
+
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f5f7fa;
+}
+
+/* ==================== Header Section ==================== */
+
+.header {
+    -fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+}
+
+.app-title {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+}
+
+/* ==================== Sidebar Styles ==================== */
+
+.sidebar {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 0 1 0 0;
+}
+
+.section-title {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+/* ==================== Controls Bar ==================== */
+
+.controls-bar {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10;
+}
+
+/* ==================== Buttons ==================== */
+
+.primary-button {
+    -fx-background-color: linear-gradient(to bottom, #667eea 0%, #5a67d8 100%);
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 8, 0, 0, 2);
+}
+
+.primary-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #5a67d8 0%, #4c51bf 100%);
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.5), 12, 0, 0, 3);
+}
+
+.primary-button:pressed {
+    -fx-background-color: #4c51bf;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.2), 4, 0, 0, 1);
+}
+
+.secondary-button {
+    -fx-background-color: white;
+    -fx-text-fill: #667eea;
+    -fx-border-color: #667eea;
+    -fx-border-width: 2;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #f7fafc;
+    -fx-border-color: #5a67d8;
+}
+
+.secondary-button:pressed {
+    -fx-background-color: #edf2f7;
+}
+
+/* ==================== TableView Styles ==================== */
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f7fafc;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 10;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f7fafc;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: #f0f4f8;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafbfc;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e6f0ff;
+    -fx-text-fill: #2c3e50;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #f0f7ff;
+}
+
+.table-cell {
+    -fx-padding: 8 10 8 10;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ==================== ListView Styles ==================== */
+
+.list-view {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10;
+    -fx-border-color: #f0f4f8;
+    -fx-border-width: 0 0 1 0;
+}
+
+.list-cell:odd {
+    -fx-background-color: #fafbfc;
+}
+
+.list-cell:selected {
+    -fx-background-color: #e6f0ff;
+    -fx-text-fill: #2c3e50;
+}
+
+.list-cell:hover {
+    -fx-background-color: #f0f7ff;
+}
+
+.list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* ==================== ComboBox Styles ==================== */
+
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 5 10 5 10;
+}
+
+.combo-box:hover {
+    -fx-border-color: #667eea;
+}
+
+.combo-box:focused {
+    -fx-border-color: #667eea;
+    -fx-border-width: 2;
+}
+
+/* ==================== Deals Pane ==================== */
+
+.deals-pane {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 0 0 0 1;
+}
+
+/* ==================== Action Bar ==================== */
+
+.action-bar {
+    -fx-background-color: white;
+    -fx-border-color: #e1e8ed;
+    -fx-border-width: 1 0 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, -2);
+}
+
+/* ==================== Dialog Styles ==================== */
+
+.dialog-title {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+}
+
+.field-label {
+    -fx-text-fill: #4a5568;
+}
+
+.rating-display {
+    -fx-text-fill: #667eea;
+}
+
+/* ==================== Text Area Styles ==================== */
+
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8;
+}
+
+.text-area:focused {
+    -fx-border-color: #667eea;
+    -fx-border-width: 2;
+}
+
+.text-area .content {
+    -fx-background-color: white;
+}
+
+/* ==================== TextField Styles ==================== */
+
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8;
+}
+
+.text-field:focused {
+    -fx-border-color: #667eea;
+    -fx-border-width: 2;
+}
+
+/* ==================== Slider Styles ==================== */
+
+.slider .track {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4;
+}
+
+.slider .thumb {
+    -fx-background-color: #667eea;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: #5a67d8;
+}
+
+/* ==================== Bot Verification Box ==================== */
+
+.verification-box {
+    -fx-background-color: #fff5e6;
+    -fx-border-color: #ffa500;
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.bot-question {
+    -fx-text-fill: #c05621;
+}
+
+.help-text {
+    -fx-text-fill: #718096;
+}
+
+/* ==================== Separator ==================== */
+
+.separator {
+    -fx-background-color: #e1e8ed;
+}
+
+/* ==================== Scrollbar Styles ==================== */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #cbd5e0;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #a0aec0;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #f7fafc;
+}

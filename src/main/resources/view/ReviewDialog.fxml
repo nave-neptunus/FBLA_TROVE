@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.fbla.businessboost.controller.ReviewDialogController"
+      spacing="20" prefWidth="500" prefHeight="450"
+      stylesheets="@../styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Title -->
+    <Label text="Submit Your Review" styleClass="dialog-title">
+        <font>
+            <Font name="System Bold" size="20"/>
+        </font>
+    </Label>
+    
+    <Separator/>
+    
+    <!-- Rating Section -->
+    <VBox spacing="10">
+        <Label text="Your Rating:" styleClass="field-label">
+            <font>
+                <Font name="System Bold" size="14"/>
+            </font>
+        </Label>
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <Slider fx:id="ratingSlider" prefWidth="300"/>
+            <Label fx:id="ratingValueLabel" text="3 Stars" styleClass="rating-display">
+                <font>
+                    <Font name="System Bold" size="16"/>
+                </font>
+            </Label>
+        </HBox>
+    </VBox>
+    
+    <!-- Review Text Section -->
+    <VBox spacing="10" VBox.vgrow="ALWAYS">
+        <Label text="Your Review:" styleClass="field-label">
+            <font>
+                <Font name="System Bold" size="14"/>
+            </font>
+        </Label>
+        <TextArea fx:id="reviewTextArea" 
+                  promptText="Share your experience with this business..."
+                  wrapText="true" 
+                  prefRowCount="5"
+                  VBox.vgrow="ALWAYS"/>
+    </VBox>
+    
+    <!-- Bot Verification Section -->
+    <VBox spacing="10" styleClass="verification-box">
+        <Label fx:id="botQuestionLabel" text="Bot Verification: What is 5 + 7?" 
+               styleClass="bot-question">
+            <font>
+                <Font name="System Bold" size="14"/>
+            </font>
+        </Label>
+        <TextField fx:id="botAnswerField" 
+                   promptText="Enter your answer here"
+                   prefWidth="150"/>
+        <Label text="Please solve this simple math problem to verify you're human." 
+               styleClass="help-text">
+            <font>
+                <Font size="11" name="System Italic"/>
+            </font>
+        </Label>
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+    </VBox>
+    
+    <!-- Action Buttons -->
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="Submit Review" onAction="#handleSubmit" 
+                styleClass="primary-button" prefWidth="150">
+            <font>
+                <Font name="System Bold" size="13"/>
+            </font>
+        </Button>
+        <Button text="Cancel" onAction="#handleCancel" 
+                styleClass="secondary-button" prefWidth="150">
+            <font>
+                <Font name="System Bold" size="13"/>
+            </font>
+        </Button>
+    </HBox>
+    
+</VBox>
