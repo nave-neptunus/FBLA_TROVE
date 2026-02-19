@@ -13,5 +13,5 @@ java -Dprism.order=sw \
      -Dprism.verbose=true \
      --module-path lib/javafx-sdk-21.0.1/lib \
      --add-modules javafx.controls,javafx.fxml \
-     -cp out/production/classes \
+     -cp out/production/classes:lib/json-20240303.jar \
      com.fbla.businessboost.Main

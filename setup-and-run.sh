@@ -31,20 +31,34 @@ fi
 if [ ! -d "lib/javafx-sdk-21.0.1" ]; then
     echo "📦 Downloading JavaFX SDK 21.0.1..."
     
-    # Detect OS
+    # Detect OS and Architecture
     OS="$(uname -s)"
+    ARCH="$(uname -m)"
+    
     case "${OS}" in
-        Darwin*)    JAVAFX_OS="osx";;
-        Linux*)     JAVAFX_OS="linux";;
+        Darwin*)
+            if [ "$ARCH" = "arm64" ]; then
+                JAVAFX_OS="osx-aarch64"
+            else
+                JAVAFX_OS="osx-x64"
+            fi
+            ;;
+        Linux*)
+            if [ "$ARCH" = "aarch64" ]; then
+                JAVAFX_OS="linux-aarch64"
+            else
+                JAVAFX_OS="linux-x64"
+            fi
+            ;;
         *)          JAVAFX_OS="unknown";;
     esac
     
     if [ "$JAVAFX_OS" = "unknown" ]; then
-        echo "❌ Unsupported operating system: ${OS}"
+        echo "❌ Unsupported operating system or architecture: ${OS} ${ARCH}"
         exit 1
     fi
     
-    JAVAFX_URL="https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_${JAVAFX_OS}-x64_bin-sdk.zip"
+    JAVAFX_URL="https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_${JAVAFX_OS}_bin-sdk.zip"
     
     echo "Downloading from: $JAVAFX_URL"
     curl -L -o lib/javafx-sdk.zip "$JAVAFX_URL"
