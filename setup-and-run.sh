@@ -21,6 +21,12 @@ echo ""
 # Create lib directory if it doesn't exist
 mkdir -p lib
 
+# Download org.json if it doesn't exist
+if [ ! -f "lib/json-20240303.jar" ]; then
+    echo "📦 Downloading org.json..."
+    curl -s -L -o lib/json-20240303.jar https://repo1.maven.org/maven2/org/json/json/20240303/json-20240303.jar
+fi
+
 # Check if JavaFX is already downloaded
 if [ ! -d "lib/javafx-sdk-21.0.1" ]; then
     echo "📦 Downloading JavaFX SDK 21.0.1..."
@@ -62,6 +68,7 @@ mkdir -p out/production/classes
 javac -d out/production/classes \
       --module-path lib/javafx-sdk-21.0.1/lib \
       --add-modules javafx.controls,javafx.fxml \
+      -cp lib/json-20240303.jar \
       $(find src/main/java -name "*.java")
 
 if [ $? -eq 0 ]; then
@@ -84,5 +91,5 @@ echo ""
 # Run the application
 java --module-path lib/javafx-sdk-21.0.1/lib \
      --add-modules javafx.controls,javafx.fxml \
-     -cp out/production/classes \
+     -cp out/production/classes:lib/json-20240303.jar \
      com.fbla.businessboost.Main

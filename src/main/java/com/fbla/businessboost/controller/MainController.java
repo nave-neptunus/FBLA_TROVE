@@ -85,6 +85,9 @@ public class MainController {
     private TableColumn<Business, Boolean> favoriteColumn;
 
     @FXML
+    private TextField zipCodeField;
+
+    @FXML
     private ComboBox<String> categoryFilter;
     @FXML
     private ListView<Business> favoritesList;
@@ -323,6 +326,50 @@ public class MainController {
     private void clearDealsPane() {
         selectedBusinessLabel.setText("Select a business to view deals");
         dealsPane.setItems(FXCollections.observableArrayList());
+    }
+
+    /**
+     * Handles fetching businesses by Zip Code from an external API using a
+     * background Task.
+     */
+    @FXML
+    private void handleZipSearch() {
+        String zipCode = zipCodeField.getText();
+        if (zipCode == null || zipCode.trim().isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Input Needed", "Please enter a Zip Code.");
+            return;
+        }
+
+        // Disable table during search
+        businessTable.setDisable(true);
+
+        javafx.concurrent.Task<ObservableList<Business>> fetchTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected ObservableList<Business> call() throws Exception {
+                return com.fbla.businessboost.util.BusinessFetcher.fetchBusinessesByZipCode(zipCode);
+            }
+        };
+
+        fetchTask.setOnSucceeded(e -> {
+            businessTable.setDisable(false);
+            ObservableList<Business> results = fetchTask.getValue();
+            if (results.isEmpty()) {
+                showAlert(Alert.AlertType.INFORMATION, "No Results", "No businesses found for this zip code.");
+            } else {
+                allBusinesses.clear();
+                allBusinesses.addAll(results);
+                categoryFilter.setValue("All"); // Reset filter
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Found " + results.size() + " businesses.");
+            }
+        });
+
+        fetchTask.setOnFailed(e -> {
+            businessTable.setDisable(false);
+            Throwable ex = fetchTask.getException();
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load businesses: " + ex.getMessage());
+        });
+
+        new Thread(fetchTask).start();
     }
 
     /**

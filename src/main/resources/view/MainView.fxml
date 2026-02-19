@@ -49,12 +49,20 @@
         <VBox spacing="15">
             <!-- Filter and Sort Controls -->
             <HBox spacing="15" alignment="CENTER_LEFT" styleClass="controls-bar">
-                <Label text="Filter by Category:">
+                <Label text="Zip Code:">
                     <font>
                         <Font name="System Bold" size="13"/>
                     </font>
                 </Label>
-                <ComboBox fx:id="categoryFilter" prefWidth="150"/>
+                <TextField fx:id="zipCodeField" promptText="e.g. 90210" prefWidth="100"/>
+                <Button text="Search" onAction="#handleZipSearch" styleClass="primary-button"/>
+                
+                <Label text="Filter:" style="-fx-padding: 0 0 0 10;">
+                    <font>
+                        <Font name="System Bold" size="13"/>
+                    </font>
+                </Label>
+                <ComboBox fx:id="categoryFilter" prefWidth="120"/>
                 
                 <Region HBox.hgrow="ALWAYS"/>
                 
