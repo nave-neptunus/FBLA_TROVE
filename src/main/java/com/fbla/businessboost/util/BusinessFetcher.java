@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -57,8 +58,20 @@ public class BusinessFetcher {
         overpassCon.setRequestMethod("GET");
         overpassCon.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
 
-        if (overpassCon.getResponseCode() != 200) {
-            throw new Exception("Failed to fetch businesses from Overpass API.");
+        int responseCode = overpassCon.getResponseCode();
+        if (responseCode != 200) {
+            java.io.InputStream errorStream = overpassCon.getErrorStream();
+            if (errorStream != null) {
+                BufferedReader errorIn = new BufferedReader(new InputStreamReader(errorStream));
+                StringBuilder errorResponse = new StringBuilder();
+                String line;
+                while ((line = errorIn.readLine()) != null) {
+                    errorResponse.append(line);
+                }
+                errorIn.close();
+                System.err.println("Overpass API Error Response: " + errorResponse.toString());
+            }
+            throw new Exception("Failed to fetch businesses from Overpass API. HTTP Code: " + responseCode);
         }
 
         BufferedReader opIn = new BufferedReader(new InputStreamReader(overpassCon.getInputStream()));
@@ -85,10 +98,24 @@ public class BusinessFetcher {
                         category = "Services";
                     }
 
+                    String description = "A local " + category.toLowerCase() + " business in this area.";
+                    if (tags.has("description")) {
+                        description = tags.getString("description");
+                    } else if (tags.has("cuisine")) {
+                        description = "A " + tags.getString("cuisine") + " restaurant.";
+                    }
+
+                    // Try to get a better description from external API for famous brands
+                    String externalDescription = fetchBusinessDescription(name);
+                    if (externalDescription != null && !externalDescription.isEmpty()) {
+                        description = externalDescription;
+                    }
+
                     double rating = 3.5 + Math.random() * 1.5;
                     rating = Math.round(rating * 10.0) / 10.0;
 
                     Business b = new Business(name, category, rating);
+                    b.setDescription(description);
                     // Add some placeholder deals
                     b.addDeal("Opening special discount!");
 
@@ -98,5 +125,60 @@ public class BusinessFetcher {
         }
 
         return businesses;
+    }
+
+    /**
+     * Attempts to fetch a short introductory description of a business from
+     * DuckDuckGo Instant Answer API.
+     * This API is better for entity lookups than direct Wikipedia because it won't
+     * redirect to random articles.
+     * 
+     * @param businessName The name of the business to look up
+     * @return The description summary, or null if not found/error
+     */
+    private static String fetchBusinessDescription(String businessName) {
+        try {
+            // Clean up name for search
+            String searchName = businessName.split("-")[0].split(",")[0].trim();
+
+            String searchUrlStr = "https://api.duckduckgo.com/?q="
+                    + URLEncoder.encode(searchName, "UTF-8") + "&format=json";
+
+            URL url = new URL(searchUrlStr);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
+            con.setConnectTimeout(2000); // Short timeout
+            con.setReadTimeout(2000);
+
+            if (con.getResponseCode() == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                JSONObject json = new JSONObject(response.toString());
+                if (json.has("AbstractText")) {
+                    String abstractText = json.getString("AbstractText").trim();
+                    if (!abstractText.isEmpty() && !abstractText.contains("may refer to")) {
+                        // Truncate to first two sentences for brevity if it's very long
+                        if (abstractText.length() > 200 && abstractText.contains(". ")) {
+                            int secondDot = abstractText.indexOf(". ", abstractText.indexOf(". ") + 1);
+                            if (secondDot > 0) {
+                                abstractText = abstractText.substring(0, secondDot + 1);
+                            }
+                        }
+                        return abstractText;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Ignore API errors
+            System.err.println("Failed to fetch description for " + businessName + ": " + e.getMessage());
+        }
+        return null;
     }
 }

@@ -95,6 +95,8 @@ public class MainController {
     private ListView<String> dealsPane;
     @FXML
     private Label selectedBusinessLabel;
+    @FXML
+    private Label businessDescriptionLabel;
 
     // ==================== Data Collections ====================
 
@@ -316,7 +318,13 @@ public class MainController {
      * @param business The selected business
      */
     private void displayBusinessDeals(Business business) {
-        selectedBusinessLabel.setText(business.getName() + " - Special Deals");
+        selectedBusinessLabel.setText(business.getName() + " - Details");
+        String desc = business.getDescription();
+        if (desc == null || desc.trim().isEmpty()) {
+            businessDescriptionLabel.setText("No description available for this business.");
+        } else {
+            businessDescriptionLabel.setText(desc);
+        }
         dealsPane.setItems(business.getDeals());
     }
 
@@ -324,7 +332,8 @@ public class MainController {
      * Clears the deals pane when no business is selected.
      */
     private void clearDealsPane() {
-        selectedBusinessLabel.setText("Select a business to view deals");
+        selectedBusinessLabel.setText("Select a business to view details");
+        businessDescriptionLabel.setText("");
         dealsPane.setItems(FXCollections.observableArrayList());
     }
 

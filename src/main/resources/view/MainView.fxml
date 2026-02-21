@@ -94,13 +94,19 @@
     <!-- Right: Deals Pane -->
     <right>
         <VBox styleClass="deals-pane" spacing="10" prefWidth="300">
-            <Label fx:id="selectedBusinessLabel" text="Select a business to view deals" 
+            <Label fx:id="selectedBusinessLabel" text="Select a business to view details" 
                    styleClass="section-title" wrapText="true">
                 <font>
                     <Font name="System Bold" size="14"/>
                 </font>
             </Label>
+            <Label fx:id="businessDescriptionLabel" wrapText="true" textFill="#555555">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
             <Separator/>
+            <Label text="Current Deals" style="-fx-font-weight: bold;"/>
             <ListView fx:id="dealsPane" VBox.vgrow="ALWAYS"/>
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
