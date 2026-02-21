@@ -42,11 +42,11 @@ public class BusinessFetcher {
 
         // 2. Get businesses around this lat/lon using Overpass API
         String query = String.format(
-                "[out:json];" +
+                "[out:json][timeout:15];" +
                         "(" +
-                        "node(around:5000,%f,%f)[\"amenity\"~\"restaurant|cafe|fast_food|bar\"];" +
-                        "node(around:5000,%f,%f)[\"shop\"];" +
-                        "node(around:5000,%f,%f)[\"leisure\"=\"fitness_centre\"];" +
+                        "node(around:2000,%f,%f)[\"amenity\"~\"restaurant|cafe|fast_food|bar\"];" +
+                        "node(around:2000,%f,%f)[\"shop\"];" +
+                        "node(around:2000,%f,%f)[\"leisure\"=\"fitness_centre\"];" +
                         ");" +
                         "out 40;",
                 lat, lon, lat, lon, lat, lon);
