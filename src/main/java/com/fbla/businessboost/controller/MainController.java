@@ -325,7 +325,7 @@ public class MainController {
         selectedBusinessLabel.setText(business.getName() + " - Details");
         String desc = business.getDescription();
         if (desc == null || desc.trim().isEmpty()) {
-            businessDescriptionLabel.setText("No description available for this business.");
+            businessDescriptionLabel.setText("");
         } else {
             businessDescriptionLabel.setText(desc);
         }

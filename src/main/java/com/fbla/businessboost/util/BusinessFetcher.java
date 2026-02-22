@@ -98,7 +98,7 @@ public class BusinessFetcher {
                         category = "Services";
                     }
 
-                    String description = "A local " + category.toLowerCase() + " business in this area.";
+                    String description = "";
                     if (tags.has("description")) {
                         description = tags.getString("description");
                     } else if (tags.has("cuisine")) {
