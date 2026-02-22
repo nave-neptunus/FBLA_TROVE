@@ -68,15 +68,15 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        // Load FXML file
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
-        Scene scene = new Scene(loader.load(), 1200, 700);
+        // Load Login FXML file first
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
+        Scene scene = new Scene(loader.load(), 500, 600);
 
-        // Configure primary stage
-        primaryStage.setTitle("FBLA Business Boost - Discover Local Businesses");
+        // Configure primary stage for Login
+        primaryStage.setTitle("FBLA Business Boost - Login");
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(900);
-        primaryStage.setMinHeight(600);
+        primaryStage.setMinWidth(400);
+        primaryStage.setMinHeight(500);
 
         // Display the window
         primaryStage.show();

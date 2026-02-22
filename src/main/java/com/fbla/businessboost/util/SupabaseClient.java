@@ -109,4 +109,90 @@ public class SupabaseClient {
         }
         return reviews;
     }
+
+    /**
+     * Registers a new user with the given username and password.
+     * 
+     * @param username The desired username
+     * @param password The plaintext password
+     * @return true if successful, false if the username is taken or an error occurs
+     */
+    public static boolean registerUser(String username, String password) {
+        String hashedPassword = PasswordHasher.hashPassword(password);
+        if (hashedPassword == null)
+            return false;
+
+        try {
+            URL url = new URL(SUPABASE_URL + "/rest/v1/app_users");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Prefer", "return=minimal");
+            conn.setDoOutput(true);
+
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("username", username);
+            jsonBody.put("password_hash", hashedPassword);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            return responseCode == 201; // 201 Created
+        } catch (Exception e) {
+            System.err.println("Registration failed (username might already exist): " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Authenticates an existing user.
+     * 
+     * @param username The username
+     * @param password The plaintext password
+     * @return true if credentials match, false otherwise
+     */
+    public static boolean authenticateUser(String username, String password) {
+        String hashedPassword = PasswordHasher.hashPassword(password);
+        if (hashedPassword == null)
+            return false;
+
+        try {
+            String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
+            String encodedPassword = URLEncoder.encode(hashedPassword, StandardCharsets.UTF_8.toString());
+
+            // Query exact match for username AND password_hash
+            URL url = new URL(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername + "&password_hash=eq."
+                    + encodedPassword + "&select=id");
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                JSONArray jsonArray = new JSONArray(response.toString());
+                // If the array is not empty, a matching row was found!
+                return jsonArray.length() > 0;
+            }
+        } catch (Exception e) {
+            System.err.println("Authentication failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
