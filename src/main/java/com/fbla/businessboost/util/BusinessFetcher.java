@@ -116,8 +116,11 @@ public class BusinessFetcher {
 
                     Business b = new Business(name, category, rating);
                     b.setDescription(description);
-                    // Add some placeholder deals
-                    b.addDeal("Opening special discount!");
+                    // Add dynamic deals
+                    java.util.List<String> generatedDeals = generateDeals(category, rating);
+                    for (String deal : generatedDeals) {
+                        b.addDeal(deal);
+                    }
 
                     businesses.add(b);
                 }
@@ -125,6 +128,78 @@ public class BusinessFetcher {
         }
 
         return businesses;
+    }
+
+    /**
+     * Generates a random list of realistic deals based on the business category.
+     * 
+     * @param category The business category (Food, Retail, Services)
+     * @param rating   The business rating to occasionally offer better deals for
+     *                 highly rated places
+     * @return A list of deal strings
+     */
+    private static java.util.List<String> generateDeals(String category, double rating) {
+        java.util.List<String> deals = new java.util.ArrayList<>();
+        java.util.Random random = new java.util.Random();
+
+        int numDeals = random.nextInt(3) + 1; // 1 to 3 deals
+
+        String[] foodDeals = {
+                "Free drink with any meal purchase over $15",
+                "Buy one get one 50% off appetizers",
+                "10% off total bill for students with ID",
+                "Lunch special: $9.99 including drink",
+                "Free dessert on your birthday",
+                "Family meal deal: 20% off orders over $40"
+        };
+
+        String[] retailDeals = {
+                "20% off your entire purchase today",
+                "Clearance event: Up to 50% off select items",
+                "Buy 2 get 1 free on all accessories",
+                "Sign up for our newsletter and get 15% off",
+                "Free gift with purchase over $50",
+                "Weekend sale: $10 off every $50 spent"
+        };
+
+        String[] serviceDeals = {
+                "First time customers get 15% off",
+                "$20 off your next service",
+                "Refer a friend and both get $10 credit",
+                "Free consultation or estimate",
+                "Loyalty reward: 5th visit is 50% off",
+                "Bundle services for a 20% discount"
+        };
+
+        String[] sourceArray;
+        switch (category) {
+            case "Food":
+                sourceArray = foodDeals;
+                break;
+            case "Retail":
+                sourceArray = retailDeals;
+                break;
+            case "Services":
+                sourceArray = serviceDeals;
+                break;
+            default:
+                sourceArray = retailDeals;
+        }
+
+        // To ensure we get unique deals without a complex shuffle
+        java.util.List<String> available = new java.util.ArrayList<>(java.util.Arrays.asList(sourceArray));
+        java.util.Collections.shuffle(available, random);
+
+        for (int i = 0; i < numDeals && i < available.size(); i++) {
+            deals.add(available.get(i));
+        }
+
+        // Add a special deal for high-rated businesses sometimes
+        if (rating >= 4.5 && random.nextBoolean()) {
+            deals.add("⭐ Top Rated Special: Extra 5% off!");
+        }
+
+        return deals;
     }
 
     /**
