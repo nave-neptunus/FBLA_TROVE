@@ -130,8 +130,12 @@ public class MainController {
      */
     @FXML
     public void initialize() {
-        // Load mock data
-        allBusinesses = DataManager.initializeMockData();
+        // Load mock data into an extractor-backed list so FilteredList
+        // re-evaluates when favoriteProperty() changes on any item.
+        ObservableList<Business> rawData = DataManager.initializeMockData();
+        allBusinesses = FXCollections.observableArrayList(
+                business -> new javafx.beans.Observable[] { business.favoriteProperty() });
+        allBusinesses.addAll(rawData);
 
         // Configure table columns
         setupTableColumns();
@@ -257,6 +261,16 @@ public class MainController {
                 }
             }
         });
+
+        // Clicking a favorite in the sidebar selects and scrolls to it in the main
+        // table
+        favoritesList.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (newVal != null) {
+                        businessTable.getSelectionModel().select(newVal);
+                        businessTable.scrollTo(newVal);
+                    }
+                });
     }
 
     /**
