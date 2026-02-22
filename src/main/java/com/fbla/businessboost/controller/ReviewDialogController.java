@@ -1,6 +1,7 @@
 package com.fbla.businessboost.controller;
 
 import com.fbla.businessboost.model.Business;
+import com.fbla.businessboost.util.SupabaseClient;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -220,12 +221,23 @@ public class ReviewDialogController {
 
         business.setRating(updatedRating);
 
-        // Show success message
-        showAlert(Alert.AlertType.INFORMATION, "Review Submitted",
-                String.format("Thank you for your review!\n\n" +
-                        "Your rating: %.0f stars\n" +
-                        "Updated business rating: %.1f stars",
-                        newRating, updatedRating));
+        // Save review to Supabase
+        boolean success = SupabaseClient.saveReview(business.getName(), newRating, reviewText);
+
+        if (success) {
+            // Show success message
+            showAlert(Alert.AlertType.INFORMATION, "Review Submitted",
+                    String.format("Thank you for your review!\n\n" +
+                            "Your rating: %.0f stars\n" +
+                            "Updated business rating: %.1f stars\n\n" +
+                            "Your review has been saved to the cloud.",
+                            newRating, updatedRating));
+        } else {
+            // Show partial success/error message
+            showAlert(Alert.AlertType.WARNING, "Review Submitted Locally",
+                    "Your review was recorded locally, but we couldn't save it to the cloud database.\n" +
+                            "Please check your internet connection.");
+        }
 
         // Close dialog
         closeDialog();

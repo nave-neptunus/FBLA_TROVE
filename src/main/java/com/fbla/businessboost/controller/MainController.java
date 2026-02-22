@@ -1,8 +1,11 @@
 package com.fbla.businessboost.controller;
 
 import com.fbla.businessboost.model.Business;
+import com.fbla.businessboost.model.Review;
 import com.fbla.businessboost.util.DataManager;
 import com.fbla.businessboost.util.ReportGenerator;
+import com.fbla.businessboost.util.SupabaseClient;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -314,6 +317,7 @@ public class MainController {
 
     /**
      * Displays the deals for the selected business in the deals pane.
+     * Also fetches persistent reviews from Supabase in the background.
      * 
      * @param business The selected business
      */
@@ -325,7 +329,37 @@ public class MainController {
         } else {
             businessDescriptionLabel.setText(desc);
         }
+
+        // Show local deals first
         dealsPane.setItems(business.getDeals());
+
+        // Fetch reviews from Supabase in background so UI doesn't freeze
+        javafx.concurrent.Task<java.util.List<Review>> fetchReviewsTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected java.util.List<Review> call() throws Exception {
+                return SupabaseClient.getReviewsForBusiness(business.getName());
+            }
+        };
+
+        fetchReviewsTask.setOnSucceeded(e -> {
+            java.util.List<Review> reviews = fetchReviewsTask.getValue();
+            if (reviews != null && !reviews.isEmpty()) {
+                // If it's still the selected business, append reviews to the deals pane
+                // visually
+                Platform.runLater(() -> {
+                    if (businessTable.getSelectionModel().getSelectedItem() == business) {
+                        ObservableList<String> combined = FXCollections.observableArrayList(business.getDeals());
+                        combined.add("--- Community Reviews ---");
+                        for (Review r : reviews) {
+                            combined.add(r.toString());
+                        }
+                        dealsPane.setItems(combined);
+                    }
+                });
+            }
+        });
+
+        new Thread(fetchReviewsTask).start();
     }
 
     /**
