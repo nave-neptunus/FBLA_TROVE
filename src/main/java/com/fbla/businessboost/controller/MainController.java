@@ -130,9 +130,23 @@ public class MainController {
      */
     @FXML
     public void initialize() {
+        // Fetch user favorites
+        String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+        java.util.List<String> userFavorites = currentUser != null ? SupabaseClient.getUserFavorites(currentUser)
+                : new java.util.ArrayList<>();
+
         // Load mock data into an extractor-backed list so FilteredList
         // re-evaluates when favoriteProperty() changes on any item.
         ObservableList<Business> rawData = DataManager.initializeMockData();
+
+        // Apply favorites and attach listener
+        for (Business b : rawData) {
+            if (userFavorites.contains(b.getName())) {
+                b.setFavorite(true);
+            }
+            attachFavoriteListener(b);
+        }
+
         allBusinesses = FXCollections.observableArrayList(
                 business -> new javafx.beans.Observable[] { business.favoriteProperty() });
         allBusinesses.addAll(rawData);
@@ -274,6 +288,25 @@ public class MainController {
     }
 
     /**
+     * Attaches a listener to a Business's favorite property to sync with Supabase.
+     */
+    private void attachFavoriteListener(Business business) {
+        business.favoriteProperty().addListener((obs, wasFavorite, isNowFavorite) -> {
+            String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            if (username == null)
+                return;
+
+            new Thread(() -> {
+                if (isNowFavorite) {
+                    SupabaseClient.addFavorite(username, business.getName());
+                } else {
+                    SupabaseClient.removeFavorite(username, business.getName());
+                }
+            }).start();
+        });
+    }
+
+    /**
      * Sets up listener for business selection in the TableView.
      * When a business is selected, displays its deals in the right pane.
      */
@@ -400,6 +433,8 @@ public class MainController {
         // Disable table during search
         businessTable.setDisable(true);
 
+        String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+
         javafx.concurrent.Task<ObservableList<Business>> fetchTask = new javafx.concurrent.Task<>() {
             @Override
             protected ObservableList<Business> call() throws Exception {
@@ -413,20 +448,60 @@ public class MainController {
             if (results.isEmpty()) {
                 showAlert(Alert.AlertType.INFORMATION, "No Results", "No businesses found for this zip code.");
             } else {
-                allBusinesses.clear();
-                allBusinesses.addAll(results);
-                categoryFilter.setValue("All"); // Reset filter
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Found " + results.size() + " businesses.");
+                new Thread(() -> {
+                    java.util.List<String> userFavoritesList = currentUser != null
+                            ? SupabaseClient.getUserFavorites(currentUser)
+                            : new java.util.ArrayList<>();
+                    Platform.runLater(() -> processZipResults(results, userFavoritesList));
+                }).start();
             }
         });
 
         fetchTask.setOnFailed(e -> {
             businessTable.setDisable(false);
             Throwable ex = fetchTask.getException();
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load businesses: " + ex.getMessage());
+            System.err.println("Zip Search fetchTask failed:");
+            if (ex != null)
+                ex.printStackTrace();
         });
 
         new Thread(fetchTask).start();
+    }
+
+    private void processZipResults(ObservableList<Business> results, java.util.List<String> userFavoritesList) {
+        java.util.List<Business> savedFavorites = new java.util.ArrayList<>();
+        for (Business b : allBusinesses) {
+            if (b.isFavorite()) {
+                savedFavorites.add(b);
+            }
+        }
+
+        allBusinesses.clear();
+
+        // Add the new search results, but if it already exists in favorites, keep the
+        // favorited instance
+        for (Business newBiz : results) {
+            boolean isFav = false;
+            for (Business fav : savedFavorites) {
+                if (fav.getName().equals(newBiz.getName())) {
+                    isFav = true;
+                    break;
+                }
+            }
+            if (!isFav) {
+                if (userFavoritesList.contains(newBiz.getName())) {
+                    newBiz.setFavorite(true);
+                }
+                attachFavoriteListener(newBiz);
+                allBusinesses.add(newBiz);
+            }
+        }
+
+        // Re-add all our preserved favorites
+        allBusinesses.addAll(savedFavorites);
+
+        categoryFilter.setValue("All"); // Reset filter
+        showAlert(Alert.AlertType.INFORMATION, "Success", "Found " + results.size() + " businesses.");
     }
 
     /**

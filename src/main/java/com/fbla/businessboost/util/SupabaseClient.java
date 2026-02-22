@@ -211,4 +211,97 @@ public class SupabaseClient {
         }
         return false;
     }
+
+    /**
+     * Fetches a list of favorited business names for a specific user.
+     */
+    public static java.util.List<String> getUserFavorites(String username) {
+        java.util.List<String> favorites = new java.util.ArrayList<>();
+        try {
+            String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
+            URL url = new URL(
+                    SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&select=business_name");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    JSONArray jsonArray = new JSONArray(response.toString());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        favorites.add(jsonArray.getJSONObject(i).getString("business_name"));
+                    }
+                }
+            } else {
+                System.err.println("Failed to fetch favorites. HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching favorites: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return favorites;
+    }
+
+    /**
+     * Adds a business to the user's favorites in Supabase.
+     */
+    public static boolean addFavorite(String username, String businessName) {
+        try {
+            URL url = new URL(SUPABASE_URL + "/rest/v1/user_favorites");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Prefer", "return=minimal");
+            conn.setDoOutput(true);
+
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("username", username);
+            jsonBody.put("business_name", businessName);
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = conn.getResponseCode();
+            return responseCode == 201;
+        } catch (Exception e) {
+            System.err.println("Failed to add favorite: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Removes a business from the user's favorites in Supabase.
+     */
+    public static boolean removeFavorite(String username, String businessName) {
+        try {
+            String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
+            String encodedBusiness = URLEncoder.encode(businessName, StandardCharsets.UTF_8.toString());
+            URL url = new URL(SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&business_name=eq."
+                    + encodedBusiness);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+
+            int responseCode = conn.getResponseCode();
+            return responseCode == 204 || responseCode == 200;
+        } catch (Exception e) {
+            System.err.println("Failed to remove favorite: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
