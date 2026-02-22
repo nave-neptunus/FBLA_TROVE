@@ -142,9 +142,25 @@ public class SupabaseClient {
             }
 
             int responseCode = conn.getResponseCode();
-            return responseCode == 201; // 201 Created
+            if (responseCode == 201) {
+                return true;
+            } else {
+                // Read the error response
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    System.err
+                            .println("Supabase Registration Failed. HTTP " + responseCode + ": " + response.toString());
+                }
+                return false;
+            }
         } catch (Exception e) {
-            System.err.println("Registration failed (username might already exist): " + e.getMessage());
+            System.err.println("Registration failed (Exception): " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
