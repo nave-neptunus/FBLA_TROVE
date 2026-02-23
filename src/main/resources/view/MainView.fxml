@@ -72,6 +72,16 @@
                 </padding>
             </HBox>
             
+            <!-- Inline Result Banner (hidden by default) -->
+            <HBox fx:id="resultBanner" styleClass="result-banner" alignment="CENTER_LEFT"
+                  spacing="10" managed="false" visible="false">
+                <padding>
+                    <Insets top="8" right="12" bottom="8" left="12"/>
+                </padding>
+                <Label fx:id="resultBannerLabel" wrapText="true" HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"/>
+            </HBox>
+
             <!-- Business Table -->
             <TableView fx:id="businessTable" VBox.vgrow="ALWAYS">
                 <columns>

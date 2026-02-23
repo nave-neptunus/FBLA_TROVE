@@ -100,11 +100,21 @@ public class MainController {
     private Label selectedBusinessLabel;
     @FXML
     private Label businessDescriptionLabel;
+    @FXML
+    private javafx.scene.layout.HBox resultBanner;
+    @FXML
+    private Label resultBannerLabel;
 
     // ==================== Data Collections ====================
 
-    /** Master list of all businesses - source of truth */
+    /** Master list of all businesses shown in the table */
     private ObservableList<Business> allBusinesses;
+
+    /**
+     * Separate list of ALL favorited businesses (drives the sidebar, independent of
+     * table)
+     */
+    private ObservableList<Business> favoritedBusinesses;
 
     /** Filtered view based on category selection */
     private FilteredList<Business> filteredList;
@@ -139,10 +149,15 @@ public class MainController {
         // re-evaluates when favoriteProperty() changes on any item.
         ObservableList<Business> rawData = DataManager.initializeMockData();
 
+        // Separate list for favorites sidebar (independent of table data)
+        favoritedBusinesses = FXCollections.observableArrayList(
+                business -> new javafx.beans.Observable[] { business.favoriteProperty() });
+
         // Apply favorites and attach listener
         for (Business b : rawData) {
             if (userFavorites.contains(b.getName())) {
                 b.setFavorite(true);
+                favoritedBusinesses.add(b);
             }
             attachFavoriteListener(b);
         }
@@ -258,10 +273,9 @@ public class MainController {
      * </p>
      */
     private void setupFavoritesList() {
-        FilteredList<Business> favoritesOnly = new FilteredList<>(allBusinesses,
-                business -> business.isFavorite());
-
-        favoritesList.setItems(favoritesOnly);
+        // Sidebar is driven by the separate favoritedBusinesses list, NOT the table
+        // data
+        favoritesList.setItems(favoritedBusinesses);
 
         // Custom cell factory to display business name and rating
         favoritesList.setCellFactory(listView -> new ListCell<Business>() {
@@ -292,6 +306,16 @@ public class MainController {
      */
     private void attachFavoriteListener(Business business) {
         business.favoriteProperty().addListener((obs, wasFavorite, isNowFavorite) -> {
+            // Sync with sidebar list
+            if (isNowFavorite) {
+                if (!favoritedBusinesses.contains(business)) {
+                    favoritedBusinesses.add(business);
+                }
+            } else {
+                favoritedBusinesses.remove(business);
+            }
+
+            // Persist to Supabase
             String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
             if (username == null)
                 return;
@@ -340,6 +364,14 @@ public class MainController {
             filteredList.setPredicate(business -> true);
         } else {
             filteredList.setPredicate(business -> business.getCategory().equals(selectedCategory));
+        }
+
+        // Show inline message when filter yields no results
+        if (filteredList.isEmpty() && !"All".equals(selectedCategory)) {
+            showResultBanner("No businesses match \"" + selectedCategory + "\" — try selecting \"All\"",
+                    "result-banner-warning");
+        } else {
+            hideResultBanner();
         }
     }
 
@@ -426,19 +458,21 @@ public class MainController {
     private void handleZipSearch() {
         String zipCode = zipCodeField.getText();
         if (zipCode == null || zipCode.trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Input Needed", "Please enter a Zip Code.");
+            showResultBanner("⚠ Please enter a zip code.", "result-banner-warning");
             return;
         }
 
         // Disable table during search
         businessTable.setDisable(true);
+        hideResultBanner();
 
         String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+        String trimmedZip = zipCode.trim();
 
         javafx.concurrent.Task<ObservableList<Business>> fetchTask = new javafx.concurrent.Task<>() {
             @Override
             protected ObservableList<Business> call() throws Exception {
-                return com.fbla.businessboost.util.BusinessFetcher.fetchBusinessesByZipCode(zipCode);
+                return com.fbla.businessboost.util.BusinessFetcher.fetchBusinessesByZipCode(trimmedZip);
             }
         };
 
@@ -446,13 +480,18 @@ public class MainController {
             businessTable.setDisable(false);
             ObservableList<Business> results = fetchTask.getValue();
             if (results.isEmpty()) {
-                showAlert(Alert.AlertType.INFORMATION, "No Results", "No businesses found for this zip code.");
+                showResultBanner("No businesses found near " + trimmedZip + " — try a different zip code.",
+                        "result-banner-warning");
             } else {
                 new Thread(() -> {
                     java.util.List<String> userFavoritesList = currentUser != null
                             ? SupabaseClient.getUserFavorites(currentUser)
                             : new java.util.ArrayList<>();
-                    Platform.runLater(() -> processZipResults(results, userFavoritesList));
+                    Platform.runLater(() -> {
+                        processZipResults(results, userFavoritesList);
+                        showResultBanner("✓ Found " + results.size() + " businesses near " + trimmedZip,
+                                "result-banner-success");
+                    });
                 }).start();
             }
         });
@@ -460,6 +499,13 @@ public class MainController {
         fetchTask.setOnFailed(e -> {
             businessTable.setDisable(false);
             Throwable ex = fetchTask.getException();
+            String msg = (ex != null && ex.getMessage() != null) ? ex.getMessage() : "";
+            if (msg.toLowerCase().contains("invalid zip")) {
+                showResultBanner("❌ Invalid zip code — please try again.", "result-banner-error");
+            } else {
+                showResultBanner("❌ Search failed — please check your connection and try again.",
+                        "result-banner-error");
+            }
             System.err.println("Zip Search fetchTask failed:");
             if (ex != null)
                 ex.printStackTrace();
@@ -469,39 +515,19 @@ public class MainController {
     }
 
     private void processZipResults(ObservableList<Business> results, java.util.List<String> userFavoritesList) {
-        java.util.List<Business> savedFavorites = new java.util.ArrayList<>();
-        for (Business b : allBusinesses) {
-            if (b.isFavorite()) {
-                savedFavorites.add(b);
-            }
-        }
-
         allBusinesses.clear();
 
-        // Add the new search results, but if it already exists in favorites, keep the
-        // favorited instance
+        // Only add the new search results to the table — favorites stay in the sidebar
+        // independently
         for (Business newBiz : results) {
-            boolean isFav = false;
-            for (Business fav : savedFavorites) {
-                if (fav.getName().equals(newBiz.getName())) {
-                    isFav = true;
-                    break;
-                }
+            if (userFavoritesList.contains(newBiz.getName())) {
+                newBiz.setFavorite(true);
             }
-            if (!isFav) {
-                if (userFavoritesList.contains(newBiz.getName())) {
-                    newBiz.setFavorite(true);
-                }
-                attachFavoriteListener(newBiz);
-                allBusinesses.add(newBiz);
-            }
+            attachFavoriteListener(newBiz);
+            allBusinesses.add(newBiz);
         }
 
-        // Re-add all our preserved favorites
-        allBusinesses.addAll(savedFavorites);
-
         categoryFilter.setValue("All"); // Reset filter
-        showAlert(Alert.AlertType.INFORMATION, "Success", "Found " + results.size() + " businesses.");
     }
 
     /**
@@ -553,15 +579,33 @@ public class MainController {
      */
     @FXML
     private void handleGenerateReport() {
-        // Filter to get only favorites
-        ObservableList<Business> favorites = FXCollections.observableArrayList();
-        for (Business business : allBusinesses) {
-            if (business.isFavorite()) {
-                favorites.add(business);
-            }
-        }
+        // Use the separate favorites list (contains all favorites across searches)
+        ReportGenerator.generateReport(FXCollections.observableArrayList(favoritedBusinesses));
+    }
 
-        ReportGenerator.generateReport(favorites);
+    // ==================== Inline Result Banner ====================
+
+    /**
+     * Shows the inline result banner below the search bar.
+     *
+     * @param message    Text to display
+     * @param styleClass One of "result-banner-success", "result-banner-warning",
+     *                   "result-banner-error"
+     */
+    private void showResultBanner(String message, String styleClass) {
+        resultBannerLabel.setText(message);
+        resultBanner.getStyleClass().removeAll(
+                "result-banner-success", "result-banner-warning", "result-banner-error");
+        resultBanner.getStyleClass().add(styleClass);
+        resultBanner.setVisible(true);
+        resultBanner.setManaged(true);
+    }
+
+    /** Hides the inline result banner. Called by the ✕ button in FXML. */
+    @FXML
+    private void hideResultBanner() {
+        resultBanner.setVisible(false);
+        resultBanner.setManaged(false);
     }
 
     /**

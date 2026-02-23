@@ -321,3 +321,47 @@
 .scroll-bar .track {
     -fx-background-color: #f7fafc;
 }
+
+/* ==================== Inline Result Banner ==================== */
+
+.result-banner {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-font-size: 13px;
+}
+
+.result-banner-success {
+    -fx-background-color: #f0fff4;
+    -fx-border-color: #68d391;
+}
+.result-banner-success .label {
+    -fx-text-fill: #276749;
+}
+
+.result-banner-warning {
+    -fx-background-color: #fffaf0;
+    -fx-border-color: #f6ad55;
+}
+.result-banner-warning .label {
+    -fx-text-fill: #9c4221;
+}
+
+.result-banner-error {
+    -fx-background-color: #fff5f5;
+    -fx-border-color: #fc8181;
+}
+.result-banner-error .label {
+    -fx-text-fill: #9b2c2c;
+}
+
+.banner-close-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #a0aec0;
+    -fx-font-size: 14px;
+    -fx-padding: 2 6 2 6;
+    -fx-cursor: hand;
+}
+.banner-close-button:hover {
+    -fx-text-fill: #4a5568;
+}
