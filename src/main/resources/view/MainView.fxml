@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
@@ -13,65 +14,52 @@
     <!-- Top: Header -->
     <top>
         <VBox styleClass="header">
-            <Label text="FBLA Business Boost" styleClass="app-title">
-                <font>
-                    <Font name="System Bold" size="28"/>
-                </font>
-            </Label>
-            <Label text="Discover Local Businesses &amp; Support Your Community" styleClass="subtitle">
-                <font>
-                    <Font size="14"/>
-                </font>
-            </Label>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="🚀 FBLA Business Boost" styleClass="app-title">
+                    <font>
+                        <Font name="System Bold" size="26"/>
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="search-bar-container">
+                    <TextField fx:id="zipCodeField" promptText="Enter zip code..." prefWidth="180" 
+                               styleClass="search-field"/>
+                    <Button text="🔍 Search" onAction="#handleZipSearch" styleClass="search-button"/>
+                </HBox>
+            </HBox>
+            <!-- Category Chips -->
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="category-chips">
+                <padding>
+                    <Insets top="10" right="0" bottom="0" left="0"/>
+                </padding>
+                <ComboBox fx:id="categoryFilter" prefWidth="130" styleClass="category-combo"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="⬇ Sort by Rating" onAction="#handleSortByRating" styleClass="sort-button"/>
+            </HBox>
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="15" right="25" bottom="15" left="25"/>
             </padding>
         </VBox>
     </top>
     
     <!-- Left: Favorites Sidebar -->
     <left>
-        <VBox styleClass="sidebar" spacing="10" prefWidth="250">
-            <Label text="⭐ My Favorites" styleClass="section-title">
+        <VBox styleClass="sidebar" spacing="10" prefWidth="230">
+            <Label text="❤️ Favorites" styleClass="section-title">
                 <font>
                     <Font name="System Bold" size="16"/>
                 </font>
             </Label>
             <ListView fx:id="favoritesList" VBox.vgrow="ALWAYS"/>
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets top="15" right="12" bottom="15" left="12"/>
             </padding>
         </VBox>
     </left>
     
-    <!-- Center: Main Content -->
+    <!-- Center: Card Grid -->
     <center>
-        <VBox spacing="15">
-            <!-- Filter and Sort Controls -->
-            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="controls-bar">
-                <Label text="Zip Code:">
-                    <font>
-                        <Font name="System Bold" size="13"/>
-                    </font>
-                </Label>
-                <TextField fx:id="zipCodeField" promptText="e.g. 90210" prefWidth="150" minWidth="100"/>
-                <Button text="Search" onAction="#handleZipSearch" styleClass="primary-button"/>
-                
-                <Label text="Filter:" style="-fx-padding: 0 0 0 10;">
-                    <font>
-                        <Font name="System Bold" size="13"/>
-                    </font>
-                </Label>
-                <ComboBox fx:id="categoryFilter" prefWidth="120"/>
-                
-                <Region HBox.hgrow="ALWAYS"/>
-                
-                <Button text="Sort by Rating ⬇" onAction="#handleSortByRating" styleClass="primary-button"/>
-                <padding>
-                    <Insets top="10" right="10" bottom="10" left="10"/>
-                </padding>
-            </HBox>
-            
+        <VBox spacing="0">
             <!-- Inline Result Banner (hidden by default) -->
             <HBox fx:id="resultBanner" styleClass="result-banner" alignment="CENTER_LEFT"
                   spacing="10" managed="false" visible="false">
@@ -82,44 +70,43 @@
                 <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"/>
             </HBox>
 
-            <!-- Business Table -->
-            <TableView fx:id="businessTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="nameColumn" text="Business Name" prefWidth="250"/>
-                    <TableColumn fx:id="categoryColumn" text="Category" prefWidth="120"/>
-                    <TableColumn fx:id="ratingColumn" text="Rating" prefWidth="100"/>
-                    <TableColumn fx:id="favoriteColumn" text="Favorite" prefWidth="80"/>
-                </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
-            </TableView>
-            
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
+            <!-- Business Card Grid -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
+                <FlowPane fx:id="businessCardGrid" hgap="20" vgap="20"
+                          alignment="CENTER" styleClass="card-grid">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                </FlowPane>
+            </ScrollPane>
         </VBox>
     </center>
     
-    <!-- Right: Deals Pane -->
+    <!-- Right: Details Pane -->
     <right>
-        <VBox styleClass="deals-pane" spacing="10" prefWidth="300">
-            <Label fx:id="selectedBusinessLabel" text="Select a business to view details" 
-                   styleClass="section-title" wrapText="true">
+        <VBox styleClass="detail-pane" spacing="12" prefWidth="320">
+            <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="180" preserveRatio="false"
+                       styleClass="detail-image"/>
+            <Label fx:id="selectedBusinessLabel" text="Select a business" 
+                   styleClass="detail-title" wrapText="true">
+                <font>
+                    <Font name="System Bold" size="16"/>
+                </font>
+            </Label>
+            <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
+                <font>
+                    <Font size="12"/>
+                </font>
+            </Label>
+            <Separator/>
+            <Label text="🔥 Current Deals" styleClass="deals-header">
                 <font>
                     <Font name="System Bold" size="14"/>
                 </font>
             </Label>
-            <Label fx:id="businessDescriptionLabel" wrapText="true" textFill="#555555">
-                <font>
-                    <Font size="13"/>
-                </font>
-            </Label>
-            <Separator/>
-            <Label text="Current Deals" style="-fx-font-weight: bold;"/>
-            <ListView fx:id="dealsPane" VBox.vgrow="ALWAYS"/>
+            <ListView fx:id="dealsPane" VBox.vgrow="ALWAYS" styleClass="deals-list"/>
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets top="15" right="15" bottom="15" left="15"/>
             </padding>
         </VBox>
     </right>
@@ -128,19 +115,19 @@
     <bottom>
         <HBox spacing="15" alignment="CENTER" styleClass="action-bar">
             <Button text="📝 Add Review" onAction="#handleAddReview" 
-                    styleClass="primary-button" prefWidth="150">
+                    styleClass="action-button" prefWidth="160">
                 <font>
                     <Font name="System Bold" size="13"/>
                 </font>
             </Button>
             <Button text="📊 Generate Report" onAction="#handleGenerateReport" 
-                    styleClass="secondary-button" prefWidth="150">
+                    styleClass="action-button-outline" prefWidth="160">
                 <font>
                     <Font name="System Bold" size="13"/>
                 </font>
             </Button>
             <padding>
-                <Insets top="15" right="20" bottom="15" left="20"/>
+                <Insets top="12" right="25" bottom="12" left="25"/>
             </padding>
         </HBox>
     </bottom>

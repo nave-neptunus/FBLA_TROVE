@@ -6,7 +6,7 @@ import javafx.collections.ObservableList;
 
 /**
  * Represents a local business entity in the FBLA Business Boost application.
- * 
+ *
  * <p>
  * This class uses JavaFX properties to enable automatic UI updates when data
  * changes.
@@ -17,7 +17,7 @@ import javafx.collections.ObservableList;
  * changes to the model are immediately reflected in the view without manual
  * refresh logic.
  * </p>
- * 
+ *
  * <p>
  * <strong>Data Type Rationale:</strong>
  * </p>
@@ -35,14 +35,14 @@ import javafx.collections.ObservableList;
  * dynamic
  * addition/removal with automatic UI refresh in the deals pane.</li>
  * </ul>
- * 
+ *
  * <p>
  * <strong>Variable Scope:</strong> All fields are private with public
  * getter/setter methods
  * following JavaBean conventions, ensuring encapsulation and controlled access
  * to business data.
  * </p>
- * 
+ *
  * @author FBLA Development Team
  * @version 1.0
  */
@@ -71,9 +71,21 @@ public class Business {
     /** Favorite/bookmark status - BooleanProperty for checkbox binding */
     private final BooleanProperty favorite;
 
+    /** URL of the business cover image from Yelp */
+    private final StringProperty imageUrl;
+
+    /** Display address of the business */
+    private final StringProperty address;
+
+    /** Price level: "$", "$$", "$$$", or "$$$$" */
+    private final StringProperty price;
+
+    /** URL to the business's Yelp page */
+    private final StringProperty yelpUrl;
+
     /**
      * Constructs a new Business with the specified attributes.
-     * 
+     *
      * @param name     The business name (must not be null)
      * @param category The business category: "Food", "Retail", or "Services"
      * @param rating   The average rating (0.0 to 5.0)
@@ -85,6 +97,10 @@ public class Business {
         this.deals = FXCollections.observableArrayList();
         this.description = new SimpleStringProperty("");
         this.favorite = new SimpleBooleanProperty(false);
+        this.imageUrl = new SimpleStringProperty("");
+        this.address = new SimpleStringProperty("");
+        this.price = new SimpleStringProperty("");
+        this.yelpUrl = new SimpleStringProperty("");
     }
 
     // ==================== Name Property ====================
@@ -143,13 +159,69 @@ public class Business {
         return description;
     }
 
+    // ==================== Image URL Property ====================
+
+    public String getImageUrl() {
+        return imageUrl.get();
+    }
+
+    public void setImageUrl(String url) {
+        this.imageUrl.set(url);
+    }
+
+    public StringProperty imageUrlProperty() {
+        return imageUrl;
+    }
+
+    // ==================== Address Property ====================
+
+    public String getAddress() {
+        return address.get();
+    }
+
+    public void setAddress(String addr) {
+        this.address.set(addr);
+    }
+
+    public StringProperty addressProperty() {
+        return address;
+    }
+
+    // ==================== Price Property ====================
+
+    public String getPrice() {
+        return price.get();
+    }
+
+    public void setPrice(String price) {
+        this.price.set(price);
+    }
+
+    public StringProperty priceProperty() {
+        return this.price;
+    }
+
+    // ==================== Yelp URL Property ====================
+
+    public String getYelpUrl() {
+        return yelpUrl.get();
+    }
+
+    public void setYelpUrl(String url) {
+        this.yelpUrl.set(url);
+    }
+
+    public StringProperty yelpUrlProperty() {
+        return yelpUrl;
+    }
+
     // ==================== Deals List ====================
 
     /**
      * Returns the observable list of deals.
      * This list can be modified directly and changes will automatically update the
      * UI.
-     * 
+     *
      * @return ObservableList of deal strings
      */
     public ObservableList<String> getDeals() {
@@ -158,7 +230,7 @@ public class Business {
 
     /**
      * Adds a new deal to this business.
-     * 
+     *
      * @param deal The deal description to add
      */
     public void addDeal(String deal) {

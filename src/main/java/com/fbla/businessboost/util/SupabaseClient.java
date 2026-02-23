@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,7 @@ public class SupabaseClient {
      */
     public static boolean saveReview(String businessName, double rating, String reviewText) {
         try {
-            URL url = new URL(SUPABASE_URL + "/rest/v1/reviews");
+            URL url = URI.create(SUPABASE_URL + "/rest/v1/reviews").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
@@ -71,7 +72,8 @@ public class SupabaseClient {
         try {
             String encodedName = URLEncoder.encode(businessName, StandardCharsets.UTF_8.toString());
             // Query parameter: business_name=eq.encodedName
-            URL url = new URL(SUPABASE_URL + "/rest/v1/reviews?business_name=eq." + encodedName + "&select=*");
+            URL url = URI.create(SUPABASE_URL + "/rest/v1/reviews?business_name=eq." + encodedName + "&select=*")
+                    .toURL();
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -123,7 +125,7 @@ public class SupabaseClient {
             return false;
 
         try {
-            URL url = new URL(SUPABASE_URL + "/rest/v1/app_users");
+            URL url = URI.create(SUPABASE_URL + "/rest/v1/app_users").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
@@ -182,8 +184,10 @@ public class SupabaseClient {
             String encodedPassword = URLEncoder.encode(hashedPassword, StandardCharsets.UTF_8.toString());
 
             // Query exact match for username AND password_hash
-            URL url = new URL(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername + "&password_hash=eq."
-                    + encodedPassword + "&select=id");
+            URL url = URI
+                    .create(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername + "&password_hash=eq."
+                            + encodedPassword + "&select=id")
+                    .toURL();
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -219,8 +223,9 @@ public class SupabaseClient {
         java.util.List<String> favorites = new java.util.ArrayList<>();
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
-            URL url = new URL(
-                    SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&select=business_name");
+            URL url = URI.create(
+                    SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&select=business_name")
+                    .toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
@@ -255,7 +260,7 @@ public class SupabaseClient {
      */
     public static boolean addFavorite(String username, String businessName) {
         try {
-            URL url = new URL(SUPABASE_URL + "/rest/v1/user_favorites");
+            URL url = URI.create(SUPABASE_URL + "/rest/v1/user_favorites").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
@@ -289,8 +294,10 @@ public class SupabaseClient {
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             String encodedBusiness = URLEncoder.encode(businessName, StandardCharsets.UTF_8.toString());
-            URL url = new URL(SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&business_name=eq."
-                    + encodedBusiness);
+            URL url = URI
+                    .create(SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&business_name=eq."
+                            + encodedBusiness)
+                    .toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
             conn.setRequestProperty("apikey", SUPABASE_KEY);

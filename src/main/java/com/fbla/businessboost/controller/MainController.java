@@ -8,87 +8,43 @@ import com.fbla.businessboost.util.SupabaseClient;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Main controller for the FBLA Business Boost dashboard.
- * 
- * <p>
- * This controller manages all user interactions with the main application
- * window,
- * including business listing, filtering, sorting, favorites management, and
- * report generation.
- * It follows the MVC pattern by separating UI logic from business logic and
- * data models.
- * </p>
- * 
- * <p>
- * <strong>Architecture Decisions:</strong>
- * </p>
- * <ul>
- * <li><strong>FilteredList:</strong> Wraps the main ObservableList to provide
- * efficient
- * category filtering without modifying the original data. Changes to the filter
- * predicate
- * automatically update the TableView.</li>
- * <li><strong>SortedList:</strong> Wraps the FilteredList to enable sorting
- * while preserving
- * filter state. This layered approach allows independent filter and sort
- * operations.</li>
- * <li><strong>Bidirectional Binding:</strong> The favorites ListView is bound
- * to a filtered
- * view of businesses where favorite=true, ensuring automatic updates when users
- * toggle
- * favorite checkboxes.</li>
- * </ul>
- * 
- * <p>
- * <strong>Variable Scope Rationale:</strong>
- * </p>
- * <ul>
- * <li><strong>Instance variables (allBusinesses, filteredList, etc.):</strong>
- * Must persist
- * across multiple method calls and UI events, so declared at class level.</li>
- * <li><strong>FXML-injected components:</strong> Declared as instance variables
- * with @FXML
- * annotation to enable JavaFX runtime injection during FXML loading.</li>
- * <li><strong>Local variables:</strong> Used within methods for temporary
- * calculations or
- * single-use objects to minimize memory footprint.</li>
- * </ul>
- * 
+ * Manages the DoorDash-style card grid UI, filtering, sorting,
+ * favorites, reviews, and report generation.
+ *
  * @author FBLA Development Team
- * @version 1.0
+ * @version 2.0
  */
 public class MainController {
 
     // ==================== FXML Injected Components ====================
 
     @FXML
-    private TableView<Business> businessTable;
-    @FXML
-    private TableColumn<Business, String> nameColumn;
-    @FXML
-    private TableColumn<Business, String> categoryColumn;
-    @FXML
-    private TableColumn<Business, Double> ratingColumn;
-    @FXML
-    private TableColumn<Business, Boolean> favoriteColumn;
-
+    private FlowPane businessCardGrid;
     @FXML
     private TextField zipCodeField;
-
     @FXML
     private ComboBox<String> categoryFilter;
     @FXML
@@ -100,55 +56,40 @@ public class MainController {
     @FXML
     private Label businessDescriptionLabel;
     @FXML
-    private javafx.scene.layout.HBox resultBanner;
+    private ImageView detailImageView;
+    @FXML
+    private HBox resultBanner;
     @FXML
     private Label resultBannerLabel;
 
     // ==================== Data Collections ====================
 
-    /** Master list of all businesses shown in the table */
+    /** Master list of all businesses */
     private ObservableList<Business> allBusinesses;
 
-    /**
-     * Separate list of ALL favorited businesses (drives the sidebar, independent of
-     * table)
-     */
+    /** Separate list of ALL favorited businesses (drives the sidebar) */
     private ObservableList<Business> favoritedBusinesses;
 
-    /** Filtered view based on category selection */
-    private FilteredList<Business> filteredList;
+    /** Currently selected business for the detail pane */
+    private Business selectedBusiness;
 
-    /** Sorted view of filtered businesses */
-    private SortedList<Business> sortedList;
+    /** Whether to sort by rating descending */
+    private boolean sortByRating = false;
 
     /**
      * Initializes the controller after FXML loading.
-     * Called automatically by JavaFX framework.
-     * 
-     * <p>
-     * Initialization sequence:
-     * </p>
-     * <ol>
-     * <li>Load mock data from DataManager</li>
-     * <li>Configure TableView columns with property bindings</li>
-     * <li>Set up filtering and sorting wrappers</li>
-     * <li>Initialize category filter ComboBox</li>
-     * <li>Configure favorites sidebar with automatic updates</li>
-     * <li>Set up event listeners for business selection</li>
-     * </ol>
      */
     @FXML
     public void initialize() {
         // Fetch user favorites
         String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
-        java.util.List<String> userFavorites = currentUser != null ? SupabaseClient.getUserFavorites(currentUser)
+        List<String> userFavorites = currentUser != null ? SupabaseClient.getUserFavorites(currentUser)
                 : new java.util.ArrayList<>();
 
-        // Load mock data into an extractor-backed list so FilteredList
-        // re-evaluates when favoriteProperty() changes on any item.
+        // Load mock data
         ObservableList<Business> rawData = DataManager.initializeMockData();
 
-        // Separate list for favorites sidebar (independent of table data)
+        // Separate list for favorites sidebar
         favoritedBusinesses = FXCollections.observableArrayList(
                 business -> new javafx.beans.Observable[] { business.favoriteProperty() });
 
@@ -165,147 +106,304 @@ public class MainController {
                 business -> new javafx.beans.Observable[] { business.favoriteProperty() });
         allBusinesses.addAll(rawData);
 
-        // Configure table columns
-        setupTableColumns();
-
-        // Set up filtering and sorting
-        setupFilteringAndSorting();
-
         // Initialize category filter dropdown
         setupCategoryFilter();
 
         // Configure favorites sidebar
         setupFavoritesList();
 
-        // Set up business selection listener
-        setupSelectionListener();
+        // Build the card grid
+        refreshCardGrid();
+
+        // Set detail pane placeholder
+        clearDetailPane();
+    }
+
+    // ==================== Card Grid ====================
+
+    /**
+     * Rebuilds the entire card grid from the current data + filters + sort.
+     */
+    private void refreshCardGrid() {
+        businessCardGrid.getChildren().clear();
+
+        String selectedCategory = categoryFilter.getValue();
+        List<Business> filtered = allBusinesses.stream()
+                .filter(b -> "All".equals(selectedCategory) || b.getCategory().equals(selectedCategory))
+                .collect(Collectors.toList());
+
+        if (sortByRating) {
+            filtered.sort(Comparator.comparingDouble(Business::getRating).reversed());
+        }
+
+        for (Business b : filtered) {
+            businessCardGrid.getChildren().add(createBusinessCard(b));
+        }
+
+        // Show empty state if no results
+        if (filtered.isEmpty() && !"All".equals(selectedCategory)) {
+            showResultBanner("No businesses match \"" + selectedCategory + "\" — try selecting \"All\"",
+                    "result-banner-warning");
+        }
     }
 
     /**
-     * Configures TableView columns with property bindings and custom cell
-     * factories.
-     * 
-     * <p>
-     * <strong>PropertyValueFactory:</strong> Automatically binds table columns to
-     * Business
-     * class properties using JavaFX reflection. For example, "name" maps to
-     * nameProperty().
-     * </p>
-     * 
-     * <p>
-     * <strong>CheckBoxTableCell:</strong> Provides editable checkbox cells for the
-     * favorite
-     * column, enabling users to toggle favorite status directly in the table.
-     * </p>
+     * Creates a DoorDash-style business card VBox for the grid.
+     *
+     * @param business The business to display
+     * @return A VBox node representing the card
      */
-    private void setupTableColumns() {
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        ratingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
+    private VBox createBusinessCard(Business business) {
+        VBox card = new VBox(0);
+        card.getStyleClass().add("business-card");
+        card.setPrefWidth(260);
+        card.setMaxWidth(260);
+        card.setCursor(Cursor.HAND);
 
-        // Custom cell factory for rating to show one decimal place
-        ratingColumn.setCellFactory(column -> new TableCell<Business, Double>() {
+        // ---- Image ----
+        StackPane imageContainer = new StackPane();
+        imageContainer.getStyleClass().add("card-image-container");
+        imageContainer.setPrefHeight(160);
+        imageContainer.setMinHeight(160);
+        imageContainer.setMaxHeight(160);
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(260);
+        imageView.setFitHeight(160);
+        imageView.setPreserveRatio(false);
+        imageView.setSmooth(true);
+
+        // Rounded clip for the image
+        Rectangle clip = new Rectangle(260, 160);
+        clip.setArcWidth(16);
+        clip.setArcHeight(16);
+        imageView.setClip(clip);
+
+        // Load image async
+        String imgUrl = business.getImageUrl();
+        if (imgUrl != null && !imgUrl.isEmpty()) {
+            try {
+                Image image = new Image(imgUrl, 260, 160, false, true, true);
+                imageView.setImage(image);
+            } catch (Exception e) {
+                // Fallback: gray placeholder
+                imageView.setStyle("-fx-background-color: #e0e0e0;");
+            }
+        }
+
+        // Heart button overlay
+        Button heartBtn = new Button(business.isFavorite() ? "❤️" : "🤍");
+        heartBtn.getStyleClass().add("card-heart-button");
+        heartBtn.setOnAction(e -> {
+            business.setFavorite(!business.isFavorite());
+            heartBtn.setText(business.isFavorite() ? "❤️" : "🤍");
+        });
+        StackPane.setAlignment(heartBtn, Pos.TOP_RIGHT);
+        StackPane.setMargin(heartBtn, new Insets(8, 8, 0, 0));
+
+        imageContainer.getChildren().addAll(imageView, heartBtn);
+
+        // ---- Info section ----
+        VBox infoBox = new VBox(4);
+        infoBox.getStyleClass().add("card-info");
+        infoBox.setPadding(new Insets(10, 12, 12, 12));
+
+        // Name
+        Label nameLabel = new Label(business.getName());
+        nameLabel.getStyleClass().add("card-title");
+        nameLabel.setWrapText(true);
+        nameLabel.setMaxWidth(236);
+
+        // Category + Price row
+        HBox metaRow = new HBox(8);
+        metaRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label categoryBadge = new Label(business.getCategory());
+        categoryBadge.getStyleClass().add("card-category-badge");
+        switch (business.getCategory()) {
+            case "Food":
+                categoryBadge.getStyleClass().add("badge-food");
+                break;
+            case "Retail":
+                categoryBadge.getStyleClass().add("badge-retail");
+                break;
+            case "Services":
+                categoryBadge.getStyleClass().add("badge-services");
+                break;
+        }
+
+        Label priceLabel = new Label(business.getPrice());
+        priceLabel.getStyleClass().add("card-price");
+
+        metaRow.getChildren().addAll(categoryBadge, priceLabel);
+
+        // Rating row
+        HBox ratingRow = new HBox(4);
+        ratingRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label starsLabel = new Label(buildStarString(business.getRating()));
+        starsLabel.getStyleClass().add("card-rating-stars");
+
+        Label ratingLabel = new Label(String.format("%.1f", business.getRating()));
+        ratingLabel.getStyleClass().add("card-rating-number");
+
+        ratingRow.getChildren().addAll(starsLabel, ratingLabel);
+
+        // Address
+        Label addressLabel = new Label(business.getAddress());
+        addressLabel.getStyleClass().add("card-address");
+        addressLabel.setWrapText(true);
+        addressLabel.setMaxWidth(236);
+
+        infoBox.getChildren().addAll(nameLabel, metaRow, ratingRow, addressLabel);
+
+        card.getChildren().addAll(imageContainer, infoBox);
+
+        // Click handler → show business details
+        card.setOnMouseClicked(e -> selectBusiness(business));
+
+        // Hover elevation effect
+        DropShadow restShadow = new DropShadow(8, Color.rgb(0, 0, 0, 0.08));
+        DropShadow hoverShadow = new DropShadow(20, Color.rgb(0, 0, 0, 0.15));
+        card.setEffect(restShadow);
+        card.setOnMouseEntered(e -> card.setEffect(hoverShadow));
+        card.setOnMouseExited(e -> card.setEffect(restShadow));
+
+        return card;
+    }
+
+    /**
+     * Builds a star string like "★★★★☆" from a rating.
+     */
+    private String buildStarString(double rating) {
+        StringBuilder stars = new StringBuilder();
+        int full = (int) Math.floor(rating);
+        for (int i = 0; i < full; i++)
+            stars.append("★");
+        if (rating - full >= 0.5)
+            stars.append("½");
+        int empty = 5 - full - (rating - full >= 0.5 ? 1 : 0);
+        for (int i = 0; i < empty; i++)
+            stars.append("☆");
+        return stars.toString();
+    }
+
+    // ==================== Selection & Detail Pane ====================
+
+    /**
+     * Selects a business and updates the detail pane.
+     */
+    private void selectBusiness(Business business) {
+        this.selectedBusiness = business;
+        selectedBusinessLabel.setText(business.getName());
+
+        String desc = business.getDescription();
+        businessDescriptionLabel.setText(desc != null && !desc.trim().isEmpty() ? desc : "");
+
+        // Load detail image
+        String imgUrl = business.getImageUrl();
+        if (imgUrl != null && !imgUrl.isEmpty()) {
+            try {
+                Image img = new Image(imgUrl, 290, 180, false, true, true);
+                detailImageView.setImage(img);
+            } catch (Exception e) {
+                detailImageView.setImage(null);
+            }
+        } else {
+            detailImageView.setImage(null);
+        }
+
+        // Show local deals first
+        dealsPane.setItems(business.getDeals());
+
+        // Fetch reviews from Supabase in background
+        javafx.concurrent.Task<List<Review>> fetchReviewsTask = new javafx.concurrent.Task<>() {
             @Override
-            protected void updateItem(Double rating, boolean empty) {
-                super.updateItem(rating, empty);
-                if (empty || rating == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%.1f ⭐", rating));
-                }
+            protected List<Review> call() throws Exception {
+                return SupabaseClient.getReviewsForBusiness(business.getName());
+            }
+        };
+
+        fetchReviewsTask.setOnSucceeded(e -> {
+            List<Review> reviews = fetchReviewsTask.getValue();
+            if (reviews != null && !reviews.isEmpty()) {
+                Platform.runLater(() -> {
+                    if (selectedBusiness == business) {
+                        ObservableList<String> combined = FXCollections.observableArrayList(business.getDeals());
+                        combined.add("--- Community Reviews ---");
+                        for (Review r : reviews) {
+                            combined.add(r.toString());
+                        }
+                        dealsPane.setItems(combined);
+                    }
+                });
             }
         });
 
-        // Checkbox column for favorites
-        favoriteColumn.setCellValueFactory(new PropertyValueFactory<>("favorite"));
-        favoriteColumn.setCellFactory(CheckBoxTableCell.forTableColumn(favoriteColumn));
-        favoriteColumn.setEditable(true);
-        businessTable.setEditable(true);
+        new Thread(fetchReviewsTask).start();
     }
 
     /**
-     * Initializes FilteredList and SortedList wrappers for dynamic filtering and
-     * sorting.
-     * 
-     * <p>
-     * <strong>Design Pattern:</strong> Uses the Decorator pattern - FilteredList
-     * wraps
-     * ObservableList, then SortedList wraps FilteredList. Each layer adds
-     * functionality
-     * without modifying the underlying data structure.
-     * </p>
+     * Clears the detail pane.
      */
-    private void setupFilteringAndSorting() {
-        // Create filtered list (initially shows all items)
-        filteredList = new FilteredList<>(allBusinesses, business -> true);
-
-        // Wrap filtered list in sorted list
-        sortedList = new SortedList<>(filteredList);
-
-        // Bind sorted list to table
-        sortedList.comparatorProperty().bind(businessTable.comparatorProperty());
-        businessTable.setItems(sortedList);
+    private void clearDetailPane() {
+        selectedBusinessLabel.setText("Select a business");
+        businessDescriptionLabel.setText("Click on a business card to view details, deals, and reviews.");
+        detailImageView.setImage(null);
+        dealsPane.setItems(FXCollections.observableArrayList());
     }
 
-    /**
-     * Initializes the category filter ComboBox with all available categories.
-     */
+    // ==================== Filters & Sort ====================
+
     private void setupCategoryFilter() {
         categoryFilter.setItems(FXCollections.observableArrayList(
                 "All", "Food", "Retail", "Services"));
         categoryFilter.setValue("All");
-
-        // Add listener to update filter when selection changes
-        categoryFilter.setOnAction(event -> handleCategoryFilter());
+        categoryFilter.setOnAction(event -> {
+            hideResultBanner();
+            refreshCardGrid();
+        });
     }
 
-    /**
-     * Configures the favorites ListView to automatically display favorited
-     * businesses.
-     * 
-     * <p>
-     * <strong>Automatic Updates:</strong> Uses a FilteredList that listens to
-     * changes
-     * in the favorite property. When a user checks/unchecks a favorite checkbox,
-     * the
-     * ListView automatically adds/removes the business without manual refresh.
-     * </p>
-     */
-    private void setupFavoritesList() {
-        // Sidebar is driven by the separate favoritedBusinesses list, NOT the table
-        // data
-        favoritesList.setItems(favoritedBusinesses);
+    @FXML
+    private void handleSortByRating() {
+        sortByRating = !sortByRating;
+        refreshCardGrid();
+    }
 
-        // Custom cell factory to display business name and rating
+    @FXML
+    private void handleCategoryFilter() {
+        hideResultBanner();
+        refreshCardGrid();
+    }
+
+    // ==================== Favorites ====================
+
+    private void setupFavoritesList() {
+        favoritesList.setItems(favoritedBusinesses);
         favoritesList.setCellFactory(listView -> new ListCell<Business>() {
             @Override
             protected void updateItem(Business business, boolean empty) {
                 super.updateItem(business, empty);
                 if (empty || business == null) {
                     setText(null);
+                    setGraphic(null);
                 } else {
                     setText(String.format("%s (%.1f⭐)", business.getName(), business.getRating()));
                 }
             }
         });
 
-        // Clicking a favorite in the sidebar selects and scrolls to it in the main
-        // table
         favoritesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, newVal) -> {
                     if (newVal != null) {
-                        businessTable.getSelectionModel().select(newVal);
-                        businessTable.scrollTo(newVal);
+                        selectBusiness(newVal);
                     }
                 });
     }
 
-    /**
-     * Attaches a listener to a Business's favorite property to sync with Supabase.
-     */
     private void attachFavoriteListener(Business business) {
         business.favoriteProperty().addListener((obs, wasFavorite, isNowFavorite) -> {
-            // Sync with sidebar list
             if (isNowFavorite) {
                 if (!favoritedBusinesses.contains(business)) {
                     favoritedBusinesses.add(business);
@@ -329,130 +427,8 @@ public class MainController {
         });
     }
 
-    /**
-     * Sets up listener for business selection in the TableView.
-     * When a business is selected, displays its deals in the right pane.
-     */
-    private void setupSelectionListener() {
-        businessTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        displayBusinessDeals(newValue);
-                    } else {
-                        clearDealsPane();
-                    }
-                });
-    }
+    // ==================== Zip Search ====================
 
-    /**
-     * Handles category filter changes by updating the FilteredList predicate.
-     * 
-     * <p>
-     * <strong>Predicate Logic:</strong> "All" shows all businesses, otherwise
-     * filters
-     * to match the selected category. The predicate is evaluated for each business
-     * in
-     * the list, and only matching items appear in the TableView.
-     * </p>
-     */
-    @FXML
-    private void handleCategoryFilter() {
-        String selectedCategory = categoryFilter.getValue();
-
-        if ("All".equals(selectedCategory)) {
-            filteredList.setPredicate(business -> true);
-        } else {
-            filteredList.setPredicate(business -> business.getCategory().equals(selectedCategory));
-        }
-
-        // Show inline message when filter yields no results
-        if (filteredList.isEmpty() && !"All".equals(selectedCategory)) {
-            showResultBanner("No businesses match \"" + selectedCategory + "\" — try selecting \"All\"",
-                    "result-banner-warning");
-        } else {
-            hideResultBanner();
-        }
-    }
-
-    /**
-     * Sorts businesses by rating in descending order (highest first).
-     * 
-     * <p>
-     * <strong>Implementation Note:</strong> Sets the rating column as the sort
-     * column
-     * with descending order. The TableView's sort order is updated, which
-     * automatically
-     * updates the SortedList due to the binding established in
-     * setupFilteringAndSorting().
-     * </p>
-     */
-    @FXML
-    private void handleSortByRating() {
-        ratingColumn.setSortType(TableColumn.SortType.DESCENDING);
-        businessTable.getSortOrder().clear();
-        businessTable.getSortOrder().add(ratingColumn);
-    }
-
-    /**
-     * Displays the deals for the selected business in the deals pane.
-     * Also fetches persistent reviews from Supabase in the background.
-     * 
-     * @param business The selected business
-     */
-    private void displayBusinessDeals(Business business) {
-        selectedBusinessLabel.setText(business.getName() + " - Details");
-        String desc = business.getDescription();
-        if (desc == null || desc.trim().isEmpty()) {
-            businessDescriptionLabel.setText("");
-        } else {
-            businessDescriptionLabel.setText(desc);
-        }
-
-        // Show local deals first
-        dealsPane.setItems(business.getDeals());
-
-        // Fetch reviews from Supabase in background so UI doesn't freeze
-        javafx.concurrent.Task<java.util.List<Review>> fetchReviewsTask = new javafx.concurrent.Task<>() {
-            @Override
-            protected java.util.List<Review> call() throws Exception {
-                return SupabaseClient.getReviewsForBusiness(business.getName());
-            }
-        };
-
-        fetchReviewsTask.setOnSucceeded(e -> {
-            java.util.List<Review> reviews = fetchReviewsTask.getValue();
-            if (reviews != null && !reviews.isEmpty()) {
-                // If it's still the selected business, append reviews to the deals pane
-                // visually
-                Platform.runLater(() -> {
-                    if (businessTable.getSelectionModel().getSelectedItem() == business) {
-                        ObservableList<String> combined = FXCollections.observableArrayList(business.getDeals());
-                        combined.add("--- Community Reviews ---");
-                        for (Review r : reviews) {
-                            combined.add(r.toString());
-                        }
-                        dealsPane.setItems(combined);
-                    }
-                });
-            }
-        });
-
-        new Thread(fetchReviewsTask).start();
-    }
-
-    /**
-     * Clears the deals pane when no business is selected.
-     */
-    private void clearDealsPane() {
-        selectedBusinessLabel.setText("Select a business to view details");
-        businessDescriptionLabel.setText("");
-        dealsPane.setItems(FXCollections.observableArrayList());
-    }
-
-    /**
-     * Handles fetching businesses by Zip Code from an external API using a
-     * background Task.
-     */
     @FXML
     private void handleZipSearch() {
         String zipCode = zipCodeField.getText();
@@ -461,9 +437,13 @@ public class MainController {
             return;
         }
 
-        // Disable table during search
-        businessTable.setDisable(true);
         hideResultBanner();
+        businessCardGrid.getChildren().clear();
+
+        // Show loading state
+        Label loadingLabel = new Label("🔍 Searching businesses...");
+        loadingLabel.getStyleClass().add("loading-label");
+        businessCardGrid.getChildren().add(loadingLabel);
 
         String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
         String trimmedZip = zipCode.trim();
@@ -476,14 +456,14 @@ public class MainController {
         };
 
         fetchTask.setOnSucceeded(e -> {
-            businessTable.setDisable(false);
             ObservableList<Business> results = fetchTask.getValue();
             if (results.isEmpty()) {
+                businessCardGrid.getChildren().clear();
                 showResultBanner("No businesses found near " + trimmedZip + " — try a different zip code.",
                         "result-banner-warning");
             } else {
                 new Thread(() -> {
-                    java.util.List<String> userFavoritesList = currentUser != null
+                    List<String> userFavoritesList = currentUser != null
                             ? SupabaseClient.getUserFavorites(currentUser)
                             : new java.util.ArrayList<>();
                     Platform.runLater(() -> {
@@ -496,7 +476,7 @@ public class MainController {
         });
 
         fetchTask.setOnFailed(e -> {
-            businessTable.setDisable(false);
+            businessCardGrid.getChildren().clear();
             Throwable ex = fetchTask.getException();
             String msg = (ex != null && ex.getMessage() != null) ? ex.getMessage() : "";
             if (msg.toLowerCase().contains("invalid zip")) {
@@ -513,11 +493,9 @@ public class MainController {
         new Thread(fetchTask).start();
     }
 
-    private void processZipResults(ObservableList<Business> results, java.util.List<String> userFavoritesList) {
+    private void processZipResults(ObservableList<Business> results, List<String> userFavoritesList) {
         allBusinesses.clear();
 
-        // Only add the new search results to the table — favorites stay in the sidebar
-        // independently
         for (Business newBiz : results) {
             if (userFavoritesList.contains(newBiz.getName())) {
                 newBiz.setFavorite(true);
@@ -526,24 +504,15 @@ public class MainController {
             allBusinesses.add(newBiz);
         }
 
-        categoryFilter.setValue("All"); // Reset filter
+        categoryFilter.setValue("All");
+        sortByRating = false;
+        refreshCardGrid();
     }
 
-    /**
-     * Opens the review submission dialog for the selected business.
-     * 
-     * <p>
-     * <strong>Modal Dialog:</strong> Uses Modality.APPLICATION_MODAL to block
-     * interaction
-     * with the main window until the review dialog is closed, ensuring users
-     * complete or
-     * cancel the review before continuing.
-     * </p>
-     */
+    // ==================== Reviews ====================
+
     @FXML
     private void handleAddReview() {
-        Business selectedBusiness = businessTable.getSelectionModel().getSelectedItem();
-
         if (selectedBusiness == null) {
             showAlert(Alert.AlertType.WARNING, "No Selection",
                     "Please select a business to review.");
@@ -563,8 +532,8 @@ public class MainController {
             dialogStage.setScene(scene);
             dialogStage.showAndWait();
 
-            // Refresh table to show updated rating
-            businessTable.refresh();
+            // Refresh detail pane to show new review
+            selectBusiness(selectedBusiness);
 
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Error",
@@ -572,25 +541,15 @@ public class MainController {
         }
     }
 
-    /**
-     * Generates a support report for all favorited businesses.
-     * Delegates to ReportGenerator utility class.
-     */
+    // ==================== Reports ====================
+
     @FXML
     private void handleGenerateReport() {
-        // Use the separate favorites list (contains all favorites across searches)
         ReportGenerator.generateReport(FXCollections.observableArrayList(favoritedBusinesses));
     }
 
     // ==================== Inline Result Banner ====================
 
-    /**
-     * Shows the inline result banner below the search bar.
-     *
-     * @param message    Text to display
-     * @param styleClass One of "result-banner-success", "result-banner-warning",
-     *                   "result-banner-error"
-     */
     private void showResultBanner(String message, String styleClass) {
         resultBannerLabel.setText(message);
         resultBanner.getStyleClass().removeAll(
@@ -600,20 +559,12 @@ public class MainController {
         resultBanner.setManaged(true);
     }
 
-    /** Hides the inline result banner. Called by the ✕ button in FXML. */
     @FXML
     private void hideResultBanner() {
         resultBanner.setVisible(false);
         resultBanner.setManaged(false);
     }
 
-    /**
-     * Displays an alert dialog to the user.
-     * 
-     * @param type    Alert type (INFORMATION, WARNING, ERROR)
-     * @param title   Dialog title
-     * @param message Dialog message
-     */
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

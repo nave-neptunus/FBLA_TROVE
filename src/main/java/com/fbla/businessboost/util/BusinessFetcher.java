@@ -9,17 +9,59 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 
 public class BusinessFetcher {
 
+    // Curated stock images by category (Unsplash permanent URLs)
+    private static final String[] FOOD_IMAGES = {
+            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400&h=300&fit=crop"
+    };
+
+    private static final String[] RETAIL_IMAGES = {
+            "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1528698827591-e19cef791f48?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1555529771-7888783a18d3?w=400&h=300&fit=crop"
+    };
+
+    private static final String[] SERVICE_IMAGES = {
+            "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1521590832167-7228fcb04b0e?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop",
+            "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop"
+    };
+
+    private static int foodIdx = 0, retailIdx = 0, serviceIdx = 0;
+
     public static ObservableList<Business> fetchBusinessesByZipCode(String zipCode) throws Exception {
         ObservableList<Business> businesses = FXCollections.observableArrayList();
 
+        // Reset image indices for fresh search
+        foodIdx = 0;
+        retailIdx = 0;
+        serviceIdx = 0;
+
         // 1. Get Lat/Lon from Zip Code using Zippopotam
         String zipUrlStr = "http://api.zippopotam.us/us/" + URLEncoder.encode(zipCode.trim(), "UTF-8");
-        URL zipUrl = new URL(zipUrlStr);
+        URL zipUrl = URI.create(zipUrlStr).toURL();
         HttpURLConnection zipCon = (HttpURLConnection) zipUrl.openConnection();
         zipCon.setRequestMethod("GET");
 
@@ -39,6 +81,8 @@ public class BusinessFetcher {
         JSONObject place = zipJson.getJSONArray("places").getJSONObject(0);
         double lat = place.getDouble("latitude");
         double lon = place.getDouble("longitude");
+        String placeName = place.optString("place name", "");
+        String state = place.optString("state abbreviation", "");
 
         // 2. Get businesses around this lat/lon using Overpass API
         String query = String.format(
@@ -52,7 +96,7 @@ public class BusinessFetcher {
                 lat, lon, lat, lon, lat, lon);
 
         String overpassUrlStr = "https://overpass-api.de/api/interpreter?data=" + URLEncoder.encode(query, "UTF-8");
-        URL overpassUrl = new URL(overpassUrlStr);
+        URL overpassUrl = URI.create(overpassUrlStr).toURL();
         HttpURLConnection overpassCon = (HttpURLConnection) overpassUrl.openConnection();
         overpassCon.setRequestMethod("GET");
         overpassCon.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
@@ -97,14 +141,10 @@ public class BusinessFetcher {
                         category = "Services";
                     }
 
-                    String description = "";
-                    if (tags.has("description")) {
-                        description = tags.getString("description");
-                    } else if (tags.has("cuisine")) {
-                        description = "A " + tags.getString("cuisine") + " restaurant.";
-                    }
+                    // Build description from OSM tags
+                    String description = buildDescription(tags, category);
 
-                    // Try to get a better description from external API for famous brands
+                    // Attempt to get a description for well-known brands
                     String externalDescription = fetchBusinessDescription(name);
                     if (externalDescription != null && !externalDescription.isEmpty()) {
                         description = externalDescription;
@@ -115,6 +155,15 @@ public class BusinessFetcher {
 
                     Business b = new Business(name, category, rating);
                     b.setDescription(description);
+                    b.setImageUrl(getImageForCategory(category));
+
+                    // Build address from OSM tags + zip code context
+                    String address = buildAddress(tags, placeName, state, zipCode);
+                    b.setAddress(address);
+
+                    // Set price from cuisine/shop type
+                    b.setPrice(estimatePrice(tags));
+
                     // Add dynamic deals
                     java.util.List<String> generatedDeals = generateDeals(category, rating);
                     for (String deal : generatedDeals) {
@@ -130,18 +179,120 @@ public class BusinessFetcher {
     }
 
     /**
+     * Returns a stock image URL based on the business category, cycling through
+     * the array so each card gets a different image.
+     */
+    private static String getImageForCategory(String category) {
+        switch (category) {
+            case "Food":
+                return FOOD_IMAGES[foodIdx++ % FOOD_IMAGES.length];
+            case "Services":
+                return SERVICE_IMAGES[serviceIdx++ % SERVICE_IMAGES.length];
+            default:
+                return RETAIL_IMAGES[retailIdx++ % RETAIL_IMAGES.length];
+        }
+    }
+
+    /**
+     * Builds a description from OpenStreetMap tags.
+     */
+    private static String buildDescription(JSONObject tags, String category) {
+        StringBuilder desc = new StringBuilder();
+
+        if (tags.has("cuisine")) {
+            desc.append(capitalize(tags.getString("cuisine").replace(";", ", ")));
+        } else if (tags.has("shop")) {
+            desc.append(capitalize(tags.getString("shop").replace("_", " ")));
+        } else if (tags.has("amenity")) {
+            desc.append(capitalize(tags.getString("amenity").replace("_", " ")));
+        }
+
+        if (tags.has("opening_hours")) {
+            if (desc.length() > 0)
+                desc.append(" · ");
+            desc.append(tags.getString("opening_hours"));
+        }
+
+        return desc.toString();
+    }
+
+    /**
+     * Builds an address string from OSM tags.
+     */
+    private static String buildAddress(JSONObject tags, String placeName, String state, String zipCode) {
+        StringBuilder addr = new StringBuilder();
+
+        if (tags.has("addr:street")) {
+            if (tags.has("addr:housenumber")) {
+                addr.append(tags.getString("addr:housenumber")).append(" ");
+            }
+            addr.append(tags.getString("addr:street"));
+        }
+
+        if (addr.length() > 0) {
+            addr.append(", ");
+        }
+
+        if (tags.has("addr:city")) {
+            addr.append(tags.getString("addr:city"));
+        } else if (!placeName.isEmpty()) {
+            addr.append(placeName);
+        }
+
+        if (!state.isEmpty()) {
+            if (addr.length() > 0)
+                addr.append(", ");
+            addr.append(state);
+        }
+
+        if (addr.length() > 0)
+            addr.append(" ");
+        addr.append(zipCode.trim());
+
+        return addr.toString();
+    }
+
+    /**
+     * Estimates a price level from OSM tags.
+     */
+    private static String estimatePrice(JSONObject tags) {
+        if (tags.has("amenity")) {
+            String amenity = tags.getString("amenity");
+            if ("fast_food".equals(amenity))
+                return "$";
+            if ("cafe".equals(amenity))
+                return "$";
+            if ("bar".equals(amenity))
+                return "$$";
+            if ("restaurant".equals(amenity))
+                return "$$";
+        }
+        if (tags.has("shop")) {
+            String shop = tags.getString("shop");
+            if ("supermarket".equals(shop) || "convenience".equals(shop))
+                return "$";
+            if ("clothes".equals(shop) || "electronics".equals(shop))
+                return "$$";
+            if ("jewelry".equals(shop))
+                return "$$$";
+        }
+        return "$$";
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.isEmpty())
+            return s;
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
+    /**
      * Generates a random list of realistic deals based on the business category.
-     * 
-     * @param category The business category (Food, Retail, Services)
-     * @param rating   The business rating to occasionally offer better deals for
-     *                 highly rated places
-     * @return A list of deal strings
      */
     private static java.util.List<String> generateDeals(String category, double rating) {
         java.util.List<String> deals = new java.util.ArrayList<>();
         java.util.Random random = new java.util.Random();
 
-        int numDeals = random.nextInt(3) + 1; // 1 to 3 deals
+        int numDeals = random.nextInt(3) + 1;
 
         String[] foodDeals = {
                 "Free drink with any meal purchase over $15",
@@ -185,7 +336,6 @@ public class BusinessFetcher {
                 sourceArray = retailDeals;
         }
 
-        // To ensure we get unique deals without a complex shuffle
         java.util.List<String> available = new java.util.ArrayList<>(java.util.Arrays.asList(sourceArray));
         java.util.Collections.shuffle(available, random);
 
@@ -193,7 +343,6 @@ public class BusinessFetcher {
             deals.add(available.get(i));
         }
 
-        // Add a special deal for high-rated businesses sometimes
         if (rating >= 4.5 && random.nextBoolean()) {
             deals.add("⭐ Top Rated Special: Extra 5% off!");
         }
@@ -202,27 +351,19 @@ public class BusinessFetcher {
     }
 
     /**
-     * Attempts to fetch a short introductory description of a business from
-     * DuckDuckGo Instant Answer API.
-     * This API is better for entity lookups than direct Wikipedia because it won't
-     * redirect to random articles.
-     * 
-     * @param businessName The name of the business to look up
-     * @return The description summary, or null if not found/error
+     * Attempts to fetch a short description from DuckDuckGo Instant Answer API.
      */
     private static String fetchBusinessDescription(String businessName) {
         try {
-            // Clean up name for search
             String searchName = businessName.split("-")[0].split(",")[0].trim();
-
             String searchUrlStr = "https://api.duckduckgo.com/?q="
                     + URLEncoder.encode(searchName, "UTF-8") + "&format=json";
 
-            URL url = new URL(searchUrlStr);
+            URL url = URI.create(searchUrlStr).toURL();
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
-            con.setConnectTimeout(2000); // Short timeout
+            con.setConnectTimeout(2000);
             con.setReadTimeout(2000);
 
             if (con.getResponseCode() == 200) {
@@ -238,7 +379,6 @@ public class BusinessFetcher {
                 if (json.has("AbstractText")) {
                     String abstractText = json.getString("AbstractText").trim();
                     if (!abstractText.isEmpty() && !abstractText.contains("may refer to")) {
-                        // Truncate to first two sentences for brevity if it's very long
                         if (abstractText.length() > 200 && abstractText.contains(". ")) {
                             int secondDot = abstractText.indexOf(". ", abstractText.indexOf(". ") + 1);
                             if (secondDot > 0) {
@@ -250,7 +390,6 @@ public class BusinessFetcher {
                 }
             }
         } catch (Exception e) {
-            // Ignore API errors
             System.err.println("Failed to fetch description for " + businessName + ": " + e.getMessage());
         }
         return null;

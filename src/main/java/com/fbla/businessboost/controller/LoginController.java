@@ -141,7 +141,7 @@ public class LoginController {
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("FBLA Business Boost - Logged in as: " + SessionManager.getCurrentUser());
-            stage.setScene(new Scene(root, 1000, 700));
+            stage.setScene(new Scene(root, 1200, 750));
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Error loading main application window.");
