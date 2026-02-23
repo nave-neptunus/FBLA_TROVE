@@ -20,7 +20,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Comparator;
 
 /**
  * Main controller for the FBLA Business Boost dashboard.
