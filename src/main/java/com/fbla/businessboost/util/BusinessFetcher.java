@@ -99,7 +99,7 @@ public class BusinessFetcher {
         URL overpassUrl = URI.create(overpassUrlStr).toURL();
         HttpURLConnection overpassCon = (HttpURLConnection) overpassUrl.openConnection();
         overpassCon.setRequestMethod("GET");
-        overpassCon.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
+        overpassCon.setRequestProperty("User-Agent", "Commercio/1.0");
 
         int responseCode = overpassCon.getResponseCode();
         if (responseCode != 200) {
@@ -362,7 +362,7 @@ public class BusinessFetcher {
             URL url = URI.create(searchUrlStr).toURL();
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", "FBLA-Business-Boost/1.0");
+            con.setRequestProperty("User-Agent", "Commercio/1.0");
             con.setConnectTimeout(2000);
             con.setReadTimeout(2000);
 

@@ -73,7 +73,7 @@ public class Main extends Application {
         Scene scene = new Scene(loader.load(), 500, 600);
 
         // Configure primary stage for Login
-        primaryStage.setTitle("FBLA Business Boost - Login");
+        primaryStage.setTitle("Commercio - Login");
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(400);
         primaryStage.setMinHeight(500);

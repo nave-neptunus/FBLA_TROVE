@@ -1,5 +1,5 @@
 /* ===================================================================
-   FBLA Business Boost - DoorDash-Inspired Stylesheet
+   Commercio - DoorDash-Inspired Stylesheet
    Modern card-based design with warm accent colors
    =================================================================== */
 
@@ -129,7 +129,7 @@
     -fx-background-color: #fafafa;
 }
 
-.card-scroll-pane > .scroll-bar {
+.card-scroll-pane>.scroll-bar {
     -fx-background-color: transparent;
 }
 
@@ -392,6 +392,7 @@
     -fx-background-color: #f0fff4;
     -fx-border-color: #68d391;
 }
+
 .result-banner-success .label {
     -fx-text-fill: #276749;
 }
@@ -400,6 +401,7 @@
     -fx-background-color: #fffaf0;
     -fx-border-color: #f6ad55;
 }
+
 .result-banner-warning .label {
     -fx-text-fill: #9c4221;
 }
@@ -408,6 +410,7 @@
     -fx-background-color: #fff5f5;
     -fx-border-color: #fc8181;
 }
+
 .result-banner-error .label {
     -fx-text-fill: #9b2c2c;
 }
@@ -419,6 +422,7 @@
     -fx-padding: 2 6 2 6;
     -fx-cursor: hand;
 }
+
 .banner-close-button:hover {
     -fx-text-fill: #4a5568;
 }

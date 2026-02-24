@@ -15,7 +15,7 @@
     <top>
         <VBox styleClass="header">
             <HBox alignment="CENTER_LEFT" spacing="15">
-                <Label text="🚀 FBLA Business Boost" styleClass="app-title">
+                <Label text="🚀 Commercio" styleClass="app-title">
                     <font>
                         <Font name="System Bold" size="26"/>
                     </font>

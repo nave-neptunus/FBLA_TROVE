@@ -86,7 +86,7 @@ public class ReportGenerator {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(REPORT_FILENAME))) {
             // Write report header
             writer.write("═══════════════════════════════════════════════════════\n");
-            writer.write("        FBLA BUSINESS BOOST - SUPPORT REPORT\n");
+            writer.write("        COMMERCIO - SUPPORT REPORT\n");
             writer.write("═══════════════════════════════════════════════════════\n");
             writer.write("\n");
 

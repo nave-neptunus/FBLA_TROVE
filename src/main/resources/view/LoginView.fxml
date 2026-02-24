@@ -15,7 +15,7 @@
         <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
     </padding>
 
-    <Label text="FBLA Business Boost" textFill="#2c3e50">
+    <Label text="Commercio" textFill="#2c3e50">
         <font>
             <Font name="System Bold" size="28.0" />
         </font>

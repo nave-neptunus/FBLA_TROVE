@@ -140,7 +140,7 @@ public class LoginController {
             Parent root = loader.load();
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            stage.setTitle("FBLA Business Boost - Logged in as: " + SessionManager.getCurrentUser());
+            stage.setTitle("Commercio - Logged in as: " + SessionManager.getCurrentUser());
             stage.setScene(new Scene(root, 1200, 750));
         } catch (IOException e) {
             e.printStackTrace();
