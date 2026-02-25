@@ -102,14 +102,6 @@ public class MainController {
     @FXML
     private FlowPane tagCloudPane;
 
-    // --- Voice AI Tab ---
-    @FXML
-    private javafx.scene.control.TextArea voiceChatHistory;
-    @FXML
-    private javafx.scene.control.Label voiceStatusLabel;
-    @FXML
-    private javafx.scene.control.Button voiceMicButton;
-
     // ==================== Data Collections ====================
 
     /** Master list of all businesses */
@@ -911,33 +903,4 @@ public class MainController {
         alert.showAndWait();
     }
 
-    // ==================== Voice AI Assistant ====================
-
-    @FXML
-    private void handleVoicePress(javafx.scene.input.MouseEvent event) {
-        voiceStatusLabel.setText("Listening... Speak now!");
-        voiceStatusLabel.getStyleClass().setAll("voice-status-listening");
-        voiceMicButton.setText("🗣️ LISTENING...");
-        com.fbla.businessboost.util.VoiceAssistant.startListening();
-    }
-
-    @FXML
-    private void handleVoiceRelease(javafx.scene.input.MouseEvent event) {
-        voiceStatusLabel.setText("Processing audio...");
-        voiceStatusLabel.getStyleClass().setAll("voice-status-processing");
-        voiceMicButton.setText("🎤 HOLD TO SPEAK");
-
-        com.fbla.businessboost.util.VoiceAssistant.stopListeningAndProcess((userText, aiResponse) -> {
-            // Append to chat history
-            String time = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
-            String currentText = voiceChatHistory.getText();
-            String newEntry = String.format("[%s] You: %s\n[%s] AI: %s\n\n", time, userText, time, aiResponse);
-            voiceChatHistory.setText(currentText + newEntry);
-            voiceChatHistory.positionCaret(voiceChatHistory.getText().length());
-
-            // Reset status
-            voiceStatusLabel.setText("Ready to listen.");
-            voiceStatusLabel.getStyleClass().setAll("voice-status-ready");
-        });
-    }
 }
