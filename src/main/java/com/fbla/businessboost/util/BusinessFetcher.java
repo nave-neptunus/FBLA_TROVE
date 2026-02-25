@@ -430,7 +430,7 @@ public class BusinessFetcher {
             System.out.println("🔍 Searching Google Places (V1) for: " + businessName);
 
             // 1. Search for Place using Places API (New) via POST
-            String searchUrl = "https://places.googleapis.com/v1/places:searchByText";
+            String searchUrl = "https://places.googleapis.com/v1/places:searchText";
             URL url1 = URI.create(searchUrl).toURL();
             HttpURLConnection con1 = (HttpURLConnection) url1.openConnection();
             con1.setRequestMethod("POST");
@@ -452,16 +452,29 @@ public class BusinessFetcher {
             }
 
             if (con1.getResponseCode() != 200) {
-                BufferedReader errorIn = new BufferedReader(new InputStreamReader(con1.getErrorStream()));
-                StringBuilder errorResponse = new StringBuilder();
-                String line;
-                while ((line = errorIn.readLine()) != null)
-                    errorResponse.append(line);
-                System.err.println("⚠️ Google V1 API HTTP " + con1.getResponseCode() + ": " + errorResponse.toString());
+                java.io.InputStream errorStream = con1.getErrorStream();
+                if (errorStream != null) {
+                    BufferedReader errorIn = new BufferedReader(new InputStreamReader(errorStream));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String line;
+                    while ((line = errorIn.readLine()) != null)
+                        errorResponse.append(line);
+                    errorIn.close();
+                    System.err.println(
+                            "⚠️ Google V1 API HTTP " + con1.getResponseCode() + ": " + errorResponse.toString());
+                } else {
+                    System.err.println("⚠️ Google V1 API Error: HTTP " + con1.getResponseCode());
+                }
                 return null;
             }
 
-            BufferedReader in1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+            java.io.InputStream inputStream = con1.getInputStream();
+            if (inputStream == null) {
+                System.err.println("⚠️ Google V1 API returned null input stream");
+                return null;
+            }
+
+            BufferedReader in1 = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder response1 = new StringBuilder();
             String inputLine1;
             while ((inputLine1 = in1.readLine()) != null)
