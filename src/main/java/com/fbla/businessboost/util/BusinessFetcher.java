@@ -435,12 +435,6 @@ public class BusinessFetcher {
             b.addTags("#premium");
     }
 
-    private static String capitalize(String s) {
-        if (s == null || s.isEmpty())
-            return s;
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
     /**
      * Generates a random list of realistic deals based on the business category.
      */
@@ -597,48 +591,4 @@ public class BusinessFetcher {
         }
     }
 
-    /**
-     * Attempts to fetch a short description from DuckDuckGo Instant Answer API.
-     */
-    private static String fetchBusinessDescription(String businessName) {
-        try {
-            String searchName = businessName.split("-")[0].split(",")[0].trim();
-            String searchUrlStr = "https://api.duckduckgo.com/?q="
-                    + URLEncoder.encode(searchName, "UTF-8") + "&format=json";
-
-            URL url = URI.create(searchUrlStr).toURL();
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("User-Agent", "Commercio/1.0");
-            con.setConnectTimeout(2000);
-            con.setReadTimeout(2000);
-
-            if (con.getResponseCode() == 200) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                JSONObject json = new JSONObject(response.toString());
-                if (json.has("AbstractText")) {
-                    String abstractText = json.getString("AbstractText").trim();
-                    if (!abstractText.isEmpty() && !abstractText.contains("may refer to")) {
-                        if (abstractText.length() > 200 && abstractText.contains(". ")) {
-                            int secondDot = abstractText.indexOf(". ", abstractText.indexOf(". ") + 1);
-                            if (secondDot > 0) {
-                                abstractText = abstractText.substring(0, secondDot + 1);
-                            }
-                        }
-                        return abstractText;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to fetch description for " + businessName + ": " + e.getMessage());
-        }
-        return null;
-    }
 }
