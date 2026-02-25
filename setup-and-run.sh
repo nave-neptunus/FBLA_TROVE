@@ -81,7 +81,7 @@ mkdir -p out/production/classes
 # Compile all Java files
 javac -d out/production/classes \
       --module-path lib/javafx-sdk-21.0.1/lib \
-      --add-modules javafx.controls,javafx.fxml \
+      --add-modules javafx.controls,javafx.fxml,javafx.web \
       -cp lib/json-20240303.jar \
       $(find src/main/java -name "*.java")
 
@@ -102,8 +102,14 @@ echo "🚀 Launching FBLA Business Boost..."
 echo "=========================================="
 echo ""
 
+# Load environment variables if .env exists
+if [ -f ".env" ]; then
+    echo "🔒 Loading environment variables from .env"
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Run the application
 java --module-path lib/javafx-sdk-21.0.1/lib \
-     --add-modules javafx.controls,javafx.fxml \
+     --add-modules javafx.controls,javafx.fxml,javafx.web \
      -cp out/production/classes:lib/json-20240303.jar \
      com.fbla.businessboost.Main

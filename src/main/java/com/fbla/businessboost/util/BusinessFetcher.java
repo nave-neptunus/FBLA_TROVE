@@ -51,6 +51,9 @@ public class BusinessFetcher {
 
     private static int foodIdx = 0, retailIdx = 0, serviceIdx = 0;
 
+    // Load API Key securely from environment variable
+    private static final String GOOGLE_PLACES_API_KEY = System.getenv("GOOGLE_PLACES_API_KEY");
+
     public static ObservableList<Business> fetchBusinessesByZipCode(String zipCode) throws Exception {
         ObservableList<Business> businesses = FXCollections.observableArrayList();
 
@@ -149,7 +152,14 @@ public class BusinessFetcher {
 
                     Business b = new Business(name, category, rating);
                     b.setDescription(description);
-                    b.setImageUrl(getImageForCategory(category));
+
+                    // Fetch real image if API key is set, otherwise fall back to stock image
+                    String realImageUrl = fetchGooglePlacePhoto(name, lat, lon);
+                    if (realImageUrl != null) {
+                        b.setImageUrl(realImageUrl);
+                    } else {
+                        b.setImageUrl(getImageForCategory(category));
+                    }
 
                     // Build address from OSM tags + zip code context
                     String address = buildAddress(tags, placeName, state, zipCode);
@@ -406,6 +416,95 @@ public class BusinessFetcher {
         }
 
         return deals;
+    }
+
+    /**
+     * Attempts to fetch real storefront photo from Google Places API.
+     */
+    private static String fetchGooglePlacePhoto(String businessName, double lat, double lon) {
+        if (GOOGLE_PLACES_API_KEY == null || GOOGLE_PLACES_API_KEY.trim().isEmpty()) {
+            return null; // Don't attempt if key isn't set securely via environment
+        }
+
+        try {
+            // 1. Find Place to get place_id
+            String query = URLEncoder.encode(businessName, "UTF-8");
+            String findPlaceUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json" +
+                    "?input=" + query +
+                    "&inputtype=textquery" +
+                    "&locationbias=circle:2000@" + lat + "," + lon +
+                    "&fields=place_id" +
+                    "&key=" + GOOGLE_PLACES_API_KEY;
+
+            URL url1 = URI.create(findPlaceUrl).toURL();
+            HttpURLConnection con1 = (HttpURLConnection) url1.openConnection();
+            con1.setRequestMethod("GET");
+            con1.setConnectTimeout(3000);
+            con1.setReadTimeout(3000);
+
+            if (con1.getResponseCode() != 200)
+                return null;
+
+            BufferedReader in1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
+            StringBuilder response1 = new StringBuilder();
+            String inputLine1;
+            while ((inputLine1 = in1.readLine()) != null)
+                response1.append(inputLine1);
+            in1.close();
+
+            JSONObject json1 = new JSONObject(response1.toString());
+            if (!"OK".equals(json1.optString("status")) || json1.getJSONArray("candidates").length() == 0) {
+                return null;
+            }
+
+            String placeId = json1.getJSONArray("candidates").getJSONObject(0).getString("place_id");
+
+            // 2. Get Place Details for photo_reference
+            String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json" +
+                    "?place_id=" + placeId +
+                    "&fields=photos" +
+                    "&key=" + GOOGLE_PLACES_API_KEY;
+
+            URL url2 = URI.create(detailsUrl).toURL();
+            HttpURLConnection con2 = (HttpURLConnection) url2.openConnection();
+            con2.setRequestMethod("GET");
+            con2.setConnectTimeout(3000);
+            con2.setReadTimeout(3000);
+
+            if (con2.getResponseCode() != 200)
+                return null;
+
+            BufferedReader in2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+            StringBuilder response2 = new StringBuilder();
+            String inputLine2;
+            while ((inputLine2 = in2.readLine()) != null)
+                response2.append(inputLine2);
+            in2.close();
+
+            JSONObject json2 = new JSONObject(response2.toString());
+            if (!"OK".equals(json2.optString("status")))
+                return null;
+
+            JSONObject result = json2.optJSONObject("result");
+            if (result == null || !result.has("photos"))
+                return null;
+
+            JSONArray photos = result.getJSONArray("photos");
+            if (photos.length() == 0)
+                return null;
+
+            String photoReference = photos.getJSONObject(0).getString("photo_reference");
+
+            // 3. Construct the actual image URL
+            return "https://maps.googleapis.com/maps/api/place/photo" +
+                    "?maxwidth=400" +
+                    "&photo_reference=" + photoReference +
+                    "&key=" + GOOGLE_PLACES_API_KEY;
+
+        } catch (Exception e) {
+            System.err.println("Failed to fetch Google photo for " + businessName + ": " + e.getMessage());
+            return null;
+        }
     }
 
     /**

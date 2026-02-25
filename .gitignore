@@ -40,3 +40,6 @@ SupportReport.txt
 bin/
 build/
 dist/
+
+# Environment Variables
+.env
