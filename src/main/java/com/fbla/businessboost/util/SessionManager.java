@@ -1,45 +1,54 @@
 package com.fbla.businessboost.util;
 
+import java.util.prefs.Preferences;
+
 /**
  * Manages the global session state for the application.
- * Currently keeps track of the globally logged-in user's username.
+ * Sessions are persisted to disk using Java Preferences, so users
+ * stay logged in between app restarts.
+ *
+ * @author FBLA Development Team
  */
 public class SessionManager {
 
-    // The presently logged-in user
     private static String currentUsername = null;
+    private static final Preferences prefs = Preferences.userNodeForPackage(SessionManager.class);
+    private static final String PREF_KEY = "logged_in_user";
 
     /**
-     * Set the currently logged-in user.
-     * 
-     * @param username The authenticated user's username.
+     * Set the currently logged-in user and persist to disk.
      */
     public static void setCurrentUser(String username) {
         currentUsername = username;
+        if (username != null) {
+            prefs.put(PREF_KEY, username);
+        } else {
+            prefs.remove(PREF_KEY);
+        }
     }
 
     /**
-     * Gets the current user.
-     * 
-     * @return the username of the logged-in user, or null if no one is logged in.
+     * Gets the current user (checks persisted session on first call).
      */
     public static String getCurrentUser() {
+        if (currentUsername == null) {
+            currentUsername = prefs.get(PREF_KEY, null);
+        }
         return currentUsername;
     }
 
     /**
-     * Checks if someone is currently logged in.
-     * 
-     * @return true if a user is logged in, false otherwise.
+     * Checks if someone is currently logged in (including persisted sessions).
      */
     public static boolean isLoggedIn() {
-        return currentUsername != null;
+        return getCurrentUser() != null;
     }
 
     /**
-     * Clears the active session (Logs out).
+     * Clears the active session and removes persisted data (full logout).
      */
     public static void logout() {
         currentUsername = null;
+        prefs.remove(PREF_KEY);
     }
 }

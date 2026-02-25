@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -8,8 +12,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.fbla.businessboost.controller.MainController"
-            stylesheets="@../styles.css">
+            fx:controller="com.fbla.businessboost.controller.MainController">
     
     <!-- Top: Header -->
     <top>
@@ -25,16 +28,10 @@
                     <TextField fx:id="zipCodeField" promptText="Enter zip code..." prefWidth="180" 
                                styleClass="search-field"/>
                     <Button text="🔍 Search" onAction="#handleZipSearch" styleClass="search-button"/>
+                    <Button fx:id="themeToggleButton" text="🌙" onAction="#handleThemeToggle" 
+                            styleClass="theme-toggle-button"/>
+                    <Button text="🚪 Logout" onAction="#handleLogout" styleClass="theme-toggle-button"/>
                 </HBox>
-            </HBox>
-            <!-- Category Chips -->
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="category-chips">
-                <padding>
-                    <Insets top="10" right="0" bottom="0" left="0"/>
-                </padding>
-                <ComboBox fx:id="categoryFilter" prefWidth="130" styleClass="category-combo"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="⬇ Sort by Rating" onAction="#handleSortByRating" styleClass="sort-button"/>
             </HBox>
             <padding>
                 <Insets top="15" right="25" bottom="15" left="25"/>
@@ -42,94 +39,234 @@
         </VBox>
     </top>
     
-    <!-- Left: Favorites Sidebar -->
-    <left>
-        <VBox styleClass="sidebar" spacing="10" prefWidth="230">
-            <Label text="❤️ Favorites" styleClass="section-title">
-                <font>
-                    <Font name="System Bold" size="16"/>
-                </font>
-            </Label>
-            <ListView fx:id="favoritesList" VBox.vgrow="ALWAYS"/>
-            <padding>
-                <Insets top="15" right="12" bottom="15" left="12"/>
-            </padding>
-        </VBox>
-    </left>
-    
-    <!-- Center: Card Grid -->
+    <!-- Center: Tabbed Interface -->
     <center>
-        <VBox spacing="0">
-            <!-- Inline Result Banner (hidden by default) -->
-            <HBox fx:id="resultBanner" styleClass="result-banner" alignment="CENTER_LEFT"
-                  spacing="10" managed="false" visible="false">
-                <padding>
-                    <Insets top="8" right="12" bottom="8" left="12"/>
-                </padding>
-                <Label fx:id="resultBannerLabel" wrapText="true" HBox.hgrow="ALWAYS"/>
-                <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"/>
-            </HBox>
+        <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tab-pane">
+            
+            <!-- ==================== TAB 1: DISCOVER ==================== -->
+            <Tab text="🏪 Discover" styleClass="discover-tab">
+                <BorderPane>
+                    <!-- Left: Favorites Sidebar -->
+                    <left>
+                        <VBox styleClass="sidebar" spacing="10" prefWidth="230">
+                            <Label text="❤️ Favorites" styleClass="section-title">
+                                <font>
+                                    <Font name="System Bold" size="16"/>
+                                </font>
+                            </Label>
+                            <ListView fx:id="favoritesList" VBox.vgrow="ALWAYS"/>
+                            <padding>
+                                <Insets top="15" right="12" bottom="15" left="12"/>
+                            </padding>
+                        </VBox>
+                    </left>
+                    
+                    <!-- Center: Card Grid -->
+                    <center>
+                        <VBox spacing="0">
+                            <!-- Category Chips -->
+                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="category-chips">
+                                <padding>
+                                    <Insets top="10" right="20" bottom="10" left="20"/>
+                                </padding>
+                                <ComboBox fx:id="categoryFilter" prefWidth="130" styleClass="category-combo"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="⬇ Sort by Rating" onAction="#handleSortByRating" styleClass="sort-button"/>
+                            </HBox>
+                            
+                            <!-- Inline Result Banner (hidden by default) -->
+                            <HBox fx:id="resultBanner" styleClass="result-banner" alignment="CENTER_LEFT"
+                                  spacing="10" managed="false" visible="false">
+                                <padding>
+                                    <Insets top="8" right="12" bottom="8" left="12"/>
+                                </padding>
+                                <Label fx:id="resultBannerLabel" wrapText="true" HBox.hgrow="ALWAYS"/>
+                                <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"/>
+                            </HBox>
 
-            <!-- Business Card Grid -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
-                <FlowPane fx:id="businessCardGrid" hgap="20" vgap="20"
-                          alignment="CENTER" styleClass="card-grid">
+                            <!-- Business Card Grid -->
+                            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
+                                <FlowPane fx:id="businessCardGrid" hgap="20" vgap="20"
+                                          alignment="CENTER" styleClass="card-grid">
+                                    <padding>
+                                        <Insets top="20" right="20" bottom="20" left="20"/>
+                                    </padding>
+                                </FlowPane>
+                            </ScrollPane>
+                            
+                            <!-- Recommendation Section -->
+                            <VBox fx:id="recommendationSection" spacing="8" styleClass="recommendation-section"
+                                  managed="false" visible="false">
+                                <padding>
+                                    <Insets top="12" right="20" bottom="12" left="20"/>
+                                </padding>
+                                <Label text="💡 You Might Also Like..." styleClass="recommendation-title">
+                                    <font>
+                                        <Font name="System Bold" size="15"/>
+                                    </font>
+                                </Label>
+                                <HBox fx:id="recommendationCards" spacing="15" alignment="CENTER_LEFT"/>
+                            </VBox>
+                        </VBox>
+                    </center>
+                    
+                    <!-- Right: Details Pane -->
+                    <right>
+                        <ScrollPane fitToWidth="true" styleClass="detail-scroll-pane" prefWidth="320">
+                            <VBox styleClass="detail-pane" spacing="12">
+                                <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="180" preserveRatio="false"
+                                           styleClass="detail-image"/>
+                                <Label fx:id="selectedBusinessLabel" text="Select a business" 
+                                       styleClass="detail-title" wrapText="true">
+                                    <font>
+                                        <Font name="System Bold" size="16"/>
+                                    </font>
+                                </Label>
+                                <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
+                                    <font>
+                                        <Font size="12"/>
+                                    </font>
+                                </Label>
+                                <Separator/>
+                                <Label text="🔥 Current Deals" styleClass="deals-header">
+                                    <font>
+                                        <Font name="System Bold" size="14"/>
+                                    </font>
+                                </Label>
+                                <ListView fx:id="dealsPane" styleClass="deals-list" prefHeight="200" maxHeight="250"/>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Button text="📝 Add Review" onAction="#handleAddReview" 
+                                            styleClass="action-button" prefWidth="140">
+                                        <font>
+                                            <Font name="System Bold" size="12"/>
+                                        </font>
+                                    </Button>
+                                </HBox>
+                                <padding>
+                                    <Insets top="15" right="15" bottom="15" left="15"/>
+                                </padding>
+                            </VBox>
+                        </ScrollPane>
+                    </right>
+                </BorderPane>
+            </Tab>
+            
+            <!-- ==================== TAB 2: MY IMPACT ==================== -->
+            <Tab text="📊 My Impact" styleClass="impact-tab">
+                <ScrollPane fitToWidth="true" styleClass="impact-scroll-pane">
+                    <VBox spacing="20" styleClass="impact-content">
+                        <padding>
+                            <Insets top="25" right="30" bottom="25" left="30"/>
+                        </padding>
+                        
+                        <Label text="📊 Your Impact Dashboard" styleClass="impact-title">
+                            <font>
+                                <Font name="System Bold" size="22"/>
+                            </font>
+                        </Label>
+                        <Label text="See how your favorites shape the local business landscape" 
+                               styleClass="impact-subtitle"/>
+                        
+                        <Separator/>
+                        
+                        <!-- Stats Cards Row -->
+                        <HBox spacing="20" alignment="CENTER">
+                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                                <Label fx:id="statTotalFavorites" text="0" styleClass="stat-number">
+                                    <font><Font name="System Bold" size="32"/></font>
+                                </Label>
+                                <Label text="Businesses Supported" styleClass="stat-label"/>
+                            </VBox>
+                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                                <Label fx:id="statAvgRating" text="0.0" styleClass="stat-number">
+                                    <font><Font name="System Bold" size="32"/></font>
+                                </Label>
+                                <Label text="Avg Rating" styleClass="stat-label"/>
+                            </VBox>
+                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                                <Label fx:id="statTopCategory" text="-" styleClass="stat-number">
+                                    <font><Font name="System Bold" size="24"/></font>
+                                </Label>
+                                <Label text="Top Category" styleClass="stat-label"/>
+                            </VBox>
+                        </HBox>
+                        
+                        <!-- Charts Row -->
+                        <HBox spacing="20">
+                            <VBox HBox.hgrow="ALWAYS" spacing="10">
+                                <Label text="Businesses by Category" styleClass="chart-title">
+                                    <font><Font name="System Bold" size="14"/></font>
+                                </Label>
+                                <BarChart fx:id="categoryBarChart" prefHeight="280" animated="true"
+                                          styleClass="impact-chart">
+                                    <xAxis><CategoryAxis label="Category"/></xAxis>
+                                    <yAxis><NumberAxis label="Count" autoRanging="true"/></yAxis>
+                                </BarChart>
+                            </VBox>
+                            <VBox HBox.hgrow="ALWAYS" spacing="10">
+                                <Label text="Rating Distribution" styleClass="chart-title">
+                                    <font><Font name="System Bold" size="14"/></font>
+                                </Label>
+                                <PieChart fx:id="ratingPieChart" prefHeight="320" animated="true" 
+                                          labelsVisible="true" legendVisible="true" legendSide="BOTTOM"
+                                          styleClass="impact-chart"/>
+                            </VBox>
+                        </HBox>
+                        
+                        <!-- Generate Report Button -->
+                        <HBox alignment="CENTER">
+                            <Button text="📄 Generate HTML Report" onAction="#handleGenerateReport" 
+                                    styleClass="action-button" prefWidth="250" prefHeight="45">
+                                <font>
+                                    <Font name="System Bold" size="14"/>
+                                </font>
+                            </Button>
+                        </HBox>
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+            
+            <!-- ==================== TAB 3: SMART SEARCH ==================== -->
+            <Tab text="🔍 Smart Search" styleClass="search-tab">
+                <VBox spacing="15">
                     <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
+                        <Insets top="25" right="30" bottom="25" left="30"/>
                     </padding>
-                </FlowPane>
-            </ScrollPane>
-        </VBox>
+                    
+                    <Label text="🔍 Smart Search" styleClass="impact-title">
+                        <font>
+                            <Font name="System Bold" size="22"/>
+                        </font>
+                    </Label>
+                    <Label text="Search by name, category, or tags like #budget, #date-night, #outdoor" 
+                           styleClass="impact-subtitle"/>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="smart-search-bar">
+                        <TextField fx:id="smartSearchField" promptText="Type to search... (e.g. pizza, #budget, #cozy)" 
+                                   prefWidth="500" styleClass="search-field" HBox.hgrow="ALWAYS"/>
+                        <Button text="Search" onAction="#handleSmartSearch" styleClass="search-button"/>
+                    </HBox>
+                    
+                    <!-- Tag Cloud -->
+                    <FlowPane fx:id="tagCloudPane" hgap="8" vgap="8" styleClass="tag-cloud">
+                        <padding>
+                            <Insets top="5" right="0" bottom="5" left="0"/>
+                        </padding>
+                    </FlowPane>
+                    
+                    <!-- Search Results -->
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
+                        <FlowPane fx:id="smartSearchResults" hgap="20" vgap="20"
+                                  alignment="CENTER" styleClass="card-grid">
+                            <padding>
+                                <Insets top="15" right="15" bottom="15" left="15"/>
+                            </padding>
+                        </FlowPane>
+                    </ScrollPane>
+                </VBox>
+            </Tab>
+            
+        </TabPane>
     </center>
-    
-    <!-- Right: Details Pane -->
-    <right>
-        <VBox styleClass="detail-pane" spacing="12" prefWidth="320">
-            <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="180" preserveRatio="false"
-                       styleClass="detail-image"/>
-            <Label fx:id="selectedBusinessLabel" text="Select a business" 
-                   styleClass="detail-title" wrapText="true">
-                <font>
-                    <Font name="System Bold" size="16"/>
-                </font>
-            </Label>
-            <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
-                <font>
-                    <Font size="12"/>
-                </font>
-            </Label>
-            <Separator/>
-            <Label text="🔥 Current Deals" styleClass="deals-header">
-                <font>
-                    <Font name="System Bold" size="14"/>
-                </font>
-            </Label>
-            <ListView fx:id="dealsPane" VBox.vgrow="ALWAYS" styleClass="deals-list"/>
-            <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
-            </padding>
-        </VBox>
-    </right>
-    
-    <!-- Bottom: Action Buttons -->
-    <bottom>
-        <HBox spacing="15" alignment="CENTER" styleClass="action-bar">
-            <Button text="📝 Add Review" onAction="#handleAddReview" 
-                    styleClass="action-button" prefWidth="160">
-                <font>
-                    <Font name="System Bold" size="13"/>
-                </font>
-            </Button>
-            <Button text="📊 Generate Report" onAction="#handleGenerateReport" 
-                    styleClass="action-button-outline" prefWidth="160">
-                <font>
-                    <Font name="System Bold" size="13"/>
-                </font>
-            </Button>
-            <padding>
-                <Insets top="12" right="25" bottom="12" left="25"/>
-            </padding>
-        </HBox>
-    </bottom>
     
 </BorderPane>

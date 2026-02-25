@@ -4,19 +4,20 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.web.WebView?>
 
 <VBox xmlns="http://javafx.com/javafx/21" 
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.fbla.businessboost.controller.ReviewDialogController"
-      spacing="20" prefWidth="500" prefHeight="450"
+      spacing="16" prefWidth="520" prefHeight="620"
       stylesheets="@../styles.css">
     
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="20" right="24" bottom="20" left="24"/>
     </padding>
     
     <!-- Title -->
-    <Label text="Submit Your Review" styleClass="dialog-title">
+    <Label text="📝 Submit Your Review" styleClass="dialog-title">
         <font>
             <Font name="System Bold" size="20"/>
         </font>
@@ -51,42 +52,45 @@
         <TextArea fx:id="reviewTextArea" 
                   promptText="Share your experience with this business..."
                   wrapText="true" 
-                  prefRowCount="5"
+                  prefRowCount="4"
                   VBox.vgrow="ALWAYS"/>
     </VBox>
     
-    <!-- Bot Verification Section -->
-    <VBox spacing="10" styleClass="verification-box">
-        <Label fx:id="botQuestionLabel" text="Bot Verification: What is 5 + 7?" 
-               styleClass="bot-question">
+    <!-- Sentiment Warning (hidden by default) -->
+    <HBox fx:id="sentimentWarningBox" styleClass="sentiment-warning" 
+          managed="false" visible="false" alignment="CENTER_LEFT" spacing="6">
+        <Label fx:id="sentimentWarningLabel" wrapText="true" 
+               text="⚠ Your rating seems low for such a positive review. Is this correct?"/>
+    </HBox>
+    
+    <!-- Google reCAPTCHA Section -->
+    <VBox spacing="8" styleClass="verification-box">
+        <Label text="🛡 Verify you're human" styleClass="bot-question">
             <font>
                 <Font name="System Bold" size="14"/>
             </font>
         </Label>
-        <TextField fx:id="botAnswerField" 
-                   promptText="Enter your answer here"
-                   prefWidth="150"/>
-        <Label text="Please solve this simple math problem to verify you're human." 
-               styleClass="help-text">
+        <WebView fx:id="recaptchaWebView" prefHeight="100" maxHeight="100"/>
+        <Label fx:id="captchaStatusLabel" text="" styleClass="help-text" wrapText="true">
             <font>
-                <Font size="11" name="System Italic"/>
+                <Font size="11"/>
             </font>
         </Label>
         <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
+            <Insets top="10" right="12" bottom="10" left="12"/>
         </padding>
     </VBox>
     
     <!-- Action Buttons -->
     <HBox spacing="15" alignment="CENTER">
         <Button text="Submit Review" onAction="#handleSubmit" 
-                styleClass="primary-button" prefWidth="150">
+                styleClass="primary-button" prefWidth="160">
             <font>
                 <Font name="System Bold" size="13"/>
             </font>
         </Button>
         <Button text="Cancel" onAction="#handleCancel" 
-                styleClass="secondary-button" prefWidth="150">
+                styleClass="secondary-button" prefWidth="160">
             <font>
                 <Font name="System Bold" size="13"/>
             </font>

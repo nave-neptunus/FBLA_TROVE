@@ -144,12 +144,6 @@ public class BusinessFetcher {
                     // Build description from OSM tags
                     String description = buildDescription(tags, category);
 
-                    // Attempt to get a description for well-known brands
-                    String externalDescription = fetchBusinessDescription(name);
-                    if (externalDescription != null && !externalDescription.isEmpty()) {
-                        description = externalDescription;
-                    }
-
                     double rating = 3.5 + Math.random() * 1.5;
                     rating = Math.round(rating * 10.0) / 10.0;
 
@@ -169,6 +163,9 @@ public class BusinessFetcher {
                     for (String deal : generatedDeals) {
                         b.addDeal(deal);
                     }
+
+                    // Auto-assign tags based on OSM data
+                    assignTags(b, tags, category);
 
                     businesses.add(b);
                 }
@@ -277,6 +274,67 @@ public class BusinessFetcher {
                 return "$$$";
         }
         return "$$";
+    }
+
+    /**
+     * Auto-assigns tags to a business based on its OSM data and category.
+     * Tags power the recommendation engine for API-fetched businesses.
+     */
+    private static void assignTags(Business b, JSONObject tags, String category) {
+        // Category-based tags
+        switch (category) {
+            case "Food":
+                b.addTags("#dine-in");
+                if (tags.has("amenity")) {
+                    String amenity = tags.getString("amenity");
+                    if ("fast_food".equals(amenity))
+                        b.addTags("#budget", "#takeout");
+                    if ("cafe".equals(amenity))
+                        b.addTags("#coffee", "#cozy");
+                    if ("bar".equals(amenity))
+                        b.addTags("#late-night", "#date-night");
+                    if ("restaurant".equals(amenity))
+                        b.addTags("#family");
+                }
+                if (tags.has("cuisine")) {
+                    String cuisine = tags.getString("cuisine").toLowerCase();
+                    if (cuisine.contains("pizza") || cuisine.contains("italian"))
+                        b.addTags("#italian");
+                    if (cuisine.contains("chinese") || cuisine.contains("asian"))
+                        b.addTags("#asian");
+                    if (cuisine.contains("mexican"))
+                        b.addTags("#mexican");
+                    if (cuisine.contains("coffee"))
+                        b.addTags("#breakfast");
+                }
+                break;
+            case "Retail":
+                if (tags.has("shop")) {
+                    String shop = tags.getString("shop").toLowerCase();
+                    if ("clothes".equals(shop) || "fashion".equals(shop))
+                        b.addTags("#fashion", "#trending");
+                    if ("electronics".equals(shop))
+                        b.addTags("#electronics", "#gadgets");
+                    if ("books".equals(shop))
+                        b.addTags("#books", "#cozy");
+                    if ("supermarket".equals(shop) || "convenience".equals(shop))
+                        b.addTags("#budget", "#family");
+                    if ("jewelry".equals(shop))
+                        b.addTags("#premium", "#date-night");
+                }
+                break;
+            case "Services":
+                if (tags.has("leisure"))
+                    b.addTags("#fitness", "#health", "#outdoor");
+                break;
+        }
+
+        // Price-based tags
+        String price = b.getPrice();
+        if ("$".equals(price))
+            b.addTags("#budget");
+        if ("$$$".equals(price) || "$$$$".equals(price))
+            b.addTags("#premium");
     }
 
     private static String capitalize(String s) {

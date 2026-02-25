@@ -68,17 +68,23 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        // Load Login FXML file first
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
-        Scene scene = new Scene(loader.load(), 500, 600);
+        // Check for saved session — skip login if already authenticated
+        if (com.fbla.businessboost.util.SessionManager.isLoggedIn()) {
+            String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
+            Scene scene = new Scene(loader.load(), 1200, 750);
+            primaryStage.setTitle("Commercio - Logged in as: " + user);
+            primaryStage.setScene(scene);
+        } else {
+            // Load Login screen
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
+            Scene scene = new Scene(loader.load(), 500, 600);
+            primaryStage.setTitle("Commercio - Login");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(400);
+            primaryStage.setMinHeight(500);
+        }
 
-        // Configure primary stage for Login
-        primaryStage.setTitle("Commercio - Login");
-        primaryStage.setScene(scene);
-        primaryStage.setMinWidth(400);
-        primaryStage.setMinHeight(500);
-
-        // Display the window
         primaryStage.show();
     }
 

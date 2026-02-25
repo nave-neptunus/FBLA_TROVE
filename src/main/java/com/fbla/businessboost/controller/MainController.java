@@ -3,6 +3,7 @@ package com.fbla.businessboost.controller;
 import com.fbla.businessboost.model.Business;
 import com.fbla.businessboost.model.Review;
 import com.fbla.businessboost.util.DataManager;
+import com.fbla.businessboost.util.RecommendationEngine;
 import com.fbla.businessboost.util.ReportGenerator;
 import com.fbla.businessboost.util.SupabaseClient;
 import javafx.application.Platform;
@@ -14,37 +15,46 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Main controller for the FBLA Business Boost dashboard.
- * Manages the DoorDash-style card grid UI, filtering, sorting,
- * favorites, reviews, and report generation.
+ * Main controller for the Commercio dashboard.
+ * Manages the tabbed UI (Discover, My Impact, Smart Search),
+ * card grid, favorites, reviews, charts, recommendations, and themes.
  *
  * @author FBLA Development Team
- * @version 2.0
+ * @version 3.0
  */
 public class MainController {
 
     // ==================== FXML Injected Components ====================
 
-    @FXML
-    private FlowPane businessCardGrid;
+    // --- Header ---
     @FXML
     private TextField zipCodeField;
+    @FXML
+    private Button themeToggleButton;
+
+    // --- Tab Pane ---
+    @FXML
+    private TabPane mainTabPane;
+
+    // --- Discover Tab ---
+    @FXML
+    private FlowPane businessCardGrid;
     @FXML
     private ComboBox<String> categoryFilter;
     @FXML
@@ -61,6 +71,30 @@ public class MainController {
     private HBox resultBanner;
     @FXML
     private Label resultBannerLabel;
+    @FXML
+    private VBox recommendationSection;
+    @FXML
+    private HBox recommendationCards;
+
+    // --- My Impact Tab ---
+    @FXML
+    private BarChart<String, Number> categoryBarChart;
+    @FXML
+    private PieChart ratingPieChart;
+    @FXML
+    private Label statTotalFavorites;
+    @FXML
+    private Label statAvgRating;
+    @FXML
+    private Label statTopCategory;
+
+    // --- Smart Search Tab ---
+    @FXML
+    private TextField smartSearchField;
+    @FXML
+    private FlowPane smartSearchResults;
+    @FXML
+    private FlowPane tagCloudPane;
 
     // ==================== Data Collections ====================
 
@@ -76,15 +110,26 @@ public class MainController {
     /** Whether to sort by rating descending */
     private boolean sortByRating = false;
 
+    /** Whether dark mode is active */
+    private boolean darkMode = false;
+
+    // ==================== Initialization ====================
+
     /**
      * Initializes the controller after FXML loading.
      */
     @FXML
     public void initialize() {
+        // Apply initial light stylesheet programmatically
+        Platform.runLater(() -> {
+            String lightCss = getClass().getResource("/styles.css").toExternalForm();
+            themeToggleButton.getScene().getRoot().getStylesheets().add(lightCss);
+        });
+
         // Fetch user favorites
         String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
         List<String> userFavorites = currentUser != null ? SupabaseClient.getUserFavorites(currentUser)
-                : new java.util.ArrayList<>();
+                : new ArrayList<>();
 
         // Load mock data
         ObservableList<Business> rawData = DataManager.initializeMockData();
@@ -117,6 +162,19 @@ public class MainController {
 
         // Set detail pane placeholder
         clearDetailPane();
+
+        // Build tag cloud on Smart Search tab
+        buildTagCloud();
+
+        // Update charts when tab is selected
+        mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            if (newTab != null && "📊 My Impact".equals(newTab.getText())) {
+                refreshCharts();
+            }
+        });
+
+        // Update recommendations
+        refreshRecommendations();
     }
 
     // ==================== Card Grid ====================
@@ -186,7 +244,6 @@ public class MainController {
                 Image image = new Image(imgUrl, 260, 160, false, true, true);
                 imageView.setImage(image);
             } catch (Exception e) {
-                // Fallback: gray placeholder
                 imageView.setStyle("-fx-background-color: #e0e0e0;");
             }
         }
@@ -261,13 +318,6 @@ public class MainController {
 
         // Click handler → show business details
         card.setOnMouseClicked(e -> selectBusiness(business));
-
-        // Hover elevation effect
-        DropShadow restShadow = new DropShadow(8, Color.rgb(0, 0, 0, 0.08));
-        DropShadow hoverShadow = new DropShadow(20, Color.rgb(0, 0, 0, 0.15));
-        card.setEffect(restShadow);
-        card.setOnMouseEntered(e -> card.setEffect(hoverShadow));
-        card.setOnMouseExited(e -> card.setEffect(restShadow));
 
         return card;
     }
@@ -412,6 +462,9 @@ public class MainController {
                 favoritedBusinesses.remove(business);
             }
 
+            // Update recommendations when favorites change
+            refreshRecommendations();
+
             // Persist to Supabase
             String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
             if (username == null)
@@ -425,6 +478,229 @@ public class MainController {
                 }
             }).start();
         });
+    }
+
+    // ==================== Recommendations ====================
+
+    /**
+     * Refreshes the "You might also like..." section using the recommendation
+     * engine.
+     */
+    private void refreshRecommendations() {
+        recommendationCards.getChildren().clear();
+
+        List<Business> recommendations = RecommendationEngine.getRecommendations(
+                new ArrayList<>(favoritedBusinesses), new ArrayList<>(allBusinesses));
+
+        if (recommendations.isEmpty()) {
+            recommendationSection.setVisible(false);
+            recommendationSection.setManaged(false);
+            return;
+        }
+
+        recommendationSection.setVisible(true);
+        recommendationSection.setManaged(true);
+
+        for (Business rec : recommendations) {
+            VBox miniCard = createMiniCard(rec);
+            recommendationCards.getChildren().add(miniCard);
+        }
+    }
+
+    /**
+     * Creates a compact recommendation card.
+     */
+    private VBox createMiniCard(Business business) {
+        VBox card = new VBox(4);
+        card.getStyleClass().add("mini-card");
+        card.setPrefWidth(200);
+        card.setMaxWidth(200);
+        card.setCursor(Cursor.HAND);
+        card.setPadding(new Insets(10));
+
+        Label name = new Label(business.getName());
+        name.getStyleClass().add("card-title");
+        name.setWrapText(true);
+        name.setStyle("-fx-font-size: 12px;");
+
+        Label category = new Label(business.getCategory() + " · " + buildStarString(business.getRating()));
+        category.getStyleClass().add("card-address");
+
+        // Show matching tags
+        String tagStr = business.getTags().stream().limit(3).collect(Collectors.joining(" "));
+        Label tags = new Label(tagStr);
+        tags.setStyle("-fx-font-size: 10px; -fx-text-fill: #5BA08C;");
+
+        card.getChildren().addAll(name, category, tags);
+        card.setOnMouseClicked(e -> selectBusiness(business));
+
+        return card;
+    }
+
+    // ==================== My Impact (Charts) ====================
+
+    /**
+     * Refreshes the charts and stats on the My Impact tab.
+     */
+    private void refreshCharts() {
+        // Update stats
+        int totalFavs = favoritedBusinesses.size();
+        statTotalFavorites.setText(String.valueOf(totalFavs));
+
+        if (totalFavs > 0) {
+            double avgRating = favoritedBusinesses.stream()
+                    .mapToDouble(Business::getRating)
+                    .average()
+                    .orElse(0.0);
+            statAvgRating.setText(String.format("%.1f", avgRating));
+
+            // Find top category
+            Map<String, Long> catCount = favoritedBusinesses.stream()
+                    .collect(Collectors.groupingBy(Business::getCategory, Collectors.counting()));
+            String topCat = catCount.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("-");
+            statTopCategory.setText(topCat);
+
+            // Bar Chart: businesses by category
+            categoryBarChart.getData().clear();
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Favorites");
+            catCount.forEach((cat, count) -> series.getData().add(new XYChart.Data<>(cat, count)));
+            categoryBarChart.getData().add(series);
+
+            // Pie Chart: rating distribution
+            ratingPieChart.getData().clear();
+            Map<String, Long> ratingDist = favoritedBusinesses.stream()
+                    .collect(Collectors.groupingBy(b -> {
+                        double r = b.getRating();
+                        if (r >= 4.5)
+                            return "★★★★★ (4.5+)";
+                        if (r >= 4.0)
+                            return "★★★★ (4.0-4.4)";
+                        if (r >= 3.5)
+                            return "★★★½ (3.5-3.9)";
+                        return "★★★ (< 3.5)";
+                    }, Collectors.counting()));
+            ratingDist.forEach((label, count) -> ratingPieChart.getData().add(new PieChart.Data(label, count)));
+        } else {
+            statAvgRating.setText("0.0");
+            statTopCategory.setText("-");
+            categoryBarChart.getData().clear();
+            ratingPieChart.getData().clear();
+        }
+    }
+
+    // ==================== Smart Search ====================
+
+    /**
+     * Handles fuzzy search by name, category, or tags.
+     */
+    @FXML
+    private void handleSmartSearch() {
+        String query = smartSearchField.getText().trim().toLowerCase();
+        smartSearchResults.getChildren().clear();
+
+        if (query.isEmpty()) {
+            // Show all businesses
+            for (Business b : allBusinesses) {
+                smartSearchResults.getChildren().add(createBusinessCard(b));
+            }
+            return;
+        }
+
+        List<Business> results = allBusinesses.stream()
+                .filter(b -> {
+                    // Match by name (fuzzy)
+                    if (b.getName().toLowerCase().contains(query))
+                        return true;
+                    // Match by category
+                    if (b.getCategory().toLowerCase().contains(query))
+                        return true;
+                    // Match by description
+                    if (b.getDescription() != null && b.getDescription().toLowerCase().contains(query))
+                        return true;
+                    // Match by tags
+                    for (String tag : b.getTags()) {
+                        if (tag.toLowerCase().contains(query))
+                            return true;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+
+        if (results.isEmpty()) {
+            Label noResults = new Label("No businesses match \"" + query + "\". Try another search term.");
+            noResults.getStyleClass().add("loading-label");
+            smartSearchResults.getChildren().add(noResults);
+        } else {
+            for (Business b : results) {
+                smartSearchResults.getChildren().add(createBusinessCard(b));
+            }
+        }
+    }
+
+    /**
+     * Builds clickable tag chips from all businesses.
+     */
+    private void buildTagCloud() {
+        Set<String> allTags = new TreeSet<>();
+        for (Business b : allBusinesses) {
+            allTags.addAll(b.getTags());
+        }
+
+        for (String tag : allTags) {
+            Button tagBtn = new Button(tag);
+            tagBtn.getStyleClass().add("tag-chip");
+            tagBtn.setOnAction(e -> {
+                smartSearchField.setText(tag);
+                handleSmartSearch();
+            });
+            tagCloudPane.getChildren().add(tagBtn);
+        }
+    }
+
+    // ==================== Theme Toggle ====================
+
+    /**
+     * Toggles between light and dark mode by swapping CSS stylesheets.
+     * Uses root node stylesheets (not scene) for reliable toggling.
+     */
+    @FXML
+    private void handleThemeToggle() {
+        ObservableList<String> stylesheets = themeToggleButton.getScene().getRoot().getStylesheets();
+
+        String lightCss = getClass().getResource("/styles.css").toExternalForm();
+        String darkCss = getClass().getResource("/styles-dark.css").toExternalForm();
+
+        stylesheets.clear();
+
+        if (darkMode) {
+            stylesheets.add(lightCss);
+            themeToggleButton.setText("🌙");
+            darkMode = false;
+        } else {
+            stylesheets.add(darkCss);
+            themeToggleButton.setText("☀️");
+            darkMode = true;
+        }
+    }
+
+    /**
+     * Logs out the current user, clears saved session, and returns to login.
+     */
+    @FXML
+    private void handleLogout() {
+        com.fbla.businessboost.util.SessionManager.logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
+            Stage stage = (Stage) themeToggleButton.getScene().getWindow();
+            stage.setTitle("Commercio - Login");
+            stage.setScene(new Scene(loader.load(), 500, 600));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // ==================== Zip Search ====================
@@ -465,7 +741,7 @@ public class MainController {
                 new Thread(() -> {
                     List<String> userFavoritesList = currentUser != null
                             ? SupabaseClient.getUserFavorites(currentUser)
-                            : new java.util.ArrayList<>();
+                            : new ArrayList<>();
                     Platform.runLater(() -> {
                         processZipResults(results, userFavoritesList);
                         showResultBanner("✓ Found " + results.size() + " businesses near " + trimmedZip,
@@ -507,6 +783,11 @@ public class MainController {
         categoryFilter.setValue("All");
         sortByRating = false;
         refreshCardGrid();
+        refreshRecommendations();
+
+        // Rebuild tag cloud with new data
+        tagCloudPane.getChildren().clear();
+        buildTagCloud();
     }
 
     // ==================== Reviews ====================
@@ -522,6 +803,12 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ReviewDialog.fxml"));
             Scene scene = new Scene(loader.load());
+
+            // Apply current theme to dialog
+            if (darkMode) {
+                String darkCss = getClass().getResource("/styles-dark.css").toExternalForm();
+                scene.getStylesheets().add(darkCss);
+            }
 
             ReviewDialogController controller = loader.getController();
             controller.setBusiness(selectedBusiness);

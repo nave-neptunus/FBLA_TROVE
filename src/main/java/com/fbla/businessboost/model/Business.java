@@ -4,6 +4,8 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.Arrays;
+
 /**
  * Represents a local business entity in the FBLA Business Boost application.
  *
@@ -80,6 +82,9 @@ public class Business {
     /** Price level: "$", "$$", "$$$", or "$$$$" */
     private final StringProperty price;
 
+    /** Tags for recommendation engine (e.g. #outdoor, #budget, #date-night) */
+    private final ObservableList<String> tags;
+
     /** URL to the business's Yelp page */
     private final StringProperty yelpUrl;
 
@@ -95,6 +100,7 @@ public class Business {
         this.category = new SimpleStringProperty(category);
         this.rating = new SimpleDoubleProperty(rating);
         this.deals = FXCollections.observableArrayList();
+        this.tags = FXCollections.observableArrayList();
         this.description = new SimpleStringProperty("");
         this.favorite = new SimpleBooleanProperty(false);
         this.imageUrl = new SimpleStringProperty("");
@@ -235,6 +241,26 @@ public class Business {
      */
     public void addDeal(String deal) {
         this.deals.add(deal);
+    }
+
+    // ==================== Tags List ====================
+
+    /**
+     * Returns the observable list of tags for recommendation matching.
+     *
+     * @return ObservableList of tag strings
+     */
+    public ObservableList<String> getTags() {
+        return tags;
+    }
+
+    /**
+     * Adds tags to this business.
+     *
+     * @param newTags Tags to add
+     */
+    public void addTags(String... newTags) {
+        this.tags.addAll(Arrays.asList(newTags));
     }
 
     // ==================== Favorite Property ====================

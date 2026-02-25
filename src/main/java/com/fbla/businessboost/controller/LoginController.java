@@ -1,5 +1,6 @@
 package com.fbla.businessboost.controller;
 
+import com.fbla.businessboost.util.CaptchaServer;
 import com.fbla.businessboost.util.SessionManager;
 import com.fbla.businessboost.util.SupabaseClient;
 import javafx.application.Platform;
@@ -10,67 +11,43 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Random;
 
+/**
+ * Controller for the login/registration screen.
+ * Features:
+ * - Google reCAPTCHA v2 verification (only required for registration)
+ * - Social login (Google, Facebook, Yahoo) via OAuth popups
+ * - Username/password auth via Supabase
+ *
+ * @author FBLA Development Team
+ * @version 4.0
+ */
 public class LoginController {
 
     @FXML
     private TextField usernameField;
-
     @FXML
     private PasswordField passwordField;
-
     @FXML
-    private Label botQuestionLabel;
-
-    @FXML
-    private TextField botAnswerField;
-
+    private Label captchaStatusLabel;
     @FXML
     private Label statusLabel;
 
-    private int num1;
-    private int num2;
-    private int correctAnswer;
+    /** Whether reCAPTCHA has been completed (only needed for Register) */
+    private boolean captchaVerified = false;
 
     @FXML
     public void initialize() {
-        generateNewBotQuestion();
+        // Nothing to load at startup — captcha opens on-demand for registration only
     }
 
-    private void generateNewBotQuestion() {
-        Random random = new Random();
-        num1 = random.nextInt(10) + 1; // 1 to 10
-        num2 = random.nextInt(10) + 1; // 1 to 10
-        correctAnswer = num1 + num2;
-        botQuestionLabel.setText(String.format("What is %d + %d?", num1, num2));
-        botAnswerField.clear();
-    }
-
-    private boolean verifyBot() {
-        String answerStr = botAnswerField.getText().trim();
-        if (answerStr.isEmpty()) {
-            statusLabel.setText("Please answer the bot verification.");
-            return false;
-        }
-
-        try {
-            int answer = Integer.parseInt(answerStr);
-            if (answer == correctAnswer) {
-                return true;
-            } else {
-                statusLabel.setText("Incorrect math answer. Please try again.");
-                generateNewBotQuestion();
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            statusLabel.setText("Please enter a valid number.");
-            return false;
-        }
-    }
+    // ==================== Login (no captcha) ====================
 
     @FXML
     private void handleLogin() {
@@ -82,13 +59,8 @@ public class LoginController {
             return;
         }
 
-        if (!verifyBot()) {
-            return;
-        }
+        statusLabel.setText("Signing in...");
 
-        statusLabel.setText("Authenticating...");
-
-        // Run authentication in background
         new Thread(() -> {
             boolean success = SupabaseClient.authenticateUser(username, password);
             Platform.runLater(() -> {
@@ -97,11 +69,12 @@ public class LoginController {
                     loadMainApp();
                 } else {
                     statusLabel.setText("Invalid username or password.");
-                    generateNewBotQuestion();
                 }
             });
         }).start();
     }
+
+    // ==================== Register (captcha required) ====================
 
     @FXML
     private void handleRegister() {
@@ -113,13 +86,22 @@ public class LoginController {
             return;
         }
 
-        if (!verifyBot()) {
+        // If not yet verified, open captcha popup first
+        if (!captchaVerified) {
+            statusLabel.setText("Please complete the reCAPTCHA to register.");
+            openCaptchaPopup(() -> {
+                // After captcha is verified, proceed with registration
+                doRegister(username, password);
+            });
             return;
         }
 
-        statusLabel.setText("Registering...");
+        doRegister(username, password);
+    }
 
-        // Run registration in background
+    private void doRegister(String username, String password) {
+        statusLabel.setText("Creating account...");
+
         new Thread(() -> {
             boolean success = SupabaseClient.registerUser(username, password);
             Platform.runLater(() -> {
@@ -128,23 +110,122 @@ public class LoginController {
                     loadMainApp();
                 } else {
                     statusLabel.setText("Registration failed. Username may already exist.");
-                    generateNewBotQuestion();
                 }
             });
         }).start();
     }
 
+    // ==================== reCAPTCHA Popup ====================
+
+    /**
+     * Opens a popup window with Google reCAPTCHA v2. Calls onVerified when
+     * complete.
+     */
+    private void openCaptchaPopup(Runnable onVerified) {
+        Stage captchaStage = new Stage();
+        captchaStage.initModality(Modality.APPLICATION_MODAL);
+        captchaStage.initOwner(usernameField.getScene().getWindow());
+        captchaStage.setTitle("🛡 Verify You're Human");
+        captchaStage.setResizable(false);
+
+        WebView webView = new WebView();
+        webView.setPrefSize(340, 200);
+        WebEngine engine = webView.getEngine();
+        engine.setJavaScriptEnabled(true);
+
+        String captchaUrl = CaptchaServer.getInstance().getCaptchaUrl();
+        engine.load(captchaUrl);
+
+        engine.titleProperty().addListener((obs, oldTitle, newTitle) -> {
+            if (newTitle != null && newTitle.startsWith("CAPTCHA_OK:")) {
+                captchaVerified = true;
+                Platform.runLater(() -> {
+                    captchaStage.close();
+                    statusLabel.setText("✅ Verified! Creating account...");
+                    onVerified.run();
+                });
+            }
+        });
+
+        Scene scene = new Scene(webView, 340, 200);
+        captchaStage.setScene(scene);
+        captchaStage.showAndWait();
+    }
+
+    // ==================== Social Login (OAuth Popups) ====================
+
+    @FXML
+    private void handleGoogleLogin() {
+        // Load Google's real OAuth page with account picker
+        String googleUrl = CaptchaServer.getInstance().getGoogleOAuthUrl();
+        openOAuthWebView(googleUrl, "Sign in with Google", 500, 650);
+    }
+
+    @FXML
+    private void handleFacebookLogin() {
+        String url = CaptchaServer.getInstance().getOAuthUrl("facebook");
+        openOAuthWebView(url, "Sign in with Facebook", 420, 480);
+    }
+
+    @FXML
+    private void handleYahooLogin() {
+        String url = CaptchaServer.getInstance().getOAuthUrl("yahoo");
+        openOAuthWebView(url, "Sign in with Yahoo", 420, 480);
+    }
+
+    /**
+     * Opens a WebView popup with the given OAuth URL.
+     * Listens for OAUTH_OK title signal to capture user info.
+     */
+    private void openOAuthWebView(String url, String title, int width, int height) {
+        Stage oauthStage = new Stage();
+        oauthStage.initModality(Modality.APPLICATION_MODAL);
+        oauthStage.initOwner(usernameField.getScene().getWindow());
+        oauthStage.setTitle(title);
+        oauthStage.setResizable(true);
+
+        WebView webView = new WebView();
+        webView.setPrefSize(width, height);
+        WebEngine engine = webView.getEngine();
+        engine.setJavaScriptEnabled(true);
+
+        engine.load(url);
+
+        // Listen for the OAUTH_OK signal from callback page
+        engine.titleProperty().addListener((obs, oldTitle, newTitle) -> {
+            if (newTitle != null && newTitle.startsWith("OAUTH_OK:")) {
+                try {
+                    String[] parts = newTitle.split(":", 4);
+                    String name = java.net.URLDecoder.decode(parts[1], "UTF-8");
+
+                    Platform.runLater(() -> {
+                        SessionManager.setCurrentUser(name);
+                        oauthStage.close();
+                        loadMainApp();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> statusLabel.setText("Sign-in failed."));
+                }
+            }
+        });
+
+        Scene scene = new Scene(webView, width, height);
+        oauthStage.setScene(scene);
+        oauthStage.showAndWait();
+    }
+
+    // ==================== Navigation ====================
+
     private void loadMainApp() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
             Parent root = loader.load();
-
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Commercio - Logged in as: " + SessionManager.getCurrentUser());
             stage.setScene(new Scene(root, 1200, 750));
         } catch (IOException e) {
             e.printStackTrace();
-            statusLabel.setText("Error loading main application window.");
+            statusLabel.setText("Error loading main application.");
         }
     }
 }

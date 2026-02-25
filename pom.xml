@@ -33,6 +33,13 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- JavaFX Web (WebView for reCAPTCHA) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
         <!-- JSON Parser -->
         <dependency>
             <groupId>org.json</groupId>

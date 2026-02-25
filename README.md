@@ -1,201 +1,156 @@
-# FBLA Business Boost
+# 🚀 Commercio
 
-A professional JavaFX desktop application for discovering local businesses, submitting reviews, and managing favorites.
+A professional JavaFX desktop application for discovering local businesses, submitting reviews, managing favorites, and generating impact reports.
 
 ## 🎯 Project Overview
 
-This application was developed for the FBLA "Byte-Sized Business Boost" competition, demonstrating:
+Built for the FBLA "Byte-Sized Business Boost" competition, Commercio demonstrates:
 - **MVC Architecture** with clear separation of concerns
-- **Professional UI/UX** with modern design principles
-- **Data Analysis** capabilities with report generation
-- **Bot Verification** to prevent automated spam
-- **Accessibility** features for all users
+- **Modern Tabbed Interface** (Discover, My Impact, Smart Search)
+- **Intelligent Recommendation Engine** ("The Local Matchmaker")
+- **Data Analysis** with live charts and HTML report export
+- **Visual Bot Verification** (icon-grid challenge)
+- **Semantic Validation** for review sentiment
+- **Accessibility** with Dark Mode / High Contrast theme toggle
 
 ## ✨ Features
 
-### Core Functionality
-- **Business Discovery**: Browse 10 local businesses across Food, Retail, and Services categories
-- **Smart Filtering**: Filter businesses by category with real-time updates
-- **Rating Sort**: Sort businesses by customer rating (highest to lowest)
-- **Favorites Management**: Bookmark favorite businesses with automatic sidebar updates
-- **Special Deals**: View current promotions and coupons for each business
+### 🏪 Discover Tab
+- **Business Discovery**: Browse local businesses across Food, Retail, and Services
+- **DoorDash-Style Cards**: Image, name, category badge, price, rating stars, and address
+- **Quick Favorite**: Heart icon overlay on each card for instant favoriting
+- **Live Search**: Search by zip code with real-time API results (Overpass API)
+- **Category Filter & Rating Sort**: Narrow results by category or highest rating
+- **Recommendations**: "You might also like..." section powered by tag matching
+
+### 📊 My Impact Tab
+- **Live Dashboard**: Stats cards showing total favorites, average rating, and top category
+- **Bar Chart**: Visualizes how many favorites you have in each category
+- **Pie Chart**: Shows the rating distribution of your favorites
+- **HTML Report Export**: Generates a styled HTML report that opens in your browser
+
+### 🔍 Smart Search Tab
+- **Fuzzy Search**: Find businesses by name, category, description, or tags
+- **Tag Cloud**: Clickable tags like `#budget`, `#date-night`, `#outdoor` for instant filtering
+- **Visual Results**: Search results displayed as the same beautiful business cards
 
 ### Review System
-- **User Reviews**: Submit ratings (1-5 stars) with written feedback
-- **Bot Verification**: Simple arithmetic challenge prevents automated submissions
-- **Rating Updates**: Weighted average algorithm maintains rating stability
+- **Visual Bot Verification**: 3×3 emoji icon grid — identify food icons to prove you're human
+- **Sentiment Validation**: Real-time warning if your rating contradicts your review text
+- **Star Rating**: Slider with instant visual feedback (★★★★☆)
+- **Weighted Average**: New ratings are blended using `(old × 5 + new) / 6` for stability
 
-### Data Analysis
-- **Report Generation**: Create formatted reports of favorited businesses
-- **Export to Text**: Saves report to `SupportReport.txt` with business details and ratings
+### 🌙 Accessibility
+- **Dark Mode Toggle**: One-click switch between light and dark themes
+- **High Contrast**: Dark theme uses deep navy (#1a1a2e) with bright accents
+- **CSS Swapping**: Instant theme change via `Scene.getStylesheets()`
 
-## 🛠️ Technical Stack
+---
+
+## 🧠 Logic & Algorithms
+
+### Collaborative Filtering Lite (Recommendation Engine)
+The "Local Matchmaker" uses a simplified version of collaborative filtering. Instead of tracking multiple users' preferences, it builds a tag frequency profile from the current user's favorites, then scores every non-favorited business by counting tag overlaps. The top 3 scoring businesses are returned as recommendations.
+
+```
+Algorithm:
+1. Collect all tags from favorited businesses
+2. Build frequency map: { #budget: 3, #cozy: 2, ... }
+3. Score each non-favorited business by sum of matching tag frequencies
+4. Return top 3 by score
+```
+
+### Asynchronous File I/O
+Report generation uses `BufferedWriter` for efficient file writing. After generating the HTML report, the app uses `Desktop.browse()` to open the report in the user's default browser, all from a background-safe context.
+
+### Observable Pattern
+JavaFX properties (`SimpleStringProperty`, `SimpleBooleanProperty`, etc.) and `ObservableList` enable automatic UI updates throughout the app:
+- Toggling a favorite instantly updates the sidebar, recommendation section, and impact charts
+- Rating slider changes instantly update the star display label
+- Review text changes trigger real-time sentiment validation
+
+### Semantic Validation (Sentiment Analysis)
+The review dialog performs lightweight sentiment detection by checking review text against positive ("great", "amazing", "love") and negative ("terrible", "awful", "hate") word lists. If a low rating (≤2) contains positive words, or a high rating (≥4) contains negative words, a non-blocking warning banner appears.
+
+### Weighted Rating Formula
+```
+updatedRating = (currentRating × 5 + newRating × 1) / 6.0
+```
+This prevents a single review from causing dramatic rating swings while still reflecting new feedback.
+
+---
+
+## �️ Technical Stack
 
 - **Language**: Java 21
-- **Framework**: JavaFX 21.0.1
+- **Framework**: JavaFX 21.0.1 (Controls, FXML, Charts)
 - **Build Tool**: Maven 3.x
 - **Architecture**: Model-View-Controller (MVC)
-
-## 📋 Requirements
-
-- **Java Development Kit (JDK)**: Version 21 or higher
-- **Maven**: Version 3.6 or higher (for building)
-
-## 🚀 Running the Application
-
-### Option 1: Using Maven (Recommended)
-
-```bash
-# Navigate to project directory
-cd fbla-business-boost
-
-# Compile the project
-mvn clean compile
-
-# Run the application
-mvn javafx:run
-```
-
-### Option 2: Building a JAR
-
-```bash
-# Package the application
-mvn clean package
-
-# Run the JAR (requires JavaFX runtime)
-java --module-path /path/to/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -jar target/business-boost-1.0-SNAPSHOT.jar
-```
+- **Data**: Supabase (auth, reviews, favorites) + Overpass API (business discovery)
+- **Reports**: HTML generation with `StringBuilder`
 
 ## 📁 Project Structure
 
 ```
-fbla-business-boost/
-├── pom.xml                          # Maven configuration
+commercio/
+├── pom.xml
 ├── src/
 │   └── main/
 │       ├── java/com/fbla/businessboost/
-│       │   ├── Main.java            # Application entry point
+│       │   ├── Main.java
 │       │   ├── model/
-│       │   │   └── Business.java    # Business entity with JavaFX properties
+│       │   │   ├── Business.java            # Business entity with tags + properties
+│       │   │   └── Review.java              # Review POJO
 │       │   ├── controller/
-│       │   │   ├── MainController.java         # Dashboard controller
-│       │   │   └── ReviewDialogController.java # Review dialog controller
+│       │   │   ├── LoginController.java     # Auth + math bot verification
+│       │   │   ├── MainController.java      # Tabbed dashboard controller
+│       │   │   └── ReviewDialogController.java  # Icon-grid verification + sentiment
 │       │   └── util/
-│       │       ├── DataManager.java       # Mock data initialization
-│       │       └── ReportGenerator.java   # Report generation utility
+│       │       ├── BusinessFetcher.java     # Overpass API + auto-tagging
+│       │       ├── DataManager.java         # Mock data with tags
+│       │       ├── RecommendationEngine.java # Tag-based recommendation engine
+│       │       ├── ReportGenerator.java     # HTML report generation
+│       │       ├── SessionManager.java      # Current user session
+│       │       └── SupabaseClient.java      # Supabase REST client
 │       └── resources/
-│           ├── styles.css           # Application styling
+│           ├── styles.css                   # Light theme
+│           ├── styles-dark.css              # Dark theme
 │           └── view/
-│               ├── MainView.fxml    # Main dashboard layout
-│               └── ReviewDialog.fxml # Review submission dialog
+│               ├── LoginView.fxml           # Login/register screen
+│               ├── MainView.fxml            # 3-tab dashboard
+│               └── ReviewDialog.fxml        # Review dialog with icon grid
 └── README.md
 ```
 
-## 🎨 Design Decisions
+## 🚀 Running the Application
 
-### Data Structures
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/fbla-buisness-boost2.git
+cd fbla-buisness-boost2
 
-**JavaFX Properties**: Used throughout the Business model to enable automatic UI updates when data changes. This eliminates the need for manual refresh logic.
+# Compile
+mvn clean compile
 
-**ObservableList**: Chosen for business collections to provide automatic TableView synchronization. When businesses are added, removed, or modified, the UI updates automatically.
-
-**FilteredList & SortedList**: Layered wrappers that enable independent filtering and sorting operations without modifying the original data.
-
-### Bot Verification
-
-The review system uses a simple arithmetic challenge (addition of two numbers 1-20) to prevent automated bot submissions while remaining accessible to all users, including those with cognitive disabilities.
-
-### Rating Algorithm
-
-New ratings are incorporated using a weighted average:
+# Run
+mvn javafx:run
 ```
-newRating = (oldRating × 5 + userRating × 1) / 6
-```
-
-This prevents single reviews from drastically changing overall ratings while still reflecting new feedback.
 
 ## 📊 FBLA Rubric Alignment
 
-### User Experience (15 points)
-- Professional JavaFX interface with modern gradient design
-- Intuitive navigation with clear visual hierarchy
-- Responsive layout with proper spacing and alignment
-
-### Functionality (15 points)
-- Category filtering with ComboBox
-- Rating-based sorting
-- Favorites management with automatic updates
-- Review submission with validation
-- Report generation with file I/O
-
-### Logic & Algorithms (15 points)
-- Bot verification with random arithmetic generation
-- Weighted rating calculation algorithm
-- Filtered and sorted list implementations
-- Comprehensive error handling
-
-### Data Analysis (15 points)
-- Report generation iterates through favorites
-- Formatted output with business details and ratings
-- File writing with proper error handling
-- Timestamp and summary statistics
-
-### Code Quality (15 points)
-- Comprehensive Javadoc comments on all classes and methods
-- Explanation of data type choices and variable scope
-- Modular architecture following MVC pattern
-- Proper exception handling throughout
-
-### Accessibility (10 points)
-- Simple bot verification accessible to all users
-- Clear labels and instructions
-- Keyboard navigation support
-- High contrast color scheme
-
-## 📝 Usage Guide
-
-### Browsing Businesses
-1. Launch the application
-2. View all businesses in the main table
-3. Use the category filter to narrow results
-4. Click "Sort by Rating" to order by highest rated
-
-### Managing Favorites
-1. Check the "Favorite" checkbox for any business
-2. The business automatically appears in the left sidebar
-3. Uncheck to remove from favorites
-
-### Viewing Deals
-1. Click on any business row in the table
-2. Current deals appear in the right pane
-3. Multiple deals are listed for each business
-
-### Submitting Reviews
-1. Select a business from the table
-2. Click "Add Review" button
-3. Set your rating using the slider (1-5 stars)
-4. Write your review in the text area
-5. Solve the arithmetic problem for verification
-6. Click "Submit Review"
-
-### Generating Reports
-1. Mark several businesses as favorites
-2. Click "Generate Report" button
-3. Find the report in `SupportReport.txt` in the project directory
-
-## 🏆 Key Achievements
-
-✅ **Full MVC Architecture**: Clean separation between model, view, and controller layers  
-✅ **Comprehensive Documentation**: Every class and method includes detailed Javadoc  
-✅ **Professional UI**: Modern design with gradient header and polished styling  
-✅ **Advanced Features**: Bot verification, weighted ratings, automatic UI updates  
-✅ **Data Analysis**: Report generation with formatted output  
-✅ **Standalone Execution**: Fully self-contained desktop application  
+| Category | Points | Evidence |
+|---|---|---|
+| **User Experience** | 15 | Modern tabbed interface, DoorDash-style cards, dark mode, micro-animations |
+| **Functionality** | 15 | 3-tab navigation, zip search, favorites, reviews, recommendations |
+| **Logic & Algorithms** | 15 | Collaborative filtering, sentiment analysis, weighted rating, fuzzy search |
+| **Data Analysis** | 15 | Live BarChart + PieChart, HTML report with stat cards and category bars |
+| **Code Quality** | 15 | Comprehensive Javadoc, MVC architecture, clean separation of concerns |
+| **Accessibility** | 10 | Dark mode toggle, icon-grid verification, keyboard navigation, high contrast |
 
 ## 👥 Author
 
-FBLA Development Team - 2026
+FBLA Development Team — 2026
 
 ## 📄 License
 
-This project was created for educational purposes as part of the FBLA competition.
+Created for educational purposes as part of the FBLA competition.

@@ -40,6 +40,7 @@ public class DataManager {
         b1.setDescription("Pizza · $$ · A beloved local pizzeria serving NY-style pies since 1985.");
         b1.addDeal("20% off large pizzas on Tuesdays");
         b1.addDeal("Free garlic bread with any order over $25");
+        b1.addTags("#dine-in", "#family", "#italian", "#late-night");
         businesses.add(b1);
 
         Business b2 = new Business("Sweet Treats Bakery", "Food", 4.8);
@@ -49,6 +50,7 @@ public class DataManager {
         b2.setDescription("Bakeries · $ · Artisan pastries and custom cakes baked fresh daily.");
         b2.addDeal("Buy 6 cupcakes, get 2 free");
         b2.addDeal("10% student discount with valid ID");
+        b2.addTags("#desserts", "#budget", "#student", "#takeout");
         businesses.add(b2);
 
         Business b3 = new Business("Dragon Wok Chinese", "Food", 4.2);
@@ -58,6 +60,7 @@ public class DataManager {
         b3.setDescription("Chinese · $$ · Authentic Sichuan and Cantonese cuisine.");
         b3.addDeal("Free spring rolls with lunch combo");
         b3.addDeal("$5 off orders over $30");
+        b3.addTags("#dine-in", "#asian", "#spicy", "#lunch");
         businesses.add(b3);
 
         Business b4 = new Business("Sunrise Cafe", "Food", 4.6);
@@ -67,6 +70,7 @@ public class DataManager {
         b4.setDescription("Coffee & Tea, Breakfast · $ · Cozy neighborhood café with specialty lattes.");
         b4.addDeal("Free coffee with breakfast sandwich");
         b4.addDeal("Happy hour: 50% off pastries after 3 PM");
+        b4.addTags("#coffee", "#breakfast", "#cozy", "#budget");
         businesses.add(b4);
 
         // ==================== Retail Category ====================
@@ -79,6 +83,7 @@ public class DataManager {
         b5.addDeal("15% off all accessories");
         b5.addDeal("Price match guarantee");
         b5.addDeal("Free tech support for 30 days");
+        b5.addTags("#electronics", "#gadgets", "#premium", "#repair");
         businesses.add(b5);
 
         Business b6 = new Business("Fashion Forward Boutique", "Retail", 4.7);
@@ -88,6 +93,7 @@ public class DataManager {
         b6.setDescription("Fashion · $$$ · Curated designer fashion and trending streetwear.");
         b6.addDeal("Buy one, get one 50% off on all clothing");
         b6.addDeal("Free alterations on purchases over $100");
+        b6.addTags("#fashion", "#date-night", "#premium", "#trending");
         businesses.add(b6);
 
         Business b7 = new Business("BookNook Bookstore", "Retail", 4.4);
@@ -98,6 +104,7 @@ public class DataManager {
         b7.addDeal("20% off bestsellers");
         b7.addDeal("Free bookmark with every purchase");
         b7.addDeal("Student discount: 10% off textbooks");
+        b7.addTags("#books", "#cozy", "#student", "#indie");
         businesses.add(b7);
 
         // ==================== Services Category ====================
@@ -109,6 +116,7 @@ public class DataManager {
         b8.setDescription("Hair Salons · $$ · Expert stylists for cuts, color, and treatments.");
         b8.addDeal("$10 off first visit");
         b8.addDeal("Refer a friend, get 20% off next haircut");
+        b8.addTags("#grooming", "#self-care", "#walk-in", "#budget");
         businesses.add(b8);
 
         Business b9 = new Business("FitLife Gym", "Services", 4.9);
@@ -119,6 +127,7 @@ public class DataManager {
         b9.addDeal("First month free for new members");
         b9.addDeal("Personal training session: $25 (regular $50)");
         b9.addDeal("Free fitness assessment");
+        b9.addTags("#fitness", "#outdoor", "#health", "#premium");
         businesses.add(b9);
 
         Business b10 = new Business("AutoCare Repair Shop", "Services", 4.0);
@@ -128,6 +137,7 @@ public class DataManager {
         b10.setDescription("Auto Repair · $$ · Honest, certified mechanics you can trust.");
         b10.addDeal("Free oil change with major service");
         b10.addDeal("10% off for seniors and military");
+        b10.addTags("#automotive", "#repair", "#family", "#trusted");
         businesses.add(b10);
 
         return businesses;
