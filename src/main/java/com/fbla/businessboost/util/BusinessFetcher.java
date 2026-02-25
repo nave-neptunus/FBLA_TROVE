@@ -174,7 +174,7 @@ public class BusinessFetcher {
                     }
 
                     // Build description from OSM tags
-                    String description = buildDescription(tags, category);
+                    String description = buildDescription(tags, category, name);
 
                     double rating = 3.5 + Math.random() * 1.5;
                     rating = Math.round(rating * 10.0) / 10.0;
@@ -247,23 +247,65 @@ public class BusinessFetcher {
     }
 
     /**
-     * Builds a description from OpenStreetMap tags.
+     * Builds a rich, natural-language description from OpenStreetMap tags.
      */
-    private static String buildDescription(JSONObject tags, String category) {
+    private static String buildDescription(JSONObject tags, String category, String name) {
         StringBuilder desc = new StringBuilder();
 
+        desc.append(name).append(" is a local ");
+
+        String typeStr = "establishment";
         if (tags.has("cuisine")) {
-            desc.append(capitalize(tags.getString("cuisine").replace(";", ", ")));
+            typeStr = tags.getString("cuisine").replace(";", " and ").replace("_", " ") + " restaurant";
         } else if (tags.has("shop")) {
-            desc.append(capitalize(tags.getString("shop").replace("_", " ")));
+            typeStr = tags.getString("shop").replace("_", " ") + " store";
         } else if (tags.has("amenity")) {
-            desc.append(capitalize(tags.getString("amenity").replace("_", " ")));
+            typeStr = tags.getString("amenity").replace("_", " ");
+        } else {
+            typeStr = category.toLowerCase() + " business";
         }
 
-        if (tags.has("opening_hours")) {
-            if (desc.length() > 0)
-                desc.append(" · ");
-            desc.append(tags.getString("opening_hours"));
+        desc.append(typeStr).append(" serving the community with great ").append(category.toLowerCase())
+                .append(" options.");
+
+        java.util.List<String> features = new java.util.ArrayList<>();
+        if (tags.has("wheelchair") && !tags.getString("wheelchair").equals("no")
+                && !tags.getString("wheelchair").equals("limited")) {
+            features.add("is wheelchair accessible");
+        }
+        if (tags.has("outdoor_seating") && tags.getString("outdoor_seating").equals("yes")) {
+            features.add("offers outdoor seating");
+        }
+        if (tags.has("takeaway") && tags.getString("takeaway").equals("yes")) {
+            features.add("provides convenient takeout");
+        }
+        if (tags.has("delivery") && tags.getString("delivery").equals("yes")) {
+            features.add("delivers locally");
+        }
+        if (tags.has("diet:vegan") && tags.getString("diet:vegan").equals("yes")) {
+            features.add("has vegan options");
+        }
+        if (tags.has("organic") && tags.getString("organic").equals("yes")) {
+            features.add("features organic products");
+        }
+
+        if (!features.isEmpty()) {
+            desc.append(" This location ");
+            if (features.size() == 1) {
+                desc.append(features.get(0)).append(".");
+            } else if (features.size() == 2) {
+                desc.append(features.get(0)).append(" and ").append(features.get(1)).append(".");
+            } else {
+                for (int i = 0; i < features.size(); i++) {
+                    if (i == features.size() - 1) {
+                        desc.append("and ").append(features.get(i)).append(".");
+                    } else {
+                        desc.append(features.get(i)).append(", ");
+                    }
+                }
+            }
+        } else {
+            desc.append(" Stop by to experience their excellent service and offerings firsthand.");
         }
 
         return desc.toString();
