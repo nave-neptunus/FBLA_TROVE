@@ -127,6 +127,11 @@
                                         <Font size="12"/>
                                     </font>
                                 </Label>
+                                <VBox spacing="4" styleClass="contact-info-box">
+                                    <Label fx:id="businessPhoneLabel" text="Phone: Not available" styleClass="detail-contact-info"/>
+                                    <Label fx:id="businessWebsiteLabel" text="Website: Not available" styleClass="detail-contact-info" wrapText="true"/>
+                                    <Label fx:id="businessHoursLabel" text="Hours: Not available" styleClass="detail-contact-info" wrapText="true"/>
+                                </VBox>
                                 <Separator/>
                                 <Label text="🔥 Current Deals" styleClass="deals-header">
                                     <font>

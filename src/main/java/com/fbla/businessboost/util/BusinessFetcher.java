@@ -194,6 +194,23 @@ public class BusinessFetcher {
                     String address = buildAddress(tags, placeName, state, zipCode);
                     b.setAddress(address);
 
+                    // Extract contact details and hours if available
+                    if (tags.has("phone")) {
+                        b.setPhone(tags.getString("phone"));
+                    } else if (tags.has("contact:phone")) {
+                        b.setPhone(tags.getString("contact:phone"));
+                    }
+
+                    if (tags.has("website")) {
+                        b.setWebsite(tags.getString("website"));
+                    } else if (tags.has("contact:website")) {
+                        b.setWebsite(tags.getString("contact:website"));
+                    }
+
+                    if (tags.has("opening_hours")) {
+                        b.setHours(tags.getString("opening_hours"));
+                    }
+
                     // Set price from cuisine/shop type
                     b.setPrice(estimatePrice(tags));
 

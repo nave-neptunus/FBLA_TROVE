@@ -66,6 +66,12 @@ public class MainController {
     @FXML
     private Label businessDescriptionLabel;
     @FXML
+    private Label businessPhoneLabel;
+    @FXML
+    private Label businessWebsiteLabel;
+    @FXML
+    private Label businessHoursLabel;
+    @FXML
     private ImageView detailImageView;
     @FXML
     private HBox resultBanner;
@@ -349,6 +355,16 @@ public class MainController {
 
         String desc = business.getDescription();
         businessDescriptionLabel.setText(desc != null && !desc.trim().isEmpty() ? desc : "");
+
+        String phone = business.getPhone();
+        businessPhoneLabel.setText(phone != null && !phone.isEmpty() ? "📞 " + phone : "📞 Phone unavailable");
+
+        String website = business.getWebsite();
+        businessWebsiteLabel
+                .setText(website != null && !website.isEmpty() ? "🌐 " + website : "🌐 Website unavailable");
+
+        String hours = business.getHours();
+        businessHoursLabel.setText(hours != null && !hours.isEmpty() ? "🕒 " + hours : "🕒 Hours unavailable");
 
         // Load detail image
         String imgUrl = business.getImageUrl();

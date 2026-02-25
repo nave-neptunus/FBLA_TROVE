@@ -88,6 +88,15 @@ public class Business {
     /** URL to the business's Yelp page */
     private final StringProperty yelpUrl;
 
+    /** Phone number of the business */
+    private final StringProperty phone;
+
+    /** Website of the business */
+    private final StringProperty website;
+
+    /** Opening hours of the business */
+    private final StringProperty hours;
+
     /**
      * Constructs a new Business with the specified attributes.
      *
@@ -107,6 +116,9 @@ public class Business {
         this.address = new SimpleStringProperty("");
         this.price = new SimpleStringProperty("");
         this.yelpUrl = new SimpleStringProperty("");
+        this.phone = new SimpleStringProperty("");
+        this.website = new SimpleStringProperty("");
+        this.hours = new SimpleStringProperty("");
     }
 
     // ==================== Name Property ====================
@@ -219,6 +231,48 @@ public class Business {
 
     public StringProperty yelpUrlProperty() {
         return yelpUrl;
+    }
+
+    // ==================== Phone Property ====================
+
+    public String getPhone() {
+        return phone.get();
+    }
+
+    public void setPhone(String phone) {
+        this.phone.set(phone);
+    }
+
+    public StringProperty phoneProperty() {
+        return phone;
+    }
+
+    // ==================== Website Property ====================
+
+    public String getWebsite() {
+        return website.get();
+    }
+
+    public void setWebsite(String website) {
+        this.website.set(website);
+    }
+
+    public StringProperty websiteProperty() {
+        return website;
+    }
+
+    // ==================== Hours Property ====================
+
+    public String getHours() {
+        return hours.get();
+    }
+
+    public void setHours(String hours) {
+        this.hours.set(hours);
+    }
+
+    public StringProperty hoursProperty() {
+        return hours;
     }
 
     // ==================== Deals List ====================
