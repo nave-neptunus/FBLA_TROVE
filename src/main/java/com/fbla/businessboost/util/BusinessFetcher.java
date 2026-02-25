@@ -51,6 +51,29 @@ public class BusinessFetcher {
 
     private static int foodIdx = 0, retailIdx = 0, serviceIdx = 0;
 
+    // List of common big corporate franchises and chains to filter out
+    private static final String[] BIG_BRANDS = {
+            "starbucks", "subway", "mcdonald", "taco bell", "kfc", "burger king",
+            "target", "walmart", "cvs", "walgreens", "dunkin", "wendy", "domino",
+            "pizza hut", "papa john", "chipotle", "panera", "panda express", "chick-fil-a",
+            "rite aid", "7-eleven", "seven eleven", "denny", "ihop", "applebee", "olive garden",
+            "outback", "red lobster", "in-n-out", "jack in the box", "sonic drive-in", "arby",
+            "dairy queen", "jimmy john", "jersey mike", "five guys", "carl's jr", "hardee",
+            "peet's coffee", "krispy kreme", "baskin robbins", "jamba"
+    };
+
+    private static boolean isBigBrand(String name) {
+        if (name == null)
+            return false;
+        String lowerName = name.toLowerCase();
+        for (String brand : BIG_BRANDS) {
+            if (lowerName.contains(brand)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Load API Key securely from environment variable
     private static final String GOOGLE_PLACES_API_KEY = System.getenv("GOOGLE_PLACES_API_KEY");
 
@@ -136,6 +159,12 @@ public class BusinessFetcher {
                 JSONObject tags = node.getJSONObject("tags");
                 if (tags.has("name")) {
                     String name = tags.getString("name");
+
+                    // Skip big corporate brands to exclusively highlight local small businesses
+                    if (isBigBrand(name)) {
+                        System.out.println("🛡️ Filtered out big brand: " + name);
+                        continue;
+                    }
 
                     String category = "Retail";
                     if (tags.has("amenity")) {
