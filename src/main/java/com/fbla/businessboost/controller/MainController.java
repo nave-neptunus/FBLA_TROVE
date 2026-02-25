@@ -102,6 +102,14 @@ public class MainController {
     @FXML
     private FlowPane tagCloudPane;
 
+    // --- Voice AI Tab ---
+    @FXML
+    private javafx.scene.control.TextArea voiceChatHistory;
+    @FXML
+    private javafx.scene.control.Label voiceStatusLabel;
+    @FXML
+    private javafx.scene.control.Button voiceMicButton;
+
     // ==================== Data Collections ====================
 
     /** Master list of all businesses */
@@ -132,10 +140,25 @@ public class MainController {
             themeToggleButton.getScene().getRoot().getStylesheets().add(lightCss);
         });
 
-        // Fetch user favorites
+        // Fetch user favorites from local storage as initial fallback
         String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
-        List<String> userFavorites = currentUser != null ? SupabaseClient.getUserFavorites(currentUser)
-                : new ArrayList<>();
+        List<String> userFavorites = com.fbla.businessboost.util.SessionManager.getFavorites();
+
+        // Merge in favorites from Supabase (async, but block briefly for initial load)
+        if (currentUser != null) {
+            try {
+                List<String> supabaseFavs = SupabaseClient.getUserFavorites(currentUser);
+                for (String fav : supabaseFavs) {
+                    if (!userFavorites.contains(fav)) {
+                        userFavorites.add(fav);
+                    }
+                }
+                // Update local cache with merged list
+                com.fbla.businessboost.util.SessionManager.saveFavorites(userFavorites);
+            } catch (Exception ex) {
+                System.err.println("Could not fetch Supabase favorites, using local cache: " + ex.getMessage());
+            }
+        }
 
         // Load mock data
         ObservableList<Business> rawData = DataManager.initializeMockData();
@@ -481,18 +504,24 @@ public class MainController {
             // Update recommendations when favorites change
             refreshRecommendations();
 
-            // Persist to Supabase
-            String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
-            if (username == null)
-                return;
+            // Persist locally
+            if (isNowFavorite) {
+                com.fbla.businessboost.util.SessionManager.addFavorite(business.getName());
+            } else {
+                com.fbla.businessboost.util.SessionManager.removeFavorite(business.getName());
+            }
 
-            new Thread(() -> {
-                if (isNowFavorite) {
-                    SupabaseClient.addFavorite(username, business.getName());
-                } else {
-                    SupabaseClient.removeFavorite(username, business.getName());
-                }
-            }).start();
+            // Sync to Supabase in background
+            String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            if (user != null) {
+                new Thread(() -> {
+                    if (isNowFavorite) {
+                        SupabaseClient.addFavorite(user, business.getName());
+                    } else {
+                        SupabaseClient.removeFavorite(user, business.getName());
+                    }
+                }).start();
+            }
         });
     }
 
@@ -600,6 +629,14 @@ public class MainController {
                         return "★★★ (< 3.5)";
                     }, Collectors.counting()));
             ratingDist.forEach((label, count) -> ratingPieChart.getData().add(new PieChart.Data(label, count)));
+
+            // Save stats snapshot to Supabase
+            String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            if (user != null) {
+                new Thread(() -> {
+                    SupabaseClient.saveUserStats(user, totalFavs, avgRating, topCat);
+                }).start();
+            }
         } else {
             statAvgRating.setText("0.0");
             statTopCategory.setText("-");
@@ -737,7 +774,6 @@ public class MainController {
         loadingLabel.getStyleClass().add("loading-label");
         businessCardGrid.getChildren().add(loadingLabel);
 
-        String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
         String trimmedZip = zipCode.trim();
 
         javafx.concurrent.Task<ObservableList<Business>> fetchTask = new javafx.concurrent.Task<>() {
@@ -755,9 +791,7 @@ public class MainController {
                         "result-banner-warning");
             } else {
                 new Thread(() -> {
-                    List<String> userFavoritesList = currentUser != null
-                            ? SupabaseClient.getUserFavorites(currentUser)
-                            : new ArrayList<>();
+                    List<String> userFavoritesList = com.fbla.businessboost.util.SessionManager.getFavorites();
                     Platform.runLater(() -> {
                         processZipResults(results, userFavoritesList);
                         showResultBanner("✓ Found " + results.size() + " businesses near " + trimmedZip,
@@ -848,7 +882,8 @@ public class MainController {
 
     @FXML
     private void handleGenerateReport() {
-        ReportGenerator.generateReport(FXCollections.observableArrayList(favoritedBusinesses));
+        String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+        ReportGenerator.generateReport(username, FXCollections.observableArrayList(favoritedBusinesses));
     }
 
     // ==================== Inline Result Banner ====================
@@ -874,5 +909,35 @@ public class MainController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // ==================== Voice AI Assistant ====================
+
+    @FXML
+    private void handleVoicePress(javafx.scene.input.MouseEvent event) {
+        voiceStatusLabel.setText("Listening... Speak now!");
+        voiceStatusLabel.getStyleClass().setAll("voice-status-listening");
+        voiceMicButton.setText("🗣️ LISTENING...");
+        com.fbla.businessboost.util.VoiceAssistant.startListening();
+    }
+
+    @FXML
+    private void handleVoiceRelease(javafx.scene.input.MouseEvent event) {
+        voiceStatusLabel.setText("Processing audio...");
+        voiceStatusLabel.getStyleClass().setAll("voice-status-processing");
+        voiceMicButton.setText("🎤 HOLD TO SPEAK");
+
+        com.fbla.businessboost.util.VoiceAssistant.stopListeningAndProcess((userText, aiResponse) -> {
+            // Append to chat history
+            String time = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+            String currentText = voiceChatHistory.getText();
+            String newEntry = String.format("[%s] You: %s\n[%s] AI: %s\n\n", time, userText, time, aiResponse);
+            voiceChatHistory.setText(currentText + newEntry);
+            voiceChatHistory.positionCaret(voiceChatHistory.getText().length());
+
+            // Reset status
+            voiceStatusLabel.setText("Ready to listen.");
+            voiceStatusLabel.getStyleClass().setAll("voice-status-ready");
+        });
     }
 }

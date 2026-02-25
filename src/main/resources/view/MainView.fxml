@@ -230,8 +230,38 @@
                     </VBox>
                 </ScrollPane>
             </Tab>
+
+            <!-- ==================== TAB 3: VOICE AI ASSISTANT ==================== -->
+            <Tab text="🗣️ Voice AI" styleClass="voice-tab">
+                <BorderPane styleClass="voice-pane">
+                    <padding>
+                        <Insets top="40" right="40" bottom="40" left="40"/>
+                    </padding>
+                    <top>
+                        <VBox alignment="CENTER" spacing="15">
+                            <Label text="Accessible Voice Assistant" styleClass="voice-title"/>
+                            <Label text="Designed for visually impaired users. Click the button or hold Spacebar to talk." styleClass="voice-subtitle" wrapText="true"/>
+                        </VBox>
+                    </top>
+                    <center>
+                        <VBox alignment="CENTER" spacing="30" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets top="30" bottom="30"/>
+                            </padding>
+                            <TextArea fx:id="voiceChatHistory" editable="false" wrapText="true" 
+                                      styleClass="voice-chat-history" VBox.vgrow="ALWAYS"
+                                      promptText="Your conversation will appear here...&#10;&#10;Try asking:&#10;- 'What is Commercio?'&#10;- 'Can you help me find a highly rated restaurant?'&#10;- 'What is my most favorited category?'"/>
+                            
+                            <Label fx:id="voiceStatusLabel" text="Ready to listen." styleClass="voice-status-ready"/>
+                            
+                            <Button fx:id="voiceMicButton" text="🎤 HOLD TO SPEAK" styleClass="voice-mic-button"
+                                    onMousePressed="#handleVoicePress" onMouseReleased="#handleVoiceRelease"/>
+                        </VBox>
+                    </center>
+                </BorderPane>
+            </Tab>
             
-            <!-- ==================== TAB 3: SMART SEARCH ==================== -->
+            <!-- ==================== TAB 4: SMART SEARCH ==================== -->
             <Tab text="🔍 Smart Search" styleClass="search-tab">
                 <VBox spacing="15">
                     <padding>

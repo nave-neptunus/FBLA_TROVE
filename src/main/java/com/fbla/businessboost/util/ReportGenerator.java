@@ -40,10 +40,11 @@ public class ReportGenerator {
     /**
      * Generates a professional HTML report for all favorited businesses.
      *
+     * @param username  The username of the user generating the report
      * @param favorites ObservableList of Business objects marked as favorites
      * @return true if report was successfully generated, false otherwise
      */
-    public static boolean generateReport(ObservableList<Business> favorites) {
+    public static boolean generateReport(String username, ObservableList<Business> favorites) {
         // Validate input
         if (favorites == null || favorites.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "No Favorites",
@@ -159,6 +160,14 @@ public class ReportGenerator {
                     String.format("HTML report created!\n\nFile: %s\nTotal businesses: %d\n\n" +
                             "The report has been opened in your browser.",
                             REPORT_FILENAME, favorites.size()));
+
+            // Save report metadata to Supabase
+            if (username != null) {
+                String categoriesStr = String.join(", ", catCount.keySet());
+                new Thread(() -> {
+                    SupabaseClient.saveReportMetadata(username, favorites.size(), avgRating, categoriesStr);
+                }).start();
+            }
 
             return true;
 

@@ -736,3 +736,66 @@
 .text-area:focused {
     -fx-border-color: #5BA08C;
 }
+
+/* ==================== AI Voice Assistant ==================== */
+.voice-pane {
+    -fx-background-color: #f8f9fa;
+}
+
+.voice-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.voice-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #7f8c8d;
+    -fx-text-alignment: center;
+}
+
+.voice-chat-history {
+    -fx-font-size: 16px;
+    -fx-font-family: "Courier New", monospace;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 15px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-border-width: 2px;
+}
+
+.voice-mic-button {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-color: #3498db;
+    -fx-padding: 20px 40px;
+    -fx-background-radius: 50px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.4), 10, 0, 0, 5);
+}
+
+.voice-mic-button:pressed {
+    -fx-background-color: #c0392b;
+    /* Turns red while holding to speak */
+    -fx-effect: dropshadow(three-pass-box, rgba(192, 57, 43, 0.4), 10, 0, 0, 5);
+}
+
+.voice-status-ready {
+    -fx-font-size: 18px;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-weight: bold;
+}
+
+.voice-status-listening {
+    -fx-font-size: 18px;
+    -fx-text-fill: #c0392b;
+    -fx-font-weight: bold;
+}
+
+.voice-status-processing {
+    -fx-font-size: 18px;
+    -fx-text-fill: #f39c12;
+    -fx-font-weight: bold;
+}
