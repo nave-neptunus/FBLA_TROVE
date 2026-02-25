@@ -414,12 +414,11 @@ public class BusinessFetcher {
         if (rating >= 4.5 && random.nextBoolean()) {
             deals.add("⭐ Top Rated Special: Extra 5% off!");
         }
-
         return deals;
     }
 
     /**
-     * Attempts to fetch real storefront photo from Google Places API.
+     * Attempts to fetch real storefront photo from Google Places API (New V1).
      */
     private static String fetchGooglePlacePhoto(String businessName, double lat, double lon) {
         if (GOOGLE_PLACES_API_KEY == null || GOOGLE_PLACES_API_KEY.trim().isEmpty()) {
@@ -428,24 +427,39 @@ public class BusinessFetcher {
         }
 
         try {
-            System.out.println("🔍 Searching Google Places for: " + businessName);
-            // 1. Find Place to get place_id
-            String query = URLEncoder.encode(businessName, "UTF-8");
-            String findPlaceUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json" +
-                    "?input=" + query +
-                    "&inputtype=textquery" +
-                    "&locationbias=circle:2000@" + lat + "," + lon +
-                    "&fields=place_id" +
-                    "&key=" + GOOGLE_PLACES_API_KEY;
+            System.out.println("🔍 Searching Google Places (V1) for: " + businessName);
 
-            URL url1 = URI.create(findPlaceUrl).toURL();
+            // 1. Search for Place using Places API (New) via POST
+            String searchUrl = "https://places.googleapis.com/v1/places:searchByText";
+            URL url1 = URI.create(searchUrl).toURL();
             HttpURLConnection con1 = (HttpURLConnection) url1.openConnection();
-            con1.setRequestMethod("GET");
+            con1.setRequestMethod("POST");
+            con1.setRequestProperty("Content-Type", "application/json");
+            con1.setRequestProperty("X-Goog-Api-Key", GOOGLE_PLACES_API_KEY);
+            con1.setRequestProperty("X-Goog-FieldMask", "places.id,places.photos");
             con1.setConnectTimeout(3000);
             con1.setReadTimeout(3000);
+            con1.setDoOutput(true);
 
-            if (con1.getResponseCode() != 200)
+            // Create JSON payload targeting the specific business near the coordinates
+            String jsonPayload = String.format(
+                    "{\"textQuery\": \"%s\", \"locationBias\": {\"circle\": {\"center\": {\"latitude\": %f, \"longitude\": %f}, \"radius\": 2000.0}}}",
+                    businessName.replace("\"", "\\\""), lat, lon);
+
+            try (java.io.OutputStream os = con1.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            if (con1.getResponseCode() != 200) {
+                BufferedReader errorIn = new BufferedReader(new InputStreamReader(con1.getErrorStream()));
+                StringBuilder errorResponse = new StringBuilder();
+                String line;
+                while ((line = errorIn.readLine()) != null)
+                    errorResponse.append(line);
+                System.err.println("⚠️ Google V1 API HTTP " + con1.getResponseCode() + ": " + errorResponse.toString());
                 return null;
+            }
 
             BufferedReader in1 = new BufferedReader(new InputStreamReader(con1.getInputStream()));
             StringBuilder response1 = new StringBuilder();
@@ -455,66 +469,29 @@ public class BusinessFetcher {
             in1.close();
 
             JSONObject json1 = new JSONObject(response1.toString());
-            if (!"OK".equals(json1.optString("status")) || json1.getJSONArray("candidates").length() == 0) {
-                System.err.println("⚠️ Google search failed for " + businessName + ". Status: "
-                        + json1.optString("status") + " | Error: " + json1.optString("error_message", "No message"));
+
+            if (!json1.has("places") || json1.getJSONArray("places").length() == 0) {
+                System.out.println(
+                        "ℹ️ No exact matches found on Google V1 for " + businessName + ". Falling back to stock.");
                 return null;
             }
 
-            String placeId = json1.getJSONArray("candidates").getJSONObject(0).getString("place_id");
-            System.out.println("✅ Found place ID for " + businessName + ": " + placeId);
-
-            // 2. Get Place Details for photo_reference
-            String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json" +
-                    "?place_id=" + placeId +
-                    "&fields=photos" +
-                    "&key=" + GOOGLE_PLACES_API_KEY;
-
-            URL url2 = URI.create(detailsUrl).toURL();
-            HttpURLConnection con2 = (HttpURLConnection) url2.openConnection();
-            con2.setRequestMethod("GET");
-            con2.setConnectTimeout(3000);
-            con2.setReadTimeout(3000);
-
-            if (con2.getResponseCode() != 200)
-                return null;
-
-            BufferedReader in2 = new BufferedReader(new InputStreamReader(con2.getInputStream()));
-            StringBuilder response2 = new StringBuilder();
-            String inputLine2;
-            while ((inputLine2 = in2.readLine()) != null)
-                response2.append(inputLine2);
-            in2.close();
-
-            JSONObject json2 = new JSONObject(response2.toString());
-            if (!"OK".equals(json2.optString("status"))) {
-                System.err.println("⚠️ Could not get details for " + businessName + ". Status: "
-                        + json2.optString("status") + " | Error: " + json2.optString("error_message", "No message"));
+            JSONObject firstPlace = json1.getJSONArray("places").getJSONObject(0);
+            if (!firstPlace.has("photos") || firstPlace.getJSONArray("photos").length() == 0) {
+                System.out.println("ℹ️ Found place but no photos for " + businessName + ". Falling back to stock.");
                 return null;
             }
 
-            JSONObject result = json2.optJSONObject("result");
-            if (result == null || !result.has("photos")) {
-                System.out.println("ℹ️ No photos found on Google for " + businessName + ". Falling back to stock.");
-                return null;
-            }
+            String photoName = firstPlace.getJSONArray("photos").getJSONObject(0).getString("name");
+            System.out.println("✅ Found V1 photo reference for " + businessName + ": " + photoName);
 
-            JSONArray photos = result.getJSONArray("photos");
-            if (photos.length() == 0) {
-                return null;
-            }
-
-            String photoReference = photos.getJSONObject(0).getString("photo_reference");
-            System.out.println("🖼️ Extracted photo reference for " + businessName + "!");
-
-            // 3. Construct the actual image URL
-            return "https://maps.googleapis.com/maps/api/place/photo" +
-                    "?maxwidth=400" +
-                    "&photo_reference=" + photoReference +
-                    "&key=" + GOOGLE_PLACES_API_KEY;
+            // 3. Construct the actual image URL using the new media REST endpoint
+            return "https://places.googleapis.com/v1/" + photoName + "/media?maxHeightPx=400&maxWidthPx=400&key="
+                    + GOOGLE_PLACES_API_KEY;
 
         } catch (Exception e) {
-            System.err.println("Failed to fetch Google photo for " + businessName + ": " + e.getMessage());
+            System.err.println("Failed to fetch Google photo (V1) for " + businessName + ": " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
