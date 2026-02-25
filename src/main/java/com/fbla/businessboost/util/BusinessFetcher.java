@@ -423,10 +423,12 @@ public class BusinessFetcher {
      */
     private static String fetchGooglePlacePhoto(String businessName, double lat, double lon) {
         if (GOOGLE_PLACES_API_KEY == null || GOOGLE_PLACES_API_KEY.trim().isEmpty()) {
+            System.err.println("❌ Google API Key is missing from .env file!");
             return null; // Don't attempt if key isn't set securely via environment
         }
 
         try {
+            System.out.println("🔍 Searching Google Places for: " + businessName);
             // 1. Find Place to get place_id
             String query = URLEncoder.encode(businessName, "UTF-8");
             String findPlaceUrl = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json" +
@@ -454,10 +456,13 @@ public class BusinessFetcher {
 
             JSONObject json1 = new JSONObject(response1.toString());
             if (!"OK".equals(json1.optString("status")) || json1.getJSONArray("candidates").length() == 0) {
+                System.err.println("⚠️ Google search failed for " + businessName + ". Status: "
+                        + json1.optString("status") + " | Error: " + json1.optString("error_message", "No message"));
                 return null;
             }
 
             String placeId = json1.getJSONArray("candidates").getJSONObject(0).getString("place_id");
+            System.out.println("✅ Found place ID for " + businessName + ": " + placeId);
 
             // 2. Get Place Details for photo_reference
             String detailsUrl = "https://maps.googleapis.com/maps/api/place/details/json" +
@@ -482,18 +487,25 @@ public class BusinessFetcher {
             in2.close();
 
             JSONObject json2 = new JSONObject(response2.toString());
-            if (!"OK".equals(json2.optString("status")))
+            if (!"OK".equals(json2.optString("status"))) {
+                System.err.println("⚠️ Could not get details for " + businessName + ". Status: "
+                        + json2.optString("status") + " | Error: " + json2.optString("error_message", "No message"));
                 return null;
+            }
 
             JSONObject result = json2.optJSONObject("result");
-            if (result == null || !result.has("photos"))
+            if (result == null || !result.has("photos")) {
+                System.out.println("ℹ️ No photos found on Google for " + businessName + ". Falling back to stock.");
                 return null;
+            }
 
             JSONArray photos = result.getJSONArray("photos");
-            if (photos.length() == 0)
+            if (photos.length() == 0) {
                 return null;
+            }
 
             String photoReference = photos.getJSONObject(0).getString("photo_reference");
+            System.out.println("🖼️ Extracted photo reference for " + businessName + "!");
 
             // 3. Construct the actual image URL
             return "https://maps.googleapis.com/maps/api/place/photo" +
