@@ -90,4 +90,23 @@ public class SessionManager {
         favs.remove(businessName);
         saveFavorites(favs);
     }
+
+    // ==================== Review Persistence ====================
+
+    private static final String REVIEW_COUNT_PREFIX = "review_count_";
+
+    public static int getReviewCount() {
+        String user = getCurrentUser();
+        if (user == null)
+            return 0;
+        return prefs.getInt(REVIEW_COUNT_PREFIX + user, 0);
+    }
+
+    public static void incrementReviewCount() {
+        String user = getCurrentUser();
+        if (user == null)
+            return;
+        int currentCount = getReviewCount();
+        prefs.putInt(REVIEW_COUNT_PREFIX + user, currentCount + 1);
+    }
 }

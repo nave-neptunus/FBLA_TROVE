@@ -559,6 +559,50 @@
     -fx-effect: dropshadow(three-pass-box, rgba(91, 160, 140, 0.06), 6, 0, 0, 2);
 }
 
+.stat-card-purple {
+    -fx-background-color: #F8F4FA;
+    background-color: #F8F4FA;
+    -fx-border-color: #EBE0F0;
+    border-color: #EBE0F0;
+}
+
+.stat-card-purple .stat-number {
+    -fx-text-fill: #9B59B6;
+}
+
+.stat-card-orange {
+    -fx-background-color: #FDFAF5;
+    background-color: #FDFAF5;
+    -fx-border-color: #F9EBE0;
+    border-color: #F9EBE0;
+}
+
+.stat-card-orange .stat-number {
+    -fx-text-fill: #E67E22;
+}
+
+.stat-card-blue {
+    -fx-background-color: #F4F9FD;
+    background-color: #F4F9FD;
+    -fx-border-color: #E0EBF9;
+    border-color: #E0EBF9;
+}
+
+.stat-card-blue .stat-number {
+    -fx-text-fill: #3498DB;
+}
+
+.stat-card-green {
+    -fx-background-color: #F5FAF9;
+    background-color: #F5FAF9;
+    -fx-border-color: #E0F0EB;
+    border-color: #E0F0EB;
+}
+
+.stat-card-green .stat-number {
+    -fx-text-fill: #5BA08C;
+}
+
 .stat-number {
     -fx-text-fill: #5BA08C;
 }

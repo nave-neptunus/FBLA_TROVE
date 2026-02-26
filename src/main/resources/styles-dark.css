@@ -508,6 +508,50 @@
     padding: 20;
 }
 
+.stat-card-purple {
+    -fx-background-color: #2D223B;
+    background-color: #2D223B;
+    -fx-border-color: #483361;
+    border-color: #483361;
+}
+
+.stat-card-purple .stat-number {
+    -fx-text-fill: #AF7AC5;
+}
+
+.stat-card-orange {
+    -fx-background-color: #3D2920;
+    background-color: #3D2920;
+    -fx-border-color: #63402E;
+    border-color: #63402E;
+}
+
+.stat-card-orange .stat-number {
+    -fx-text-fill: #E67E22;
+}
+
+.stat-card-blue {
+    -fx-background-color: #202C3D;
+    background-color: #202C3D;
+    -fx-border-color: #2E4763;
+    border-color: #2E4763;
+}
+
+.stat-card-blue .stat-number {
+    -fx-text-fill: #5DADE2;
+}
+
+.stat-card-green {
+    -fx-background-color: #203D32;
+    background-color: #203D32;
+    -fx-border-color: #2E6350;
+    border-color: #2E6350;
+}
+
+.stat-card-green .stat-number {
+    -fx-text-fill: #48C9B0;
+}
+
 .stat-number {
     -fx-text-fill: #5BA08C;
 }

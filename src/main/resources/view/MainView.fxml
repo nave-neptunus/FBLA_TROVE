@@ -176,19 +176,25 @@
                         
                         <!-- Stats Cards Row -->
                         <HBox spacing="20" alignment="CENTER">
-                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <VBox styleClass="stat-card, stat-card-purple" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
                                 <Label fx:id="statTotalFavorites" text="0" styleClass="stat-number">
                                     <font><Font name="System Bold" size="32"/></font>
                                 </Label>
-                                <Label text="Businesses Supported" styleClass="stat-label"/>
+                                <Label text="Places Favorited" styleClass="stat-label"/>
                             </VBox>
-                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <VBox styleClass="stat-card, stat-card-orange" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
                                 <Label fx:id="statAvgRating" text="0.0" styleClass="stat-number">
                                     <font><Font name="System Bold" size="32"/></font>
                                 </Label>
                                 <Label text="Avg Rating" styleClass="stat-label"/>
                             </VBox>
-                            <VBox styleClass="stat-card" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                            <VBox styleClass="stat-card, stat-card-blue" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
+                                <Label fx:id="statReviewsDone" text="0" styleClass="stat-number">
+                                    <font><Font name="System Bold" size="32"/></font>
+                                </Label>
+                                <Label text="Reviews Done" styleClass="stat-label"/>
+                            </VBox>
+                            <VBox styleClass="stat-card, stat-card-green" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
                                 <Label fx:id="statTopCategory" text="-" styleClass="stat-number">
                                     <font><Font name="System Bold" size="24"/></font>
                                 </Label>

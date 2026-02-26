@@ -92,6 +92,8 @@ public class MainController {
     @FXML
     private Label statAvgRating;
     @FXML
+    private Label statReviewsDone;
+    @FXML
     private Label statTopCategory;
 
     // --- Smart Search Tab ---
@@ -584,6 +586,9 @@ public class MainController {
         int totalFavs = favoritedBusinesses.size();
         statTotalFavorites.setText(String.valueOf(totalFavs));
 
+        int reviewsDone = com.fbla.businessboost.util.SessionManager.getReviewCount();
+        statReviewsDone.setText(String.valueOf(reviewsDone));
+
         if (totalFavs > 0) {
             double avgRating = favoritedBusinesses.stream()
                     .mapToDouble(Business::getRating)
@@ -602,10 +607,35 @@ public class MainController {
 
             // Bar Chart: businesses by category
             categoryBarChart.getData().clear();
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("Favorites");
-            catCount.forEach((cat, count) -> series.getData().add(new XYChart.Data<>(cat, count)));
-            categoryBarChart.getData().add(series);
+
+            // By putting each category in its own Series, JavaFX will automatically
+            // color them differently instead of coloring them all as a single "Favorites"
+            // series.
+            catCount.forEach((cat, count) -> {
+                XYChart.Series<String, Number> series = new XYChart.Series<>();
+                series.setName(cat);
+
+                // Add the data point (empty string for x-axis so they cluster nicely, or use
+                // cat)
+                XYChart.Data<String, Number> dataNode = new XYChart.Data<>(cat, count);
+                dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        if ("Food".equals(cat)) {
+                            newNode.setStyle("-fx-bar-fill: #E67E22;"); // Orange
+                        } else if ("Retail".equals(cat)) {
+                            newNode.setStyle("-fx-bar-fill: #3498DB;"); // Blue
+                        } else if ("Services".equals(cat)) {
+                            newNode.setStyle("-fx-bar-fill: #9B59B6;"); // Purple
+                        } else {
+                            newNode.setStyle("-fx-bar-fill: #5BA08C;"); // Default Commercio Green
+                        }
+                    }
+                });
+
+                series.getData().add(dataNode);
+
+                categoryBarChart.getData().add(series);
+            });
 
             // Pie Chart: rating distribution
             ratingPieChart.getData().clear();
@@ -620,7 +650,23 @@ public class MainController {
                             return "★★★½ (3.5-3.9)";
                         return "★★★ (< 3.5)";
                     }, Collectors.counting()));
-            ratingDist.forEach((label, count) -> ratingPieChart.getData().add(new PieChart.Data(label, count)));
+            ratingDist.forEach((label, count) -> {
+                PieChart.Data slice = new PieChart.Data(label, count);
+                ratingPieChart.getData().add(slice);
+
+                slice.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        if (label.contains("4.5+"))
+                            newNode.setStyle("-fx-pie-color: #2ECC71;"); // Green
+                        else if (label.contains("4.0-4.4"))
+                            newNode.setStyle("-fx-pie-color: #F1C40F;"); // Yellow
+                        else if (label.contains("3.5-3.9"))
+                            newNode.setStyle("-fx-pie-color: #E67E22;"); // Orange
+                        else
+                            newNode.setStyle("-fx-pie-color: #E74C3C;"); // Red
+                    }
+                });
+            });
 
             // Save stats snapshot to Supabase
             String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();

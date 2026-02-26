@@ -177,7 +177,8 @@ public class ReviewDialogController {
         final double updatedRating = Math.round(((currentRating * 5 + newRating) / 6.0) * 10.0) / 10.0;
         business.setRating(updatedRating);
 
-        // Step 4: Save review to Supabase
+        // Step 4: Save review to Supabase and track locally
+        com.fbla.businessboost.util.SessionManager.incrementReviewCount();
         new Thread(() -> {
             SupabaseClient.saveReview(business.getName(), newRating, reviewText.trim());
             Platform.runLater(() -> {
