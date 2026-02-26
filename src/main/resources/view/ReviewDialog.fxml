@@ -84,13 +84,19 @@
     <!-- Action Buttons -->
     <HBox spacing="15" alignment="CENTER">
         <Button text="Submit Review" onAction="#handleSubmit" 
-                styleClass="primary-button" prefWidth="160">
+                styleClass="primary-button" prefWidth="130">
+            <font>
+                <Font name="System Bold" size="13"/>
+            </font>
+        </Button>
+        <Button text="Skip" onAction="#handleSkipCaptcha" 
+                style="-fx-background-color: #FFDE59; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 4; -fx-background-radius: 4;" prefWidth="90">
             <font>
                 <Font name="System Bold" size="13"/>
             </font>
         </Button>
         <Button text="Cancel" onAction="#handleCancel" 
-                styleClass="secondary-button" prefWidth="160">
+                styleClass="secondary-button" prefWidth="130">
             <font>
                 <Font name="System Bold" size="13"/>
             </font>

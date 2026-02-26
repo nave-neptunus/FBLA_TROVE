@@ -191,6 +191,15 @@ public class ReviewDialogController {
     }
 
     @FXML
+    private void handleSkipCaptcha() {
+        this.captchaVerified = true;
+        Platform.runLater(() -> {
+            captchaStatusLabel.setText("✅ Presentation Mode: Captcha Skipped");
+            captchaStatusLabel.setStyle("-fx-text-fill: #22c55e;");
+        });
+    }
+
+    @FXML
     private void handleCancel() {
         closeDialog();
     }
