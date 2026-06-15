@@ -3,83 +3,84 @@ package com.fbla.businessboost;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Main application entry point for FBLA Business Boost.
- * 
+ * Main application entry point for FBLA Business Boost — Commercio.
+ *
  * <p>
- * This class extends {@code javafx.application.Application} and serves as the
- * JavaFX
- * application launcher. It loads the main FXML view, applies styling, and
- * displays the
- * primary stage (main window).
- * </p>
- * 
- * <p>
- * <strong>JavaFX Application Lifecycle:</strong>
- * </p>
+ * <strong>Startup flow:</strong>
  * <ol>
- * <li><strong>init():</strong> Called before start(), used for initialization
- * (not overridden here)</li>
- * <li><strong>start(Stage):</strong> Main entry point where the UI is
- * constructed and displayed</li>
- * <li><strong>stop():</strong> Called when application is closing (not
- * overridden here)</li>
+ *   <li>Load the app icon for the window/taskbar.</li>
+ *   <li>Check for a persisted login session ({@link com.fbla.businessboost.util.SessionManager}).</li>
+ *   <li>If logged in, check whether the onboarding wizard has been completed.</li>
+ *   <li>If onboarding is pending, show {@code OnboardingView.fxml}.</li>
+ *   <li>Otherwise, go directly to {@code MainView.fxml}.</li>
+ *   <li>If not logged in, show {@code LoginView.fxml}.</li>
  * </ol>
- * 
- * <p>
- * <strong>Design Decisions:</strong>
  * </p>
+ *
+ * <p>
+ * <strong>Design decisions:</strong>
  * <ul>
- * <li><strong>Window Size:</strong> 1200x700 provides optimal space for the
- * dashboard layout
- * with sidebar, main table, and deals pane without overwhelming smaller
- * screens.</li>
- * <li><strong>Minimum Size:</strong> Set to 900x600 to prevent layout collapse
- * when window
- * is resized, ensuring all UI elements remain usable.</li>
- * <li><strong>FXML Loading:</strong> Uses FXMLLoader to separate UI structure
- * (FXML) from
- * application logic (Java), following MVC best practices.</li>
+ *   <li><strong>Window size 1200×750:</strong> Optimal for the dashboard layout without
+ *       overwhelming 1080p screens.</li>
+ *   <li><strong>Minimum size 900×600:</strong> Prevents layout collapse on resize.</li>
+ *   <li><strong>App icon:</strong> Bundled as a resource to avoid external file dependencies.</li>
  * </ul>
- * 
+ * </p>
+ *
  * @author FBLA Development Team
- * @version 1.0
+ * @version 2.0
  */
 public class Main extends Application {
 
     /**
-     * Starts the JavaFX application and displays the main window.
-     * 
-     * <p>
-     * This method is called by the JavaFX runtime after the application is
-     * initialized.
-     * It loads the MainView.fxml file, creates a Scene with the loaded content,
-     * applies
-     * the CSS stylesheet, and configures the primary Stage.
-     * </p>
-     * 
-     * @param primaryStage The primary stage (main window) provided by JavaFX
-     *                     runtime
-     * @throws IOException If the FXML file cannot be loaded
+     * Starts the JavaFX application and displays the appropriate first screen.
+     *
+     * @param primaryStage The primary stage provided by the JavaFX runtime
+     * @throws IOException If any FXML file cannot be loaded
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        // Check for saved session — skip login if already authenticated
+        // Set branded app icon
+        try (InputStream iconStream = getClass().getResourceAsStream("/icons/app_icon.png")) {
+            if (iconStream != null) {
+                primaryStage.getIcons().add(new Image(iconStream));
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load app icon: " + e.getMessage());
+        }
+
         if (com.fbla.businessboost.util.SessionManager.isLoggedIn()) {
             String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
-            Scene scene = new Scene(loader.load(), 1200, 750);
-            primaryStage.setTitle("Commercio - Logged in as: " + user);
-            primaryStage.setScene(scene);
+
+            if (!com.fbla.businessboost.util.SessionManager.isOnboardingComplete()) {
+                // First login — show onboarding wizard
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OnboardingView.fxml"));
+                Scene scene = new Scene(loader.load(), 600, 500);
+                primaryStage.setTitle("Welcome to Commercio!");
+                primaryStage.setScene(scene);
+                primaryStage.setMinWidth(500);
+                primaryStage.setMinHeight(460);
+            } else {
+                // Returning user — go straight to the dashboard
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
+                Scene scene = new Scene(loader.load(), 1200, 750);
+                primaryStage.setTitle("Commercio — Logged in as: " + user);
+                primaryStage.setScene(scene);
+                primaryStage.setMinWidth(900);
+                primaryStage.setMinHeight(600);
+            }
         } else {
-            // Load Login screen
+            // Not logged in — show login screen
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
             Scene scene = new Scene(loader.load(), 500, 600);
-            primaryStage.setTitle("Commercio - Login");
+            primaryStage.setTitle("Commercio — Sign In");
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(400);
             primaryStage.setMinHeight(500);
@@ -89,15 +90,9 @@ public class Main extends Application {
     }
 
     /**
-     * Application entry point.
-     * 
-     * <p>
-     * This method is called when the application is launched from the command line
-     * or IDE. It delegates to {@code Application.launch()}, which initializes the
-     * JavaFX runtime and calls the {@code start()} method.
-     * </p>
-     * 
-     * @param args Command line arguments (not used in this application)
+     * Application entry point — delegates to {@link Application#launch(String...)}.
+     *
+     * @param args Command-line arguments (not used)
      */
     public static void main(String[] args) {
         launch(args);

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.*?>
+
+<!--
+    Onboarding wizard — shown once per user account on first login.
+    3-step flow: Welcome → ZIP code → Category preferences.
+    Uses a StackPane with three overlapping VBox pages, only one visible at a time.
+-->
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.fbla.businessboost.controller.OnboardingController"
+           styleClass="onboarding-root"
+           stylesheets="@../styles.css">
+
+    <!-- ==================== STEP 1: WELCOME ==================== -->
+    <VBox fx:id="step1" styleClass="onboarding-card" alignment="CENTER" spacing="18">
+        <Label text="🗺️" styleClass="onboarding-subtitle">
+            <font><Font size="52"/></font>
+        </Label>
+        <Label text="Welcome to Commercio" styleClass="onboarding-title" wrapText="true">
+            <font><Font name="System Bold" size="26"/></font>
+        </Label>
+        <Label text="Discover the hidden gems in your neighborhood — local cafes, boutique shops, and trusted services."
+               styleClass="onboarding-subtitle" wrapText="true" maxWidth="320" textAlignment="CENTER"/>
+        <VBox spacing="10" alignment="CENTER">
+            <Button text="Get Started →" onAction="#handleStep1Next" styleClass="onboarding-next-btn" prefWidth="200">
+                <font><Font name="System Bold" size="14"/></font>
+            </Button>
+            <Button text="Skip" onAction="#handleSkip" styleClass="onboarding-skip-btn"/>
+        </VBox>
+        <!-- Progress dots -->
+        <HBox spacing="8" alignment="CENTER">
+            <Region styleClass="onboarding-dot-active" fx:id="dot1a"/>
+            <Region styleClass="onboarding-dot" fx:id="dot1b"/>
+            <Region styleClass="onboarding-dot" fx:id="dot1c"/>
+        </HBox>
+    </VBox>
+
+    <!-- ==================== STEP 2: ZIP CODE ==================== -->
+    <VBox fx:id="step2" styleClass="onboarding-card" alignment="CENTER" spacing="18" visible="false" managed="false">
+        <Label text="📍" styleClass="onboarding-subtitle">
+            <font><Font size="52"/></font>
+        </Label>
+        <Label text="Where are you located?" styleClass="onboarding-title" wrapText="true">
+            <font><Font name="System Bold" size="24"/></font>
+        </Label>
+        <Label text="We'll use your ZIP code to find the best local businesses near you."
+               styleClass="onboarding-subtitle" wrapText="true" maxWidth="300" textAlignment="CENTER"/>
+        <TextField fx:id="zipCodeInput" promptText="Enter ZIP code (e.g. 10001)"
+                   styleClass="onboarding-zip-field" maxWidth="280">
+            <font><Font size="16"/></font>
+        </TextField>
+        <Label fx:id="zipErrorLabel" text="" style="-fx-text-fill: #FA5252; -fx-font-size: 12px;" managed="false" visible="false"/>
+        <VBox spacing="10" alignment="CENTER">
+            <Button text="Continue →" onAction="#handleStep2Next" styleClass="onboarding-next-btn" prefWidth="200">
+                <font><Font name="System Bold" size="14"/></font>
+            </Button>
+            <Button text="Skip" onAction="#handleSkip" styleClass="onboarding-skip-btn"/>
+        </VBox>
+        <!-- Progress dots -->
+        <HBox spacing="8" alignment="CENTER">
+            <Region styleClass="onboarding-dot"/>
+            <Region styleClass="onboarding-dot-active"/>
+            <Region styleClass="onboarding-dot"/>
+        </HBox>
+    </VBox>
+
+    <!-- ==================== STEP 3: CATEGORY PREFERENCES ==================== -->
+    <VBox fx:id="step3" styleClass="onboarding-card" alignment="CENTER" spacing="18" visible="false" managed="false">
+        <Label text="🛍️" styleClass="onboarding-subtitle">
+            <font><Font size="52"/></font>
+        </Label>
+        <Label text="What do you love?" styleClass="onboarding-title" wrapText="true">
+            <font><Font name="System Bold" size="24"/></font>
+        </Label>
+        <Label text="Pick your favorites and we'll personalize your recommendations from day one."
+               styleClass="onboarding-subtitle" wrapText="true" maxWidth="300" textAlignment="CENTER"/>
+        <HBox spacing="12" alignment="CENTER">
+            <ToggleButton fx:id="toggleFood" text="🍕 Food" styleClass="onboarding-category-toggle">
+                <font><Font name="System Bold" size="13"/></font>
+            </ToggleButton>
+            <ToggleButton fx:id="toggleRetail" text="🛒 Retail" styleClass="onboarding-category-toggle">
+                <font><Font name="System Bold" size="13"/></font>
+            </ToggleButton>
+            <ToggleButton fx:id="toggleServices" text="🔧 Services" styleClass="onboarding-category-toggle">
+                <font><Font name="System Bold" size="13"/></font>
+            </ToggleButton>
+        </HBox>
+        <VBox spacing="10" alignment="CENTER">
+            <Button text="✓ Let's Go!" onAction="#handleFinish" styleClass="onboarding-next-btn" prefWidth="200">
+                <font><Font name="System Bold" size="14"/></font>
+            </Button>
+            <Button text="Skip" onAction="#handleSkip" styleClass="onboarding-skip-btn"/>
+        </VBox>
+        <!-- Progress dots -->
+        <HBox spacing="8" alignment="CENTER">
+            <Region styleClass="onboarding-dot"/>
+            <Region styleClass="onboarding-dot"/>
+            <Region styleClass="onboarding-dot-active"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

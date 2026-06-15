@@ -97,6 +97,12 @@ public class Business {
     /** Opening hours of the business */
     private final StringProperty hours;
 
+    /** Geographic latitude from OpenStreetMap (used for static map thumbnail) */
+    private double latitude = 0.0;
+
+    /** Geographic longitude from OpenStreetMap (used for static map thumbnail) */
+    private double longitude = 0.0;
+
     /**
      * Constructs a new Business with the specified attributes.
      *
@@ -329,6 +335,45 @@ public class Business {
 
     public BooleanProperty favoriteProperty() {
         return favorite;
+    }
+
+    // ==================== Latitude / Longitude ====================
+
+    /**
+     * Returns the geographic latitude of this business (from OpenStreetMap).
+     * Used to generate a static map thumbnail URL.
+     *
+     * @return latitude in decimal degrees, or 0.0 if not set
+     */
+    public double getLatitude() {
+        return latitude;
+    }
+
+    /**
+     * Sets the geographic latitude.
+     *
+     * @param latitude latitude in decimal degrees
+     */
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    /**
+     * Returns the geographic longitude of this business (from OpenStreetMap).
+     *
+     * @return longitude in decimal degrees, or 0.0 if not set
+     */
+    public double getLongitude() {
+        return longitude;
+    }
+
+    /**
+     * Sets the geographic longitude.
+     *
+     * @param longitude longitude in decimal degrees
+     */
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     @Override

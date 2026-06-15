@@ -2,10 +2,7 @@ package com.fbla.businessboost.controller;
 
 import com.fbla.businessboost.model.Business;
 import com.fbla.businessboost.model.Review;
-import com.fbla.businessboost.util.DataManager;
-import com.fbla.businessboost.util.RecommendationEngine;
-import com.fbla.businessboost.util.ReportGenerator;
-import com.fbla.businessboost.util.SupabaseClient;
+import com.fbla.businessboost.util.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,113 +29,122 @@ import java.util.stream.Collectors;
 
 /**
  * Main controller for the Commercio dashboard.
- * Manages the tabbed UI (Discover, My Impact, Smart Search),
- * card grid, favorites, reviews, charts, recommendations, and themes.
+ *
+ * <p>
+ * Manages the tabbed UI (Discover, My Impact, Smart Search), card grid,
+ * favorites, reviews, charts, recommendations, themes, and the offline cache.
+ * </p>
+ *
+ * <p>
+ * <strong>New features in v4.0:</strong>
+ * <ul>
+ *   <li>Skeleton loading animation during ZIP search</li>
+ *   <li>Empty state when no results / filter match</li>
+ *   <li>Live client-side search (no API call)</li>
+ *   <li>Distance radius slider (re-fires Overpass API)</li>
+ *   <li>Static OpenStreetMap thumbnail in the detail pane</li>
+ *   <li>Rich review cards (styled VBox per review)</li>
+ *   <li>Local-jobs economic impact stat</li>
+ *   <li>Recommendation explainability ("Because you love: #cozy #budget")</li>
+ *   <li>Offline cache fallback on network failure</li>
+ *   <li>Accessibility labels on all interactive elements</li>
+ * </ul>
+ * </p>
  *
  * @author FBLA Development Team
- * @version 3.0
+ * @version 4.0
  */
 public class MainController {
 
     // ==================== FXML Injected Components ====================
 
     // --- Header ---
-    @FXML
-    private TextField zipCodeField;
-    @FXML
-    private Button themeToggleButton;
+    @FXML private TextField zipCodeField;
+    @FXML private Button themeToggleButton;
 
     // --- Tab Pane ---
-    @FXML
-    private TabPane mainTabPane;
+    @FXML private TabPane mainTabPane;
 
     // --- Discover Tab ---
-    @FXML
-    private FlowPane businessCardGrid;
-    @FXML
-    private ComboBox<String> categoryFilter;
-    @FXML
-    private ListView<Business> favoritesList;
-    @FXML
-    private ListView<String> dealsPane;
-    @FXML
-    private Label selectedBusinessLabel;
-    @FXML
-    private Label businessDescriptionLabel;
-    @FXML
-    private Label businessPhoneLabel;
-    @FXML
-    private Label businessWebsiteLabel;
-    @FXML
-    private Label businessHoursLabel;
-    @FXML
-    private ImageView detailImageView;
-    @FXML
-    private HBox resultBanner;
-    @FXML
-    private Label resultBannerLabel;
-    @FXML
-    private VBox recommendationSection;
-    @FXML
-    private HBox recommendationCards;
+    @FXML private FlowPane businessCardGrid;
+    @FXML private ComboBox<String> categoryFilter;
+    @FXML private TextField liveSearchField;
+    @FXML private Slider distanceSlider;
+    @FXML private Label distanceLabel;
+    @FXML private ListView<Business> favoritesList;
+    @FXML private ListView<String> dealsPane;
+    @FXML private Label selectedBusinessLabel;
+    @FXML private Label businessDescriptionLabel;
+    @FXML private Label businessPhoneLabel;
+    @FXML private Label businessWebsiteLabel;
+    @FXML private Label businessHoursLabel;
+    @FXML private ImageView detailImageView;
+    @FXML private ImageView mapImageView;
+    @FXML private VBox reviewsContainer;
+    @FXML private Label reviewCountLabel;
+    @FXML private HBox resultBanner;
+    @FXML private Label resultBannerLabel;
+    @FXML private VBox recommendationSection;
+    @FXML private HBox recommendationCards;
 
     // --- My Impact Tab ---
-    @FXML
-    private BarChart<String, Number> categoryBarChart;
-    @FXML
-    private PieChart ratingPieChart;
-    @FXML
-    private Label statTotalFavorites;
-    @FXML
-    private Label statAvgRating;
-    @FXML
-    private Label statReviewsDone;
-    @FXML
-    private Label statTopCategory;
+    @FXML private BarChart<String, Number> categoryBarChart;
+    @FXML private PieChart ratingPieChart;
+    @FXML private Label statTotalFavorites;
+    @FXML private Label statAvgRating;
+    @FXML private Label statReviewsDone;
+    @FXML private Label statTopCategory;
+    @FXML private HBox jobsImpactBanner;
+    @FXML private Label jobsCountLabel;
 
     // --- Smart Search Tab ---
-    @FXML
-    private TextField smartSearchField;
-    @FXML
-    private FlowPane smartSearchResults;
-    @FXML
-    private FlowPane tagCloudPane;
+    @FXML private TextField smartSearchField;
+    @FXML private FlowPane smartSearchResults;
+    @FXML private FlowPane tagCloudPane;
 
-    // ==================== Data Collections ====================
+    // ==================== Data ====================
 
-    /** Master list of all businesses */
+    /** Master list of all loaded businesses. */
     private ObservableList<Business> allBusinesses;
 
-    /** Separate list of ALL favorited businesses (drives the sidebar) */
+    /** Sidebar favorites list (reactive via ObservableList). */
     private ObservableList<Business> favoritedBusinesses;
 
-    /** Currently selected business for the detail pane */
+    /** Currently selected business for the detail pane. */
     private Business selectedBusiness;
 
-    /** Whether to sort by rating descending */
+    /** Whether to sort by rating descending. */
     private boolean sortByRating = false;
 
-    /** Whether dark mode is active */
+    /** Whether dark mode is currently active. */
     private boolean darkMode = false;
+
+    /**
+     * Radius values in metres corresponding to distanceSlider positions 0-3.
+     * Labels: "500m", "1 km", "2 km", "5 km"
+     */
+    private static final int[] RADIUS_VALUES  = {500, 1000, 2000, 5000};
+    private static final String[] RADIUS_LABELS = {"500m", "1 km", "2 km", "5 km"};
 
     // ==================== Initialization ====================
 
     /**
      * Initializes the controller after FXML loading.
+     * Applies the light stylesheet, loads mock data, restores favorites,
+     * wires up all listeners, and seeds from onboarding preferences.
      */
     @FXML
     public void initialize() {
-        // Apply initial light stylesheet programmatically
+        // Apply initial light stylesheet
         Platform.runLater(() -> {
             String lightCss = getClass().getResource("/styles.css").toExternalForm();
             themeToggleButton.getScene().getRoot().getStylesheets().add(lightCss);
         });
 
-        // Fetch user favorites from local storage as initial fallback
-        String currentUser = com.fbla.businessboost.util.SessionManager.getCurrentUser();
-        List<String> userFavorites = com.fbla.businessboost.util.SessionManager.getFavorites();
+        // Fetch user favorites (local + Supabase merge)
+        String currentUser = SessionManager.getCurrentUser();
+        List<String> userFavorites = SessionManager.getFavorites();
 
-        // Merge in favorites from Supabase (async, but block briefly for initial load)
         if (currentUser != null) {
             try {
                 List<String> supabaseFavs = SupabaseClient.getUserFavorites(currentUser);
@@ -147,21 +153,18 @@ public class MainController {
                         userFavorites.add(fav);
                     }
                 }
-                // Update local cache with merged list
-                com.fbla.businessboost.util.SessionManager.saveFavorites(userFavorites);
+                SessionManager.saveFavorites(userFavorites);
             } catch (Exception ex) {
-                System.err.println("Could not fetch Supabase favorites, using local cache: " + ex.getMessage());
+                System.err.println("Could not fetch Supabase favorites: " + ex.getMessage());
             }
         }
 
         // Load mock data
         ObservableList<Business> rawData = DataManager.initializeMockData();
 
-        // Separate list for favorites sidebar
         favoritedBusinesses = FXCollections.observableArrayList(
-                business -> new javafx.beans.Observable[] { business.favoriteProperty() });
+                business -> new javafx.beans.Observable[]{business.favoriteProperty()});
 
-        // Apply favorites and attach listener
         for (Business b : rawData) {
             if (userFavorites.contains(b.getName())) {
                 b.setFavorite(true);
@@ -171,44 +174,212 @@ public class MainController {
         }
 
         allBusinesses = FXCollections.observableArrayList(
-                business -> new javafx.beans.Observable[] { business.favoriteProperty() });
+                business -> new javafx.beans.Observable[]{business.favoriteProperty()});
         allBusinesses.addAll(rawData);
 
-        // Initialize category filter dropdown
+        // Wire up UI components
         setupCategoryFilter();
-
-        // Configure favorites sidebar
         setupFavoritesList();
-
-        // Build the card grid
+        setupLiveSearch();
+        setupDistanceSlider();
         refreshCardGrid();
-
-        // Set detail pane placeholder
         clearDetailPane();
-
-        // Build tag cloud on Smart Search tab
         buildTagCloud();
 
-        // Update charts when tab is selected
+        // Refresh charts when My Impact tab is selected
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab != null && "📊 My Impact".equals(newTab.getText())) {
                 refreshCharts();
             }
         });
 
-        // Update recommendations
         refreshRecommendations();
+
+        // Pre-fill ZIP from onboarding preference
+        String preferredZip = SessionManager.getPreferredZip();
+        if (!preferredZip.isEmpty()) {
+            zipCodeField.setText(preferredZip);
+        }
+    }
+
+    // ==================== Distance Slider ====================
+
+    /**
+     * Wires the distance slider to update its label and mirrors values
+     * to a human-readable string.
+     */
+    private void setupDistanceSlider() {
+        distanceSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int idx = Math.min(newVal.intValue(), RADIUS_LABELS.length - 1);
+            distanceLabel.setText("Within " + RADIUS_LABELS[idx]);
+        });
+        // Default: index 1 = 1km (but slider value starts at 1 which maps to index 1)
+        distanceLabel.setText("Within " + RADIUS_LABELS[1]);
+    }
+
+    /**
+     * Returns the currently selected search radius in metres from the distance slider.
+     *
+     * @return radius in metres
+     */
+    private int getSelectedRadiusMeters() {
+        int idx = (int) Math.round(distanceSlider.getValue());
+        idx = Math.max(0, Math.min(idx, RADIUS_VALUES.length - 1));
+        return RADIUS_VALUES[idx];
+    }
+
+    // ==================== Live Search ====================
+
+    /**
+     * Wires the live search text field so every keystroke filters the card grid
+     * client-side without firing any API calls.
+     */
+    private void setupLiveSearch() {
+        liveSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            filterCardGridLive(newVal);
+        });
+    }
+
+    /**
+     * Filters the visible cards by the given query string without touching the
+     * {@code allBusinesses} list or making network calls.
+     *
+     * @param query the text to match against name, category, description, and tags
+     */
+    private void filterCardGridLive(String query) {
+        businessCardGrid.getChildren().clear();
+        String selectedCategory = categoryFilter.getValue();
+        String q = query == null ? "" : query.trim().toLowerCase();
+
+        List<Business> filtered = allBusinesses.stream()
+                .filter(b -> "All".equals(selectedCategory) || b.getCategory().equals(selectedCategory))
+                .filter(b -> {
+                    if (q.isEmpty()) return true;
+                    if (b.getName().toLowerCase().contains(q)) return true;
+                    if (b.getCategory().toLowerCase().contains(q)) return true;
+                    if (b.getDescription() != null && b.getDescription().toLowerCase().contains(q)) return true;
+                    return b.getTags().stream().anyMatch(t -> t.toLowerCase().contains(q));
+                })
+                .collect(Collectors.toList());
+
+        if (sortByRating) {
+            filtered.sort(Comparator.comparingDouble(Business::getRating).reversed());
+        }
+
+        if (filtered.isEmpty()) {
+            showEmptyState(businessCardGrid, "No results match \"" + query + "\"",
+                    "Try removing the filter or searching a different term.");
+        } else {
+            for (Business b : filtered) {
+                businessCardGrid.getChildren().add(createBusinessCard(b));
+            }
+        }
+    }
+
+    // ==================== Skeleton Loading ====================
+
+    /**
+     * Replaces the card grid content with 6 shimmer skeleton cards to indicate
+     * that a network fetch is in progress.
+     */
+    private void showSkeletonCards() {
+        businessCardGrid.getChildren().clear();
+        for (int i = 0; i < 6; i++) {
+            businessCardGrid.getChildren().add(buildSkeletonCard());
+        }
+    }
+
+    /**
+     * Builds a single skeleton placeholder card.
+     *
+     * @return a VBox styled as a skeleton loading card
+     */
+    private VBox buildSkeletonCard() {
+        VBox card = new VBox(0);
+        card.getStyleClass().add("skeleton-card");
+        card.setPrefWidth(260);
+        card.setMaxWidth(260);
+
+        // Skeleton image placeholder
+        Region imgPlaceholder = new Region();
+        imgPlaceholder.getStyleClass().add("skeleton-image");
+        imgPlaceholder.setPrefWidth(260);
+        imgPlaceholder.setPrefHeight(160);
+
+        VBox info = new VBox(8);
+        info.setPadding(new Insets(12));
+
+        Region line1 = new Region();
+        line1.getStyleClass().add("skeleton-line");
+        line1.setPrefHeight(14);
+        line1.setMaxWidth(200);
+
+        Region line2 = new Region();
+        line2.getStyleClass().addAll("skeleton-line", "skeleton-line-short");
+        line2.setPrefHeight(12);
+        line2.setMaxWidth(140);
+
+        Region line3 = new Region();
+        line3.getStyleClass().addAll("skeleton-line", "skeleton-line-short");
+        line3.setPrefHeight(11);
+        line3.setMaxWidth(160);
+
+        info.getChildren().addAll(line1, line2, line3);
+        card.getChildren().addAll(imgPlaceholder, info);
+        return card;
+    }
+
+    // ==================== Empty State ====================
+
+    /**
+     * Shows a friendly empty state illustration inside the given FlowPane.
+     *
+     * @param pane      the FlowPane to show the empty state in
+     * @param title     main empty state message
+     * @param subtitle  secondary hint text
+     */
+    private void showEmptyState(FlowPane pane, String title, String subtitle) {
+        pane.getChildren().clear();
+        VBox emptyState = new VBox(12);
+        emptyState.getStyleClass().add("empty-state-container");
+        emptyState.setAlignment(Pos.CENTER);
+        emptyState.setPadding(new Insets(60, 40, 60, 40));
+        emptyState.setPrefWidth(pane.getWidth() > 100 ? pane.getWidth() : 600);
+
+        Label icon = new Label("🗺️");
+        icon.getStyleClass().add("empty-state-icon");
+        icon.setStyle("-fx-font-size: 52px;");
+
+        Label titleLabel = new Label(title);
+        titleLabel.getStyleClass().add("empty-state-title");
+        titleLabel.setWrapText(true);
+        titleLabel.setStyle("-fx-text-alignment: center;");
+
+        Label subtitleLabel = new Label(subtitle);
+        subtitleLabel.getStyleClass().add("empty-state-subtitle");
+        subtitleLabel.setWrapText(true);
+        subtitleLabel.setStyle("-fx-text-alignment: center;");
+
+        emptyState.getChildren().addAll(icon, titleLabel, subtitleLabel);
+        pane.getChildren().add(emptyState);
     }
 
     // ==================== Card Grid ====================
 
     /**
      * Rebuilds the entire card grid from the current data + filters + sort.
+     * Respects both the category filter and the live search field.
      */
     private void refreshCardGrid() {
-        businessCardGrid.getChildren().clear();
+        String liveQuery = liveSearchField != null ? liveSearchField.getText() : "";
+        if (!liveQuery.isEmpty()) {
+            filterCardGridLive(liveQuery);
+            return;
+        }
 
+        businessCardGrid.getChildren().clear();
         String selectedCategory = categoryFilter.getValue();
+
         List<Business> filtered = allBusinesses.stream()
                 .filter(b -> "All".equals(selectedCategory) || b.getCategory().equals(selectedCategory))
                 .collect(Collectors.toList());
@@ -217,22 +388,22 @@ public class MainController {
             filtered.sort(Comparator.comparingDouble(Business::getRating).reversed());
         }
 
-        for (Business b : filtered) {
-            businessCardGrid.getChildren().add(createBusinessCard(b));
-        }
-
-        // Show empty state if no results
-        if (filtered.isEmpty() && !"All".equals(selectedCategory)) {
-            showResultBanner("No businesses match \"" + selectedCategory + "\" — try selecting \"All\"",
-                    "result-banner-warning");
+        if (filtered.isEmpty()) {
+            showEmptyState(businessCardGrid,
+                    "No businesses in \"" + selectedCategory + "\"",
+                    "Try selecting \"All\" or searching a different ZIP code.");
+        } else {
+            for (Business b : filtered) {
+                businessCardGrid.getChildren().add(createBusinessCard(b));
+            }
         }
     }
 
     /**
-     * Creates a DoorDash-style business card VBox for the grid.
+     * Creates a DoorDash-style business card for the card grid.
      *
-     * @param business The business to display
-     * @return A VBox node representing the card
+     * @param business The business to render
+     * @return a styled VBox card node
      */
     private VBox createBusinessCard(Business business) {
         VBox card = new VBox(0);
@@ -254,13 +425,11 @@ public class MainController {
         imageView.setPreserveRatio(false);
         imageView.setSmooth(true);
 
-        // Rounded clip for the image
         Rectangle clip = new Rectangle(260, 160);
         clip.setArcWidth(16);
         clip.setArcHeight(16);
         imageView.setClip(clip);
 
-        // Load image async
         String imgUrl = business.getImageUrl();
         if (imgUrl != null && !imgUrl.isEmpty()) {
             try {
@@ -271,16 +440,21 @@ public class MainController {
             }
         }
 
-        // Heart button overlay
+        // Heart button overlay with accessibility text
         Button heartBtn = new Button(business.isFavorite() ? "❤️" : "🤍");
         heartBtn.getStyleClass().add("card-heart-button");
+        heartBtn.setAccessibleText(business.isFavorite()
+                ? "Remove " + business.getName() + " from favorites"
+                : "Add " + business.getName() + " to favorites");
         heartBtn.setOnAction(e -> {
             business.setFavorite(!business.isFavorite());
             heartBtn.setText(business.isFavorite() ? "❤️" : "🤍");
+            heartBtn.setAccessibleText(business.isFavorite()
+                    ? "Remove " + business.getName() + " from favorites"
+                    : "Add " + business.getName() + " to favorites");
         });
         StackPane.setAlignment(heartBtn, Pos.TOP_RIGHT);
         StackPane.setMargin(heartBtn, new Insets(8, 8, 0, 0));
-
         imageContainer.getChildren().addAll(imageView, heartBtn);
 
         // ---- Info section ----
@@ -288,45 +462,34 @@ public class MainController {
         infoBox.getStyleClass().add("card-info");
         infoBox.setPadding(new Insets(10, 12, 12, 12));
 
-        // Name
         Label nameLabel = new Label(business.getName());
         nameLabel.getStyleClass().add("card-title");
         nameLabel.setWrapText(true);
         nameLabel.setMaxWidth(236);
 
-        // Category + Price row
+        // Category badge + price row
         HBox metaRow = new HBox(8);
         metaRow.setAlignment(Pos.CENTER_LEFT);
 
         Label categoryBadge = new Label(business.getCategory());
         categoryBadge.getStyleClass().add("card-category-badge");
         switch (business.getCategory()) {
-            case "Food":
-                categoryBadge.getStyleClass().add("badge-food");
-                break;
-            case "Retail":
-                categoryBadge.getStyleClass().add("badge-retail");
-                break;
-            case "Services":
-                categoryBadge.getStyleClass().add("badge-services");
-                break;
+            case "Food":     categoryBadge.getStyleClass().add("badge-food");     break;
+            case "Retail":   categoryBadge.getStyleClass().add("badge-retail");   break;
+            case "Services": categoryBadge.getStyleClass().add("badge-services"); break;
         }
 
         Label priceLabel = new Label(business.getPrice());
         priceLabel.getStyleClass().add("card-price");
-
         metaRow.getChildren().addAll(categoryBadge, priceLabel);
 
         // Rating row
         HBox ratingRow = new HBox(4);
         ratingRow.setAlignment(Pos.CENTER_LEFT);
-
         Label starsLabel = new Label(buildStarString(business.getRating()));
         starsLabel.getStyleClass().add("card-rating-stars");
-
         Label ratingLabel = new Label(String.format("%.1f", business.getRating()));
         ratingLabel.getStyleClass().add("card-rating-number");
-
         ratingRow.getChildren().addAll(starsLabel, ratingLabel);
 
         // Address
@@ -336,35 +499,30 @@ public class MainController {
         addressLabel.setMaxWidth(236);
 
         infoBox.getChildren().addAll(nameLabel, metaRow, ratingRow, addressLabel);
-
         card.getChildren().addAll(imageContainer, infoBox);
-
-        // Click handler → show business details
         card.setOnMouseClicked(e -> selectBusiness(business));
 
         return card;
     }
 
-    /**
-     * Builds a star string like "★★★★☆" from a rating.
-     */
+    /** Builds a star string like "★★★★☆" from a 0-5 rating. */
     private String buildStarString(double rating) {
         StringBuilder stars = new StringBuilder();
         int full = (int) Math.floor(rating);
-        for (int i = 0; i < full; i++)
-            stars.append("★");
-        if (rating - full >= 0.5)
-            stars.append("½");
+        for (int i = 0; i < full; i++) stars.append("★");
+        if (rating - full >= 0.5) stars.append("½");
         int empty = 5 - full - (rating - full >= 0.5 ? 1 : 0);
-        for (int i = 0; i < empty; i++)
-            stars.append("☆");
+        for (int i = 0; i < empty; i++) stars.append("☆");
         return stars.toString();
     }
 
     // ==================== Selection & Detail Pane ====================
 
     /**
-     * Selects a business and updates the detail pane.
+     * Selects a business and fully populates the detail pane, including the
+     * static map thumbnail and styled review cards.
+     *
+     * @param business the business to display
      */
     private void selectBusiness(Business business) {
         this.selectedBusiness = business;
@@ -377,17 +535,16 @@ public class MainController {
         businessPhoneLabel.setText(phone != null && !phone.isEmpty() ? "📞 " + phone : "📞 Phone unavailable");
 
         String website = business.getWebsite();
-        businessWebsiteLabel
-                .setText(website != null && !website.isEmpty() ? "🌐 " + website : "🌐 Website unavailable");
+        businessWebsiteLabel.setText(website != null && !website.isEmpty() ? "🌐 " + website : "🌐 Website unavailable");
 
         String hours = business.getHours();
         businessHoursLabel.setText(hours != null && !hours.isEmpty() ? "🕒 " + hours : "🕒 Hours unavailable");
 
-        // Load detail image
+        // Load business image
         String imgUrl = business.getImageUrl();
         if (imgUrl != null && !imgUrl.isEmpty()) {
             try {
-                Image img = new Image(imgUrl, 290, 180, false, true, true);
+                Image img = new Image(imgUrl, 290, 160, false, true, true);
                 detailImageView.setImage(img);
             } catch (Exception e) {
                 detailImageView.setImage(null);
@@ -396,10 +553,36 @@ public class MainController {
             detailImageView.setImage(null);
         }
 
-        // Show local deals first
+        // Load static map thumbnail if lat/lon are available
+        double lat = business.getLatitude();
+        double lon = business.getLongitude();
+        if (lat != 0.0 && lon != 0.0) {
+            String mapUrl = String.format(
+                    "https://staticmap.openstreetmap.de/staticmap.php" +
+                    "?center=%.6f,%.6f&zoom=15&size=280x110&markers=%.6f,%.6f,red-pushpin",
+                    lat, lon, lat, lon);
+            try {
+                Image mapImg = new Image(mapUrl, 290, 110, false, true, true);
+                mapImageView.setImage(mapImg);
+                mapImageView.setVisible(true);
+                mapImageView.setManaged(true);
+            } catch (Exception e) {
+                mapImageView.setVisible(false);
+                mapImageView.setManaged(false);
+            }
+        } else {
+            mapImageView.setVisible(false);
+            mapImageView.setManaged(false);
+        }
+
+        // Show local deals
         dealsPane.setItems(business.getDeals());
 
-        // Fetch reviews from Supabase in background
+        // Clear review pane
+        reviewsContainer.getChildren().clear();
+        reviewCountLabel.setText("");
+
+        // Fetch reviews from Supabase in background and render as cards
         javafx.concurrent.Task<List<Review>> fetchReviewsTask = new javafx.concurrent.Task<>() {
             @Override
             protected List<Review> call() throws Exception {
@@ -409,41 +592,89 @@ public class MainController {
 
         fetchReviewsTask.setOnSucceeded(e -> {
             List<Review> reviews = fetchReviewsTask.getValue();
-            if (reviews != null && !reviews.isEmpty()) {
-                Platform.runLater(() -> {
-                    if (selectedBusiness == business) {
-                        ObservableList<String> combined = FXCollections.observableArrayList(business.getDeals());
-                        combined.add("--- Community Reviews ---");
+            Platform.runLater(() -> {
+                if (selectedBusiness == business) {
+                    reviewsContainer.getChildren().clear();
+                    if (reviews == null || reviews.isEmpty()) {
+                        Label noReview = new Label("No reviews yet — be the first!");
+                        noReview.setStyle("-fx-text-fill: #aaa; -fx-font-size: 12px; -fx-padding: 8 0;");
+                        reviewsContainer.getChildren().add(noReview);
+                        reviewCountLabel.setText("");
+                    } else {
+                        reviewCountLabel.setText("(" + reviews.size() + ")");
                         for (Review r : reviews) {
-                            combined.add(r.toString());
+                            reviewsContainer.getChildren().add(buildReviewCard(r));
                         }
-                        dealsPane.setItems(combined);
                     }
-                });
-            }
+                }
+            });
         });
+
+        fetchReviewsTask.setOnFailed(e -> Platform.runLater(() -> {
+            if (selectedBusiness == business) {
+                Label errLabel = new Label("Could not load reviews.");
+                errLabel.setStyle("-fx-text-fill: #aaa; -fx-font-size: 12px;");
+                reviewsContainer.getChildren().setAll(errLabel);
+            }
+        }));
 
         new Thread(fetchReviewsTask).start();
     }
 
     /**
-     * Clears the detail pane.
+     * Builds a styled review card VBox for the detail pane.
+     *
+     * @param review the review to render
+     * @return a styled VBox card
+     */
+    private VBox buildReviewCard(Review review) {
+        VBox card = new VBox(4);
+        card.getStyleClass().add("review-card");
+
+        // Star rating row
+        int stars = (int) Math.round(review.getRating());
+        String starStr = "★".repeat(Math.max(0, stars)) + "☆".repeat(Math.max(0, 5 - stars));
+        Label starsLabel = new Label(starStr + "  " + String.format("%.1f", review.getRating()));
+        starsLabel.getStyleClass().add("review-stars");
+
+        // Review text
+        Label textLabel = new Label(review.getReviewText());
+        textLabel.getStyleClass().add("review-text");
+        textLabel.setWrapText(true);
+
+        // Timestamp (truncate to date only if long)
+        String ts = review.getTimestamp();
+        if (ts != null && ts.length() > 10) ts = ts.substring(0, 10);
+        Label tsLabel = new Label(ts != null ? ts : "");
+        tsLabel.getStyleClass().add("review-timestamp");
+
+        card.getChildren().addAll(starsLabel, textLabel, tsLabel);
+        return card;
+    }
+
+    /**
+     * Clears the detail pane to its placeholder state.
      */
     private void clearDetailPane() {
         selectedBusinessLabel.setText("Select a business");
         businessDescriptionLabel.setText("Click on a business card to view details, deals, and reviews.");
         detailImageView.setImage(null);
+        mapImageView.setImage(null);
+        mapImageView.setVisible(false);
+        mapImageView.setManaged(false);
         dealsPane.setItems(FXCollections.observableArrayList());
+        reviewsContainer.getChildren().clear();
+        reviewCountLabel.setText("");
     }
 
     // ==================== Filters & Sort ====================
 
     private void setupCategoryFilter() {
-        categoryFilter.setItems(FXCollections.observableArrayList(
-                "All", "Food", "Retail", "Services"));
+        categoryFilter.setItems(FXCollections.observableArrayList("All", "Food", "Retail", "Services"));
         categoryFilter.setValue("All");
         categoryFilter.setOnAction(event -> {
             hideResultBanner();
+            liveSearchField.clear();
             refreshCardGrid();
         });
     }
@@ -476,12 +707,9 @@ public class MainController {
                 }
             }
         });
-
         favoritesList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, newVal) -> {
-                    if (newVal != null) {
-                        selectBusiness(newVal);
-                    }
+                    if (newVal != null) selectBusiness(newVal);
                 });
     }
 
@@ -495,18 +723,16 @@ public class MainController {
                 favoritedBusinesses.remove(business);
             }
 
-            // Update recommendations when favorites change
             refreshRecommendations();
 
-            // Persist locally
             if (isNowFavorite) {
-                com.fbla.businessboost.util.SessionManager.addFavorite(business.getName());
+                SessionManager.addFavorite(business.getName());
             } else {
-                com.fbla.businessboost.util.SessionManager.removeFavorite(business.getName());
+                SessionManager.removeFavorite(business.getName());
             }
 
             // Sync to Supabase in background
-            String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            String user = SessionManager.getCurrentUser();
             if (user != null) {
                 new Thread(() -> {
                     if (isNowFavorite) {
@@ -522,8 +748,9 @@ public class MainController {
     // ==================== Recommendations ====================
 
     /**
-     * Refreshes the "You might also like..." section using the recommendation
-     * engine.
+     * Refreshes the "You Might Also Like…" section.
+     * Each recommendation card now shows <em>why</em> it was recommended:
+     * "Because you love: #cozy #budget" using the tag overlap explanation.
      */
     private void refreshRecommendations() {
         recommendationCards.getChildren().clear();
@@ -540,16 +767,28 @@ public class MainController {
         recommendationSection.setVisible(true);
         recommendationSection.setManaged(true);
 
+        // Build tag-frequency map from favorites for explainability
+        Map<String, Integer> tagFrequency = new HashMap<>();
+        for (Business fav : favoritedBusinesses) {
+            for (String tag : fav.getTags()) {
+                tagFrequency.merge(tag, 1, Integer::sum);
+            }
+        }
+
         for (Business rec : recommendations) {
-            VBox miniCard = createMiniCard(rec);
+            VBox miniCard = createMiniCard(rec, tagFrequency);
             recommendationCards.getChildren().add(miniCard);
         }
     }
 
     /**
-     * Creates a compact recommendation card.
+     * Creates a compact recommendation mini-card with explainability text.
+     *
+     * @param business     the recommended business
+     * @param tagFrequency frequency map of tags from the user's favorites
+     * @return a styled mini-card VBox
      */
-    private VBox createMiniCard(Business business) {
+    private VBox createMiniCard(Business business, Map<String, Integer> tagFrequency) {
         VBox card = new VBox(4);
         card.getStyleClass().add("mini-card");
         card.setPrefWidth(200);
@@ -565,29 +804,46 @@ public class MainController {
         Label category = new Label(business.getCategory() + " · " + buildStarString(business.getRating()));
         category.getStyleClass().add("card-address");
 
-        // Show matching tags
-        String tagStr = business.getTags().stream().limit(3).collect(Collectors.joining(" "));
-        Label tags = new Label(tagStr);
-        tags.setStyle("-fx-font-size: 10px; -fx-text-fill: #5BA08C;");
+        // Build explainability: find matching tags sorted by frequency
+        List<String> matchingTags = business.getTags().stream()
+                .filter(tagFrequency::containsKey)
+                .sorted(Comparator.comparingInt(t -> -tagFrequency.getOrDefault(t, 0)))
+                .limit(3)
+                .collect(Collectors.toList());
 
-        card.getChildren().addAll(name, category, tags);
+        if (!matchingTags.isEmpty()) {
+            Label whyLabel = new Label("Because you love: " + String.join(" ", matchingTags));
+            whyLabel.getStyleClass().add("rec-why-label");
+            whyLabel.setWrapText(true);
+            card.getChildren().addAll(name, category, whyLabel);
+        } else {
+            card.getChildren().addAll(name, category);
+        }
+
         card.setOnMouseClicked(e -> selectBusiness(business));
-
         return card;
     }
 
     // ==================== My Impact (Charts) ====================
 
     /**
-     * Refreshes the charts and stats on the My Impact tab.
+     * Refreshes all My Impact stats, charts, and the jobs impact banner.
      */
     private void refreshCharts() {
-        // Update stats
         int totalFavs = favoritedBusinesses.size();
         statTotalFavorites.setText(String.valueOf(totalFavs));
+        statReviewsDone.setText(String.valueOf(SessionManager.getReviewCount()));
 
-        int reviewsDone = com.fbla.businessboost.util.SessionManager.getReviewCount();
-        statReviewsDone.setText(String.valueOf(reviewsDone));
+        // Update jobs impact banner
+        if (totalFavs > 0) {
+            int estimatedJobs = (int) Math.round(totalFavs * 4.7);
+            jobsCountLabel.setText(String.valueOf(estimatedJobs));
+            jobsImpactBanner.setVisible(true);
+            jobsImpactBanner.setManaged(true);
+        } else {
+            jobsImpactBanner.setVisible(false);
+            jobsImpactBanner.setManaged(false);
+        }
 
         if (totalFavs > 0) {
             double avgRating = favoritedBusinesses.stream()
@@ -596,7 +852,6 @@ public class MainController {
                     .orElse(0.0);
             statAvgRating.setText(String.format("%.1f", avgRating));
 
-            // Find top category
             Map<String, Long> catCount = favoritedBusinesses.stream()
                     .collect(Collectors.groupingBy(Business::getCategory, Collectors.counting()));
             String topCat = catCount.entrySet().stream()
@@ -605,75 +860,55 @@ public class MainController {
                     .orElse("-");
             statTopCategory.setText(topCat);
 
-            // Bar Chart: businesses by category
+            // Bar Chart
             categoryBarChart.getData().clear();
-
-            // By putting each category in its own Series, JavaFX will automatically
-            // color them differently instead of coloring them all as a single "Favorites"
-            // series.
             catCount.forEach((cat, count) -> {
                 XYChart.Series<String, Number> series = new XYChart.Series<>();
                 series.setName(cat);
-
-                // Add the data point (empty string for x-axis so they cluster nicely, or use
-                // cat)
                 XYChart.Data<String, Number> dataNode = new XYChart.Data<>(cat, count);
                 dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
-                        if ("Food".equals(cat)) {
-                            newNode.setStyle("-fx-bar-fill: #E67E22;"); // Orange
-                        } else if ("Retail".equals(cat)) {
-                            newNode.setStyle("-fx-bar-fill: #3498DB;"); // Blue
-                        } else if ("Services".equals(cat)) {
-                            newNode.setStyle("-fx-bar-fill: #9B59B6;"); // Purple
-                        } else {
-                            newNode.setStyle("-fx-bar-fill: #5BA08C;"); // Default Commercio Green
+                        switch (cat) {
+                            case "Food":     newNode.setStyle("-fx-bar-fill: #E67E22;"); break;
+                            case "Retail":   newNode.setStyle("-fx-bar-fill: #3498DB;"); break;
+                            case "Services": newNode.setStyle("-fx-bar-fill: #9B59B6;"); break;
+                            default:         newNode.setStyle("-fx-bar-fill: #5BA08C;"); break;
                         }
                     }
                 });
-
                 series.getData().add(dataNode);
-
                 categoryBarChart.getData().add(series);
             });
 
-            // Pie Chart: rating distribution
+            // Pie Chart
             ratingPieChart.getData().clear();
             Map<String, Long> ratingDist = favoritedBusinesses.stream()
                     .collect(Collectors.groupingBy(b -> {
                         double r = b.getRating();
-                        if (r >= 4.5)
-                            return "★★★★★ (4.5+)";
-                        if (r >= 4.0)
-                            return "★★★★ (4.0-4.4)";
-                        if (r >= 3.5)
-                            return "★★★½ (3.5-3.9)";
+                        if (r >= 4.5) return "★★★★★ (4.5+)";
+                        if (r >= 4.0) return "★★★★ (4.0-4.4)";
+                        if (r >= 3.5) return "★★★½ (3.5-3.9)";
                         return "★★★ (< 3.5)";
                     }, Collectors.counting()));
             ratingDist.forEach((label, count) -> {
                 PieChart.Data slice = new PieChart.Data(label, count);
                 ratingPieChart.getData().add(slice);
-
                 slice.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
-                        if (label.contains("4.5+"))
-                            newNode.setStyle("-fx-pie-color: #2ECC71;"); // Green
-                        else if (label.contains("4.0-4.4"))
-                            newNode.setStyle("-fx-pie-color: #F1C40F;"); // Yellow
-                        else if (label.contains("3.5-3.9"))
-                            newNode.setStyle("-fx-pie-color: #E67E22;"); // Orange
-                        else
-                            newNode.setStyle("-fx-pie-color: #E74C3C;"); // Red
+                        if (label.contains("4.5+"))     newNode.setStyle("-fx-pie-color: #2ECC71;");
+                        else if (label.contains("4.0")) newNode.setStyle("-fx-pie-color: #F1C40F;");
+                        else if (label.contains("3.5")) newNode.setStyle("-fx-pie-color: #E67E22;");
+                        else                             newNode.setStyle("-fx-pie-color: #E74C3C;");
                     }
                 });
             });
 
-            // Save stats snapshot to Supabase
-            String user = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+            // Async Supabase stat snapshot
+            String user = SessionManager.getCurrentUser();
+            final double finalAvgRating = avgRating;
+            final String finalTopCat = topCat;
             if (user != null) {
-                new Thread(() -> {
-                    SupabaseClient.saveUserStats(user, totalFavs, avgRating, topCat);
-                }).start();
+                new Thread(() -> SupabaseClient.saveUserStats(user, totalFavs, finalAvgRating, finalTopCat)).start();
             }
         } else {
             statAvgRating.setText("0.0");
@@ -685,16 +920,12 @@ public class MainController {
 
     // ==================== Smart Search ====================
 
-    /**
-     * Handles fuzzy search by name, category, or tags.
-     */
     @FXML
     private void handleSmartSearch() {
         String query = smartSearchField.getText().trim().toLowerCase();
         smartSearchResults.getChildren().clear();
 
         if (query.isEmpty()) {
-            // Show all businesses
             for (Business b : allBusinesses) {
                 smartSearchResults.getChildren().add(createBusinessCard(b));
             }
@@ -703,28 +934,17 @@ public class MainController {
 
         List<Business> results = allBusinesses.stream()
                 .filter(b -> {
-                    // Match by name (fuzzy)
-                    if (b.getName().toLowerCase().contains(query))
-                        return true;
-                    // Match by category
-                    if (b.getCategory().toLowerCase().contains(query))
-                        return true;
-                    // Match by description
-                    if (b.getDescription() != null && b.getDescription().toLowerCase().contains(query))
-                        return true;
-                    // Match by tags
-                    for (String tag : b.getTags()) {
-                        if (tag.toLowerCase().contains(query))
-                            return true;
-                    }
-                    return false;
+                    if (b.getName().toLowerCase().contains(query)) return true;
+                    if (b.getCategory().toLowerCase().contains(query)) return true;
+                    if (b.getDescription() != null && b.getDescription().toLowerCase().contains(query)) return true;
+                    return b.getTags().stream().anyMatch(t -> t.toLowerCase().contains(query));
                 })
                 .collect(Collectors.toList());
 
         if (results.isEmpty()) {
-            Label noResults = new Label("No businesses match \"" + query + "\". Try another search term.");
-            noResults.getStyleClass().add("loading-label");
-            smartSearchResults.getChildren().add(noResults);
+            showEmptyState(smartSearchResults,
+                    "No results for \"" + smartSearchField.getText().trim() + "\"",
+                    "Try a different keyword, category name, or tag like #budget.");
         } else {
             for (Business b : results) {
                 smartSearchResults.getChildren().add(createBusinessCard(b));
@@ -732,18 +952,15 @@ public class MainController {
         }
     }
 
-    /**
-     * Builds clickable tag chips from all businesses.
-     */
     private void buildTagCloud() {
         Set<String> allTags = new TreeSet<>();
         for (Business b : allBusinesses) {
             allTags.addAll(b.getTags());
         }
-
         for (String tag : allTags) {
             Button tagBtn = new Button(tag);
             tagBtn.getStyleClass().add("tag-chip");
+            tagBtn.setAccessibleText("Filter by tag " + tag);
             tagBtn.setOnAction(e -> {
                 smartSearchField.setText(tag);
                 handleSmartSearch();
@@ -754,19 +971,13 @@ public class MainController {
 
     // ==================== Theme Toggle ====================
 
-    /**
-     * Toggles between light and dark mode by swapping CSS stylesheets.
-     * Uses root node stylesheets (not scene) for reliable toggling.
-     */
     @FXML
     private void handleThemeToggle() {
         ObservableList<String> stylesheets = themeToggleButton.getScene().getRoot().getStylesheets();
-
         String lightCss = getClass().getResource("/styles.css").toExternalForm();
-        String darkCss = getClass().getResource("/styles-dark.css").toExternalForm();
+        String darkCss  = getClass().getResource("/styles-dark.css").toExternalForm();
 
         stylesheets.clear();
-
         if (darkMode) {
             stylesheets.add(lightCss);
             themeToggleButton.setText("🌙");
@@ -778,23 +989,20 @@ public class MainController {
         }
     }
 
-    /**
-     * Logs out the current user, clears saved session, and returns to login.
-     */
     @FXML
     private void handleLogout() {
-        com.fbla.businessboost.util.SessionManager.logout();
+        SessionManager.logout();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
             Stage stage = (Stage) themeToggleButton.getScene().getWindow();
-            stage.setTitle("Commercio - Login");
+            stage.setTitle("Commercio — Sign In");
             stage.setScene(new Scene(loader.load(), 500, 600));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // ==================== Zip Search ====================
+    // ==================== ZIP Search ====================
 
     @FXML
     private void handleZipSearch() {
@@ -805,19 +1013,15 @@ public class MainController {
         }
 
         hideResultBanner();
-        businessCardGrid.getChildren().clear();
-
-        // Show loading state
-        Label loadingLabel = new Label("🔍 Searching businesses...");
-        loadingLabel.getStyleClass().add("loading-label");
-        businessCardGrid.getChildren().add(loadingLabel);
+        showSkeletonCards();
 
         String trimmedZip = zipCode.trim();
+        int radiusMeters = getSelectedRadiusMeters();
 
         javafx.concurrent.Task<ObservableList<Business>> fetchTask = new javafx.concurrent.Task<>() {
             @Override
             protected ObservableList<Business> call() throws Exception {
-                return com.fbla.businessboost.util.BusinessFetcher.fetchBusinessesByZipCode(trimmedZip);
+                return BusinessFetcher.fetchBusinessesByZipCode(trimmedZip, radiusMeters);
             }
         };
 
@@ -828,30 +1032,45 @@ public class MainController {
                 showResultBanner("No businesses found near " + trimmedZip + " — try a different zip code.",
                         "result-banner-warning");
             } else {
-                new Thread(() -> {
-                    List<String> userFavoritesList = com.fbla.businessboost.util.SessionManager.getFavorites();
-                    Platform.runLater(() -> {
-                        processZipResults(results, userFavoritesList);
-                        showResultBanner("✓ Found " + results.size() + " businesses near " + trimmedZip,
-                                "result-banner-success");
-                    });
-                }).start();
+                // Save to offline cache in background
+                new Thread(() -> OfflineCache.save(trimmedZip, results)).start();
+
+                List<String> userFavoritesList = SessionManager.getFavorites();
+                Platform.runLater(() -> {
+                    processZipResults(results, userFavoritesList);
+                    showResultBanner("✓ Found " + results.size() + " local businesses near " + trimmedZip,
+                            "result-banner-success");
+                });
             }
         });
 
         fetchTask.setOnFailed(e -> {
-            businessCardGrid.getChildren().clear();
             Throwable ex = fetchTask.getException();
-            String msg = (ex != null && ex.getMessage() != null) ? ex.getMessage() : "";
-            if (msg.toLowerCase().contains("invalid zip")) {
-                showResultBanner("❌ Invalid zip code — please try again.", "result-banner-error");
+
+            // Try offline cache fallback
+            ObservableList<Business> cached = OfflineCache.load(trimmedZip);
+            if (!cached.isEmpty()) {
+                List<String> userFavoritesList = SessionManager.getFavorites();
+                Platform.runLater(() -> {
+                    processZipResults(cached, userFavoritesList);
+                    showResultBanner("📦 Network unavailable — showing cached results for " + trimmedZip,
+                            "result-banner-warning");
+                });
             } else {
-                showResultBanner("❌ Search failed — please check your connection and try again.",
-                        "result-banner-error");
+                Platform.runLater(() -> {
+                    businessCardGrid.getChildren().clear();
+                    String msg = (ex != null && ex.getMessage() != null) ? ex.getMessage() : "";
+                    if (msg.toLowerCase().contains("invalid zip")) {
+                        showResultBanner("❌ Invalid zip code — please try again.", "result-banner-error");
+                    } else {
+                        showResultBanner("❌ Search failed — check your connection and try again.", "result-banner-error");
+                    }
+                    showEmptyState(businessCardGrid, "No results found",
+                            "Check your connection or try a different ZIP code.");
+                });
             }
-            System.err.println("Zip Search fetchTask failed:");
-            if (ex != null)
-                ex.printStackTrace();
+
+            if (ex != null) ex.printStackTrace();
         });
 
         new Thread(fetchTask).start();
@@ -859,7 +1078,6 @@ public class MainController {
 
     private void processZipResults(ObservableList<Business> results, List<String> userFavoritesList) {
         allBusinesses.clear();
-
         for (Business newBiz : results) {
             if (userFavoritesList.contains(newBiz.getName())) {
                 newBiz.setFavorite(true);
@@ -867,13 +1085,11 @@ public class MainController {
             attachFavoriteListener(newBiz);
             allBusinesses.add(newBiz);
         }
-
         categoryFilter.setValue("All");
         sortByRating = false;
+        liveSearchField.clear();
         refreshCardGrid();
         refreshRecommendations();
-
-        // Rebuild tag cloud with new data
         tagCloudPane.getChildren().clear();
         buildTagCloud();
     }
@@ -883,36 +1099,27 @@ public class MainController {
     @FXML
     private void handleAddReview() {
         if (selectedBusiness == null) {
-            showAlert(Alert.AlertType.WARNING, "No Selection",
-                    "Please select a business to review.");
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a business to review.");
             return;
         }
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ReviewDialog.fxml"));
             Scene scene = new Scene(loader.load());
-
-            // Apply current theme to dialog
             if (darkMode) {
-                String darkCss = getClass().getResource("/styles-dark.css").toExternalForm();
-                scene.getStylesheets().add(darkCss);
+                scene.getStylesheets().add(getClass().getResource("/styles-dark.css").toExternalForm());
             }
-
             ReviewDialogController controller = loader.getController();
             controller.setBusiness(selectedBusiness);
 
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Submit Review - " + selectedBusiness.getName());
+            dialogStage.setTitle("Submit Review — " + selectedBusiness.getName());
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setScene(scene);
             dialogStage.showAndWait();
 
-            // Refresh detail pane to show new review
             selectBusiness(selectedBusiness);
-
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Error",
-                    "Failed to load review dialog: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load review dialog: " + e.getMessage());
         }
     }
 
@@ -920,16 +1127,15 @@ public class MainController {
 
     @FXML
     private void handleGenerateReport() {
-        String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+        String username = SessionManager.getCurrentUser();
         ReportGenerator.generateReport(username, FXCollections.observableArrayList(favoritedBusinesses));
     }
 
-    // ==================== Inline Result Banner ====================
+    // ==================== Result Banner ====================
 
     private void showResultBanner(String message, String styleClass) {
         resultBannerLabel.setText(message);
-        resultBanner.getStyleClass().removeAll(
-                "result-banner-success", "result-banner-warning", "result-banner-error");
+        resultBanner.getStyleClass().removeAll("result-banner-success", "result-banner-warning", "result-banner-error");
         resultBanner.getStyleClass().add(styleClass);
         resultBanner.setVisible(true);
         resultBanner.setManaged(true);
@@ -948,5 +1154,4 @@ public class MainController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }

@@ -23,10 +23,21 @@ import java.util.stream.Collectors;
 
 /**
  * Generates professional PDF-formatted reports for favorited businesses.
- * Uses the LibrePDF OpenPDF library for generation.
+ *
+ * <p>
+ * <strong>Report structure (v4.0):</strong>
+ * <ol>
+ *   <li>Cover page — branded with app icon, title, username, and date</li>
+ *   <li>Summary stats cards — favorites count, avg rating, categories explored</li>
+ *   <li>Economic impact section — estimated local jobs supported</li>
+ *   <li>Business table — ranked list of all favorited businesses</li>
+ *   <li>Category breakdown — aggregated category distribution</li>
+ *   <li>Footer — brand tagline</li>
+ * </ol>
+ * </p>
  *
  * @author FBLA Development Team
- * @version 3.0
+ * @version 4.0
  */
 public class ReportGenerator {
 
@@ -74,19 +85,36 @@ public class ReportGenerator {
 
             String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
 
-            // ================= Header =================
-            Paragraph title = new Paragraph("Commercio Support Report", titleFont);
-            title.setAlignment(Paragraph.ALIGN_CENTER);
-            title.setSpacingAfter(5);
-            document.add(title);
+            // ================= Cover Page =================
+            Paragraph appName = new Paragraph("🚀 Commercio", titleFont);
+            appName.setAlignment(Paragraph.ALIGN_CENTER);
+            appName.setSpacingAfter(4);
+            document.add(appName);
 
-            Paragraph subtitle = new Paragraph(
-                    "Generated for " + (username != null ? username : "Guest") + " on " + timestamp, subtitleFont);
-            subtitle.setAlignment(Paragraph.ALIGN_CENTER);
-            subtitle.setSpacingAfter(20);
-            document.add(subtitle);
+            Paragraph tagline = new Paragraph("Local Business Discovery — Impact Report",
+                    new Font(Font.HELVETICA, 14, Font.ITALIC, Color.GRAY));
+            tagline.setAlignment(Paragraph.ALIGN_CENTER);
+            tagline.setSpacingAfter(20);
+            document.add(tagline);
 
-            // ================= Summary Stats =================
+            PdfPTable coverRule = new PdfPTable(1);
+            coverRule.setWidthPercentage(100);
+            PdfPCell ruleCell = new PdfPCell(new Phrase(""));
+            ruleCell.setBackgroundColor(PRIMARY_COLOR);
+            ruleCell.setFixedHeight(3);
+            ruleCell.setBorder(PdfPCell.NO_BORDER);
+            coverRule.addCell(ruleCell);
+            document.add(coverRule);
+
+            Paragraph coverMeta = new Paragraph(
+                    "\nGenerated for: " + (username != null ? username : "Guest") +
+                    "\nDate: " + timestamp +
+                    "\nPowered by Commercio — FBLA Business Boost",
+                    subtitleFont);
+            coverMeta.setAlignment(Paragraph.ALIGN_CENTER);
+            coverMeta.setSpacingAfter(30);
+            document.add(coverMeta);
+
             Map<String, Long> catCount = favorites.stream()
                     .collect(Collectors.groupingBy(Business::getCategory, Collectors.counting()));
             double avgRating = favorites.stream().mapToDouble(Business::getRating).average().orElse(0);
@@ -98,11 +126,48 @@ public class ReportGenerator {
             statsTable.addCell(createStatCell("Businesses Supported", String.valueOf(favorites.size()), tableBodyFont,
                     sectionFont));
             statsTable.addCell(
-                    createStatCell("Average Rating", String.format("%.1f", avgRating), tableBodyFont, sectionFont));
+                    createStatCell("Average Rating", String.format("%.1f ★", avgRating), tableBodyFont, sectionFont));
             statsTable.addCell(
                     createStatCell("Categories Explored", String.valueOf(catCount.size()), tableBodyFont, sectionFont));
 
             document.add(statsTable);
+
+            // ================= Economic Impact Section =================
+            int estimatedJobs = (int) Math.round(favorites.size() * 4.7);
+
+            PdfPTable impactTable = new PdfPTable(1);
+            impactTable.setWidthPercentage(100);
+            impactTable.setSpacingBefore(5);
+            impactTable.setSpacingAfter(20);
+
+            PdfPCell impactCell = new PdfPCell();
+            impactCell.setBackgroundColor(HEADER_BG);
+            impactCell.setBorderColor(PRIMARY_COLOR);
+            impactCell.setBorderWidth(2);
+            impactCell.setPadding(16);
+
+            Font impactNumFont  = new Font(Font.HELVETICA, 24, Font.BOLD, PRIMARY_COLOR);
+            Font impactTextFont = new Font(Font.HELVETICA, 11, Font.NORMAL, TEXT_DARK);
+            Font impactSmallFont = new Font(Font.HELVETICA, 9, Font.ITALIC, Color.GRAY);
+
+            Paragraph impactHeading = new Paragraph("🏪 Economic Impact",
+                    new Font(Font.HELVETICA, 14, Font.BOLD, TEXT_DARK));
+            impactHeading.setSpacingAfter(6);
+
+            Paragraph impactLine = new Paragraph(
+                    "Your " + favorites.size() + " favorited businesses support an estimated  ", impactTextFont);
+            impactLine.add(new Phrase(estimatedJobs + " local jobs", impactNumFont));
+            impactLine.setSpacingAfter(4);
+
+            Paragraph impactSource = new Paragraph(
+                    "Estimate based on U.S. Small Business Administration average of 4.7 employees per small business.",
+                    impactSmallFont);
+
+            impactCell.addElement(impactHeading);
+            impactCell.addElement(impactLine);
+            impactCell.addElement(impactSource);
+            impactTable.addCell(impactCell);
+            document.add(impactTable);
 
             // ================= Business Table =================
             Paragraph tableTitle = new Paragraph("Favorited Businesses", sectionFont);

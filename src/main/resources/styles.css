@@ -1,3 +1,22 @@
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Regular.otf');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Medium.otf');
+    font-weight: 500;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Bold.otf');
+    font-weight: 700;
+    font-style: normal;
+}
+
 /* ===================================================================
    Commercio - Light Theme
    Palette: Lavender (#D8D0E8, #E8E0F5), White (#FFFFFF, #F8F7FA),
@@ -7,8 +26,8 @@
 /* ==================== Root and Global Styles ==================== */
 
 .root {
-    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     -fx-font-size: 13px;
     font-size: 13px;
     -fx-background-color: #F8F7FA;
@@ -305,18 +324,30 @@
 }
 
 .badge-food {
-    -fx-background-color: #5BA08C;
-    background-color: #5BA08C;
+    -fx-background-color: #20C997;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
 }
 
 .badge-retail {
-    -fx-background-color: #8B7BB8;
-    background-color: #8B7BB8;
+    -fx-background-color: #FD7E14;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
 }
 
 .badge-services {
-    -fx-background-color: #6BAF9C;
-    background-color: #6BAF9C;
+    -fx-background-color: #FA5252;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
 }
 
 .card-price {
@@ -1010,4 +1041,238 @@
 .text-area:focused {
     -fx-border-color: #5BA08C;
     border-color: #5BA08C;
+}
+
+/* ==================== Skeleton Loading ==================== */
+.skeleton-card {
+    -fx-background-color: #F0EEF5;
+    -fx-background-radius: 16;
+    -fx-pref-width: 260px;
+    -fx-pref-height: 240px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+.skeleton-image {
+    -fx-background-color: linear-gradient(to right, #E8E5F0, #D8D0E8, #E8E5F0);
+    -fx-background-radius: 12 12 0 0;
+    -fx-pref-height: 160px;
+    -fx-pref-width: 260px;
+}
+.skeleton-line {
+    -fx-background-color: linear-gradient(to right, #E8E5F0, #D8D0E8, #E8E5F0);
+    -fx-background-radius: 4;
+    -fx-pref-height: 14px;
+    -fx-max-width: 220px;
+}
+.skeleton-line-short {
+    -fx-background-color: linear-gradient(to right, #E8E5F0, #D8D0E8, #E8E5F0);
+    -fx-background-radius: 4;
+    -fx-pref-height: 12px;
+    -fx-max-width: 140px;
+}
+
+/* ==================== Empty State ==================== */
+.empty-state-container {
+    -fx-alignment: center;
+    -fx-spacing: 12;
+    -fx-padding: 60 40;
+}
+.empty-state-icon {
+    -fx-font-size: 52px;
+}
+.empty-state-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #3D3555;
+}
+.empty-state-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #888;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* ==================== Recommendation Explainability ==================== */
+.rec-why-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: #5BA08C;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+.rec-tag-highlight {
+    -fx-text-fill: #4A9079;
+    -fx-font-weight: bold;
+}
+
+/* ==================== Local Jobs Impact Banner ==================== */
+.jobs-impact-banner {
+    -fx-background-color: linear-gradient(to right, #5BA08C, #4A9079);
+    -fx-background-radius: 12;
+    -fx-padding: 16 24;
+    -fx-spacing: 16;
+    -fx-alignment: center-left;
+}
+.jobs-impact-number {
+    -fx-text-fill: white;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+.jobs-impact-label {
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+.jobs-impact-emoji {
+    -fx-font-size: 32px;
+}
+
+/* ==================== Review Cards ==================== */
+.review-card {
+    -fx-background-color: #F8F7FA;
+    -fx-background-radius: 10;
+    -fx-border-color: #E8E0F5;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-padding: 10 12;
+    -fx-spacing: 4;
+}
+.review-stars {
+    -fx-font-size: 13px;
+    -fx-text-fill: #F59E0B;
+}
+.review-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #3D3555;
+    -fx-wrap-text: true;
+}
+.review-timestamp {
+    -fx-font-size: 10px;
+    -fx-text-fill: #999;
+}
+.review-count-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #5BA08C;
+    -fx-font-weight: bold;
+}
+
+/* ==================== Static Map ==================== */
+.detail-map-image {
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 6, 0, 0, 2);
+}
+
+/* ==================== Onboarding Wizard ==================== */
+.onboarding-root {
+    -fx-background-color: linear-gradient(to bottom right, #5BA08C, #D8D0E8);
+    -fx-alignment: center;
+    -fx-spacing: 20;
+    -fx-padding: 40;
+}
+.onboarding-card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 20, 0, 0, 6);
+    -fx-padding: 40 50;
+    -fx-spacing: 20;
+    -fx-alignment: center;
+    -fx-pref-width: 420;
+    -fx-pref-height: 380;
+}
+.onboarding-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D2640;
+    -fx-text-alignment: center;
+}
+.onboarding-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+.onboarding-dot {
+    -fx-background-color: #D8D0E8;
+    -fx-background-radius: 50;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-min-width: 10;
+    -fx-min-height: 10;
+}
+.onboarding-dot-active {
+    -fx-background-color: #5BA08C;
+    -fx-background-radius: 50;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-min-width: 10;
+    -fx-min-height: 10;
+}
+.onboarding-next-btn {
+    -fx-background-color: #5BA08C;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20;
+    -fx-padding: 10 40;
+    -fx-cursor: hand;
+}
+.onboarding-next-btn:hover {
+    -fx-background-color: #4A9079;
+}
+.onboarding-skip-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaa;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+.onboarding-category-toggle {
+    -fx-background-color: #F0EEF5;
+    -fx-text-fill: #3D3555;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+}
+.onboarding-category-toggle:selected {
+    -fx-background-color: #5BA08C;
+    -fx-text-fill: white;
+}
+.onboarding-zip-field {
+    -fx-background-color: #F8F7FA;
+    -fx-border-color: #D8D0E8;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16;
+    -fx-font-size: 16px;
+    -fx-text-fill: #3D3555;
+    -fx-pref-width: 280;
+}
+.onboarding-zip-field:focused {
+    -fx-border-color: #5BA08C;
+}
+
+/* ==================== Live Filter Search ==================== */
+.live-search-field {
+    -fx-background-color: white;
+    -fx-border-color: #D8D0E8;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 7 16;
+    -fx-font-size: 12px;
+    -fx-text-fill: #3D3555;
+    -fx-prompt-text-fill: #aaa;
+    -fx-pref-width: 180;
+}
+.live-search-field:focused {
+    -fx-border-color: #5BA08C;
+    -fx-border-width: 2;
+}
+
+/* ==================== Distance Label ==================== */
+.distance-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5BA08C;
+    -fx-font-weight: bold;
 }

@@ -77,7 +77,26 @@ public class BusinessFetcher {
     // Load API Key securely from environment variable
     private static final String GOOGLE_PLACES_API_KEY = System.getenv("GOOGLE_PLACES_API_KEY");
 
+    /**
+     * Fetches businesses near the given ZIP code with a default 2km radius.
+     *
+     * @param zipCode 5-digit US ZIP code
+     * @return observable list of local businesses
+     * @throws Exception on API error or invalid ZIP
+     */
     public static ObservableList<Business> fetchBusinessesByZipCode(String zipCode) throws Exception {
+        return fetchBusinessesByZipCode(zipCode, 2000);
+    }
+
+    /**
+     * Fetches businesses near the given ZIP code within a specified radius.
+     *
+     * @param zipCode      5-digit US ZIP code
+     * @param radiusMeters search radius in metres (e.g. 500, 1000, 2000, 5000)
+     * @return observable list of local businesses
+     * @throws Exception on API error or invalid ZIP
+     */
+    public static ObservableList<Business> fetchBusinessesByZipCode(String zipCode, int radiusMeters) throws Exception {
         ObservableList<Business> businesses = FXCollections.observableArrayList();
 
         // Reset image indices for fresh search
@@ -110,16 +129,16 @@ public class BusinessFetcher {
         String placeName = place.optString("place name", "");
         String state = place.optString("state abbreviation", "");
 
-        // 2. Get businesses around this lat/lon using Overpass API
+        // 2. Get businesses around this lat/lon using Overpass API (with configurable radius)
         String query = String.format(
                 "[out:json][timeout:15];" +
                         "(" +
-                        "node(around:2000,%f,%f)[\"amenity\"~\"restaurant|cafe|fast_food|bar\"];" +
-                        "node(around:2000,%f,%f)[\"shop\"];" +
-                        "node(around:2000,%f,%f)[\"leisure\"=\"fitness_centre\"];" +
+                        "node(around:%d,%f,%f)[\"amenity\"~\"restaurant|cafe|fast_food|bar\"];" +
+                        "node(around:%d,%f,%f)[\"shop\"];" +
+                        "node(around:%d,%f,%f)[\"leisure\"=\"fitness_centre\"];" +
                         ");" +
                         "out 40;",
-                lat, lon, lat, lon, lat, lon);
+                radiusMeters, lat, lon, radiusMeters, lat, lon, radiusMeters, lat, lon);
 
         String overpassUrlStr = "https://overpass-api.de/api/interpreter?data=" + URLEncoder.encode(query, "UTF-8");
         URL overpassUrl = URI.create(overpassUrlStr).toURL();
@@ -181,6 +200,10 @@ public class BusinessFetcher {
 
                     Business b = new Business(name, category, rating);
                     b.setDescription(description);
+
+                    // Store lat/lon from OSM node for static map thumbnail
+                    b.setLatitude(node.optDouble("lat", 0.0));
+                    b.setLongitude(node.optDouble("lon", 0.0));
 
                     // Fetch real image if API key is set, otherwise fall back to stock image
                     String realImageUrl = fetchGooglePlacePhoto(name, lat, lon);

@@ -109,4 +109,82 @@ public class SessionManager {
         int currentCount = getReviewCount();
         prefs.putInt(REVIEW_COUNT_PREFIX + user, currentCount + 1);
     }
+
+    // ==================== Onboarding ====================
+
+    private static final String ONBOARDING_KEY = "onboarding_complete";
+
+    /**
+     * Returns true if the current user has already completed the onboarding wizard.
+     *
+     * @return true if onboarding is done (or no user is logged in)
+     */
+    public static boolean isOnboardingComplete() {
+        String user = getCurrentUser();
+        if (user == null) return true; // No user — skip onboarding
+        return prefs.getBoolean(ONBOARDING_KEY + "_" + user, false);
+    }
+
+    /**
+     * Marks onboarding as complete for the current user.
+     * After this, the wizard will never be shown again for this account.
+     */
+    public static void markOnboardingComplete() {
+        String user = getCurrentUser();
+        if (user != null) {
+            prefs.putBoolean(ONBOARDING_KEY + "_" + user, true);
+        }
+    }
+
+    // ==================== Preferred ZIP & Categories ====================
+
+    private static final String PREF_ZIP_KEY = "preferred_zip";
+    private static final String PREF_CATEGORIES_KEY = "preferred_categories";
+
+    /**
+     * Returns the ZIP code the user entered during onboarding, or empty string.
+     *
+     * @return preferred ZIP code string
+     */
+    public static String getPreferredZip() {
+        String user = getCurrentUser();
+        if (user == null) return "";
+        return prefs.get(PREF_ZIP_KEY + "_" + user, "");
+    }
+
+    /**
+     * Saves the user's preferred ZIP code (set during onboarding).
+     *
+     * @param zip the ZIP code to save
+     */
+    public static void setPreferredZip(String zip) {
+        String user = getCurrentUser();
+        if (user != null && zip != null) {
+            prefs.put(PREF_ZIP_KEY + "_" + user, zip.trim());
+        }
+    }
+
+    /**
+     * Returns the pipe-separated list of preferred category names selected during
+     * onboarding, or empty string if none were chosen.
+     *
+     * @return pipe-separated categories, e.g. "Food|Retail"
+     */
+    public static String getPreferredCategories() {
+        String user = getCurrentUser();
+        if (user == null) return "";
+        return prefs.get(PREF_CATEGORIES_KEY + "_" + user, "");
+    }
+
+    /**
+     * Saves the user's preferred categories (set during onboarding).
+     *
+     * @param categories pipe-separated category names, e.g. "Food|Retail"
+     */
+    public static void setPreferredCategories(String categories) {
+        String user = getCurrentUser();
+        if (user != null && categories != null) {
+            prefs.put(PREF_CATEGORIES_KEY + "_" + user, categories);
+        }
+    }
 }

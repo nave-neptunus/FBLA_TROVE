@@ -26,11 +26,15 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="search-bar-container">
                     <TextField fx:id="zipCodeField" promptText="Enter zip code..." prefWidth="180" 
-                               styleClass="search-field"/>
-                    <Button text="🔍 Search" onAction="#handleZipSearch" styleClass="search-button"/>
+                               styleClass="search-field"
+                               accessibleText="ZIP code search field"/>
+                    <Button text="🔍 Search" onAction="#handleZipSearch" styleClass="search-button"
+                            accessibleText="Search for local businesses by ZIP code"/>
                     <Button fx:id="themeToggleButton" text="🌙" onAction="#handleThemeToggle" 
-                            styleClass="theme-toggle-button"/>
-                    <Button text="🚪 Logout" onAction="#handleLogout" styleClass="theme-toggle-button"/>
+                            styleClass="theme-toggle-button"
+                            accessibleText="Toggle dark mode"/>
+                    <Button text="🚪 Logout" onAction="#handleLogout" styleClass="theme-toggle-button"
+                            accessibleText="Log out of Commercio"/>
                 </HBox>
             </HBox>
             <padding>
@@ -54,7 +58,8 @@
                                     <Font name="System Bold" size="16"/>
                                 </font>
                             </Label>
-                            <ListView fx:id="favoritesList" VBox.vgrow="ALWAYS"/>
+                            <ListView fx:id="favoritesList" VBox.vgrow="ALWAYS"
+                                      accessibleText="List of favorited businesses"/>
                             <padding>
                                 <Insets top="15" right="12" bottom="15" left="12"/>
                             </padding>
@@ -64,14 +69,26 @@
                     <!-- Center: Card Grid -->
                     <center>
                         <VBox spacing="0">
-                            <!-- Category Chips -->
-                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="category-chips">
+                            <!-- Filter/Search Toolbar -->
+                            <HBox spacing="8" alignment="CENTER_LEFT" styleClass="category-chips">
                                 <padding>
                                     <Insets top="10" right="20" bottom="10" left="20"/>
                                 </padding>
-                                <ComboBox fx:id="categoryFilter" prefWidth="130" styleClass="category-combo"/>
+                                <ComboBox fx:id="categoryFilter" prefWidth="120" styleClass="category-combo"
+                                          accessibleText="Filter businesses by category"/>
+                                <!-- Live client-side search -->
+                                <TextField fx:id="liveSearchField" promptText="🔎 Filter results..."
+                                           styleClass="live-search-field"
+                                           accessibleText="Live filter businesses by name or keyword"/>
                                 <Region HBox.hgrow="ALWAYS"/>
-                                <Button text="⬇ Sort by Rating" onAction="#handleSortByRating" styleClass="sort-button"/>
+                                <!-- Distance Slider -->
+                                <Label fx:id="distanceLabel" text="Within 2km" styleClass="distance-label"/>
+                                <Slider fx:id="distanceSlider" min="0" max="3" value="1"
+                                        majorTickUnit="1" minorTickCount="0" snapToTicks="true"
+                                        showTickMarks="false" prefWidth="90"
+                                        accessibleText="Search radius slider"/>
+                                <Button text="⬇ Rating" onAction="#handleSortByRating" styleClass="sort-button"
+                                        accessibleText="Sort businesses by rating descending"/>
                             </HBox>
                             
                             <!-- Inline Result Banner (hidden by default) -->
@@ -81,7 +98,8 @@
                                     <Insets top="8" right="12" bottom="8" left="12"/>
                                 </padding>
                                 <Label fx:id="resultBannerLabel" wrapText="true" HBox.hgrow="ALWAYS"/>
-                                <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"/>
+                                <Button text="✕" onAction="#hideResultBanner" styleClass="banner-close-button"
+                                        accessibleText="Close notification banner"/>
                             </HBox>
 
                             <!-- Business Card Grid -->
@@ -110,38 +128,69 @@
                         </VBox>
                     </center>
                     
-                    <!-- Right: Details Pane -->
+                    <!-- Right: Detail Pane -->
                     <right>
                         <ScrollPane fitToWidth="true" styleClass="detail-scroll-pane" prefWidth="320">
-                            <VBox styleClass="detail-pane" spacing="12">
-                                <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="180" preserveRatio="false"
-                                           styleClass="detail-image"/>
+                            <VBox styleClass="detail-pane" spacing="10">
+                                <!-- Business image -->
+                                <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="160"
+                                           preserveRatio="false" styleClass="detail-image"/>
+                                <!-- Static map thumbnail -->
+                                <ImageView fx:id="mapImageView" fitWidth="290" fitHeight="110"
+                                           preserveRatio="false" styleClass="detail-map-image"
+                                           managed="false" visible="false"/>
+                                <!-- Business name -->
                                 <Label fx:id="selectedBusinessLabel" text="Select a business" 
                                        styleClass="detail-title" wrapText="true">
                                     <font>
                                         <Font name="System Bold" size="16"/>
                                     </font>
                                 </Label>
+                                <!-- Description -->
                                 <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
                                     <font>
                                         <Font size="12"/>
                                     </font>
                                 </Label>
+                                <!-- Contact info -->
                                 <VBox spacing="4" styleClass="contact-info-box">
-                                    <Label fx:id="businessPhoneLabel" text="Phone: Not available" styleClass="detail-contact-info"/>
-                                    <Label fx:id="businessWebsiteLabel" text="Website: Not available" styleClass="detail-contact-info" wrapText="true"/>
-                                    <Label fx:id="businessHoursLabel" text="Hours: Not available" styleClass="detail-contact-info" wrapText="true"/>
+                                    <Label fx:id="businessPhoneLabel" text="Phone: Not available"
+                                           styleClass="detail-contact-info"
+                                           accessibleText="Business phone number"/>
+                                    <Label fx:id="businessWebsiteLabel" text="Website: Not available"
+                                           styleClass="detail-contact-info" wrapText="true"
+                                           accessibleText="Business website"/>
+                                    <Label fx:id="businessHoursLabel" text="Hours: Not available"
+                                           styleClass="detail-contact-info" wrapText="true"
+                                           accessibleText="Business opening hours"/>
                                 </VBox>
                                 <Separator/>
+                                <!-- Deals -->
                                 <Label text="🔥 Current Deals" styleClass="deals-header">
                                     <font>
                                         <Font name="System Bold" size="14"/>
                                     </font>
                                 </Label>
-                                <ListView fx:id="dealsPane" styleClass="deals-list" prefHeight="200" maxHeight="250"/>
+                                <ListView fx:id="dealsPane" styleClass="deals-list" prefHeight="120" maxHeight="140"/>
+                                <Separator/>
+                                <!-- Reviews section -->
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="💬 Reviews" styleClass="deals-header">
+                                        <font><Font name="System Bold" size="14"/></font>
+                                    </Label>
+                                    <Label fx:id="reviewCountLabel" text="" styleClass="review-count-label"/>
+                                </HBox>
+                                <ScrollPane fitToWidth="true" prefHeight="180" maxHeight="220"
+                                            styleClass="card-scroll-pane">
+                                    <VBox fx:id="reviewsContainer" spacing="8">
+                                        <padding><Insets top="4" right="4" bottom="4" left="4"/></padding>
+                                    </VBox>
+                                </ScrollPane>
+                                <!-- Action buttons -->
                                 <HBox spacing="10" alignment="CENTER">
                                     <Button text="📝 Add Review" onAction="#handleAddReview" 
-                                            styleClass="action-button" prefWidth="140">
+                                            styleClass="action-button" prefWidth="140"
+                                            accessibleText="Write a review for this business">
                                         <font>
                                             <Font name="System Bold" size="12"/>
                                         </font>
@@ -174,6 +223,21 @@
                         
                         <Separator/>
                         
+                        <!-- Local Jobs Impact Banner -->
+                        <HBox fx:id="jobsImpactBanner" styleClass="jobs-impact-banner" spacing="20"
+                              alignment="CENTER_LEFT" managed="false" visible="false">
+                            <Label text="🏪" styleClass="jobs-impact-emoji"/>
+                            <VBox spacing="2">
+                                <HBox spacing="6" alignment="CENTER_LEFT">
+                                    <Label text="Your favorites support an estimated" styleClass="jobs-impact-label"/>
+                                    <Label fx:id="jobsCountLabel" text="0" styleClass="jobs-impact-number"/>
+                                    <Label text="local jobs" styleClass="jobs-impact-label"/>
+                                </HBox>
+                                <Label text="Based on the U.S. SBA avg. of 4.7 employees per small business"
+                                       style="-fx-text-fill: rgba(255,255,255,0.65); -fx-font-size: 11px;"/>
+                            </VBox>
+                        </HBox>
+
                         <!-- Stats Cards Row -->
                         <HBox spacing="20" alignment="CENTER">
                             <VBox styleClass="stat-card, stat-card-purple" alignment="CENTER" spacing="4" HBox.hgrow="ALWAYS">
@@ -226,8 +290,9 @@
                         
                         <!-- Generate Report Button -->
                         <HBox alignment="CENTER">
-                            <Button text="📄 Generate HTML Report" onAction="#handleGenerateReport" 
-                                    styleClass="action-button" prefWidth="250" prefHeight="45">
+                            <Button text="📄 Generate PDF Report" onAction="#handleGenerateReport" 
+                                    styleClass="action-button" prefWidth="250" prefHeight="45"
+                                    accessibleText="Generate a PDF report of your favorited businesses">
                                 <font>
                                     <Font name="System Bold" size="14"/>
                                 </font>
@@ -237,9 +302,7 @@
                 </ScrollPane>
             </Tab>
 
-
-            
-            <!-- ==================== TAB 4: SMART SEARCH ==================== -->
+            <!-- ==================== TAB 3: SMART SEARCH ==================== -->
             <Tab text="🔍 Smart Search" styleClass="search-tab">
                 <VBox spacing="15">
                     <padding>
@@ -256,8 +319,10 @@
                     
                     <HBox spacing="10" alignment="CENTER_LEFT" styleClass="smart-search-bar">
                         <TextField fx:id="smartSearchField" promptText="Type to search... (e.g. pizza, #budget, #cozy)" 
-                                   prefWidth="500" styleClass="search-field" HBox.hgrow="ALWAYS"/>
-                        <Button text="Search" onAction="#handleSmartSearch" styleClass="search-button"/>
+                                   prefWidth="500" styleClass="search-field" HBox.hgrow="ALWAYS"
+                                   accessibleText="Smart search field for businesses by name, tag, or category"/>
+                        <Button text="Search" onAction="#handleSmartSearch" styleClass="search-button"
+                                accessibleText="Run smart search"/>
                     </HBox>
                     
                     <!-- Tag Cloud -->

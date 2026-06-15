@@ -168,25 +168,28 @@ public class SupabaseClient {
     }
 
     /**
-     * Authenticates an existing user.
-     * 
+     * Authenticates an existing user using bcrypt verification.
+     *
+     * <p>
+     * Since bcrypt hashes cannot be compared directly in SQL (each hash is unique
+     * even for the same password due to salting), we fetch the stored hash by
+     * username and verify client-side using {@code BCrypt.checkpw}.
+     * </p>
+     *
      * @param username The username
      * @param password The plaintext password
      * @return true if credentials match, false otherwise
      */
     public static boolean authenticateUser(String username, String password) {
-        String hashedPassword = PasswordHasher.hashPassword(password);
-        if (hashedPassword == null)
-            return false;
+        if (username == null || password == null) return false;
 
         try {
             String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
-            String encodedPassword = URLEncoder.encode(hashedPassword, StandardCharsets.UTF_8.toString());
 
-            // Query exact match for username AND password_hash
+            // Fetch only the password_hash for this username
             URL url = URI
-                    .create(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername + "&password_hash=eq."
-                            + encodedPassword + "&select=id")
+                    .create(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername
+                            + "&select=password_hash")
                     .toURL();
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -197,17 +200,21 @@ public class SupabaseClient {
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String inputLine;
                 StringBuilder response = new StringBuilder();
-
+                String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
 
                 JSONArray jsonArray = new JSONArray(response.toString());
-                // If the array is not empty, a matching row was found!
-                return jsonArray.length() > 0;
+                if (jsonArray.length() == 0) {
+                    return false; // Username not found
+                }
+
+                String storedHash = jsonArray.getJSONObject(0).optString("password_hash", "");
+                // Verify using bcrypt client-side
+                return PasswordHasher.verifyPassword(password, storedHash);
             }
         } catch (Exception e) {
             System.err.println("Authentication failed: " + e.getMessage());
