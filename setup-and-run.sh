@@ -88,7 +88,7 @@ mkdir -p out/production/classes
 javac -d out/production/classes \
       --module-path lib/javafx-sdk-21.0.1/lib \
       --add-modules javafx.controls,javafx.fxml,javafx.web \
-      -cp lib/json-20240303.jar:lib/openpdf-1.3.30.jar \
+      -cp lib/json-20240303.jar:lib/openpdf-1.3.30.jar:lib/jbcrypt-0.4.jar \
       $(find src/main/java -name "*.java")
 
 if [ $? -eq 0 ]; then
@@ -117,5 +117,5 @@ fi
 # Run the application
 java --module-path lib/javafx-sdk-21.0.1/lib \
      --add-modules javafx.controls,javafx.fxml,javafx.web \
-     -cp out/production/classes:lib/json-20240303.jar:lib/openpdf-1.3.30.jar \
+     -cp out/production/classes:lib/json-20240303.jar:lib/openpdf-1.3.30.jar:lib/jbcrypt-0.4.jar \
      com.fbla.businessboost.Main
