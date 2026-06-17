@@ -90,7 +90,7 @@
             </font>
         </Button>
         <Button text="Skip" onAction="#handleSkipCaptcha" 
-                style="-fx-background-color: #FFDE59; -fx-text-fill: black; -fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 4; -fx-background-radius: 4;" prefWidth="90">
+                styleClass="skip-captcha-btn" prefWidth="90">
             <font>
                 <Font name="System Bold" size="13"/>
             </font>

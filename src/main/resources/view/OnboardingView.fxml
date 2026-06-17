@@ -55,7 +55,7 @@
                    styleClass="onboarding-zip-field" maxWidth="280">
             <font><Font size="16"/></font>
         </TextField>
-        <Label fx:id="zipErrorLabel" text="" style="-fx-text-fill: #FA5252; -fx-font-size: 12px;" managed="false" visible="false"/>
+        <Label fx:id="zipErrorLabel" text="" styleClass="onboarding-error-label" managed="false" visible="false"/>
         <VBox spacing="10" alignment="CENTER">
             <Button text="Continue →" onAction="#handleStep2Next" styleClass="onboarding-next-btn" prefWidth="200">
                 <font><Font name="System Bold" size="14"/></font>

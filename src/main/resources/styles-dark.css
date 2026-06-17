@@ -18,901 +18,821 @@
 }
 
 /* ===================================================================
-   Commercio - Dark Theme
-   Palette: Deep purple (#1A1625, #251F33), Muted lavender (#352D45),
-            Coastal green (#5BA08C, #4A9079)
+   Commercio - Premium Dark Theme (Apple Dark HIG Inspired)
+   Palette: Space-Black (#09090B), Dark Charcoal (#18181B), 
+            Zinc Border (#27272A), Bright White (#FAFAFA),
+            Zinc Gray (#A1A1AA), Commercio Vibrant Teal (#14B8A6, #0D9488)
    =================================================================== */
 
 /* ==================== Root and Global Styles ==================== */
-
 .root {
-    -fx-font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -fx-font-family: 'Inter', -apple-system, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     -fx-font-size: 13px;
     font-size: 13px;
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-text-fill: #FAFAFA;
 }
 
-/* ==================== Header Section ==================== */
-
+/* ==================== Header Section (macOS Unified Dark Titlebar) ==================== */
 .header {
-    -fx-background-color: linear-gradient(to right, #251F33, #1E3A32);
-    background-color: linear-gradient(to right, #251F33, #1E3A32);
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 0 0 1 0;
     border-width: 0 0 1 0;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 2);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 2);
 }
 
 .app-title {
-    -fx-text-fill: #E8E0F5;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+    -fx-font-size: 24px;
+    font-size: 24px;
+    -fx-letter-spacing: -0.5px;
 }
 
-/* ==================== Search Bar ==================== */
+/* ==================== Search & Header Controls ==================== */
+.search-bar-container {
+    -fx-alignment: CENTER_RIGHT;
+}
 
 .search-field {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+    -fx-border-color: transparent;
+    border-color: transparent;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 20;
-    border-radius: 20;
-    -fx-background-radius: 20;
-    -fx-padding: 8 16;
-    padding: 8 16;
+    -fx-border-radius: 10;
+    border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8 14;
+    padding: 8 14;
     -fx-font-size: 13px;
     font-size: 13px;
-    -fx-text-fill: #E0DCE8;
-    -fx-prompt-text-fill: #666;
+    -fx-text-fill: #FAFAFA;
+    -fx-prompt-text-fill: #71717A;
 }
 
 .search-field:focused {
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
-    -fx-border-width: 2;
-    border-width: 2;
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
 }
 
 .search-button {
-    -fx-background-color: #5BA08C;
-    background-color: #5BA08C;
-    -fx-text-fill: white;
-    -fx-background-radius: 20;
-    -fx-padding: 8 20;
-    padding: 8 20;
+    -fx-background-color: #14B8A6;
+    background-color: #14B8A6;
+    -fx-text-fill: #09090B;
+    -fx-background-radius: 10;
+    -fx-padding: 8 18;
+    padding: 8 18;
     -fx-cursor: hand;
     cursor: hand;
-    -fx-font-weight: bold;
-    font-weight: bold;
+    -fx-font-weight: 700;
+    font-weight: 700;
+    -fx-font-size: 13px;
+    font-size: 13px;
 }
 
 .search-button:hover {
-    -fx-background-color: #4A9079;
-    background-color: #4A9079;
+    -fx-background-color: #2DD4BF;
+    background-color: #2DD4BF;
 }
-
-/* ==================== Theme Toggle ==================== */
 
 .theme-toggle-button {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-border-width: 1;
-    border-width: 1;
-    -fx-border-radius: 20;
-    border-radius: 20;
-    -fx-background-radius: 20;
-    -fx-padding: 6 12;
-    padding: 6 12;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+    -fx-text-fill: #FAFAFA;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-radius: 10;
+    border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8 14;
+    padding: 8 14;
     -fx-cursor: hand;
     cursor: hand;
+    -fx-font-size: 13px;
+    font-size: 13px;
 }
 
-/* ==================== TabPane ==================== */
+.theme-toggle-button:hover {
+    -fx-background-color: #3F3F46;
+    background-color: #3F3F46;
+}
 
+/* ==================== TabPane (macOS Segmented Switcher) ==================== */
 .main-tab-pane {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
 }
 
 .tab-pane>.tab-header-area {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-padding: 0 20;
+    padding: 0 20;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-width: 0 0 1 0;
 }
 
 .tab-pane>.tab-header-area>.tab-header-background {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
 }
 
 .tab {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #777;
-    -fx-padding: 10 20;
-    padding: 10 20;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: #71717A;
+    -fx-padding: 14 24;
+    padding: 14 24;
     -fx-font-size: 13px;
     font-size: 13px;
-    -fx-font-weight: bold;
-    font-weight: bold;
+    -fx-font-weight: 600;
+    font-weight: 600;
 }
 
 .tab:selected {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-text-fill: #5BA08C;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: #14B8A6;
 }
 
 .tab .tab-label {
-    -fx-text-fill: #777;
+    -fx-text-fill: #71717A;
 }
 
 .tab:selected .tab-label {
-    -fx-text-fill: #5BA08C;
+    -fx-text-fill: #14B8A6;
 }
 
-/* ==================== Category Chips ==================== */
-
+/* ==================== Category Chips / Toolbar ==================== */
 .category-chips {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-width: 0 0 1 0;
+    border-width: 0 0 1 0;
+    -fx-padding: 12 24;
 }
 
 .category-combo {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 16;
-    border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-padding: 4 12;
-    padding: 4 12;
-    -fx-text-fill: #E0DCE8;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5 12;
+    padding: 5 12;
+    -fx-text-fill: #FAFAFA;
 }
 
 .sort-button {
     -fx-background-color: transparent;
     background-color: transparent;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-text-fill: #FAFAFA;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 16;
-    border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-padding: 6 14;
-    padding: 6 14;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 7 14;
+    padding: 7 14;
     -fx-cursor: hand;
     cursor: hand;
+    -fx-font-size: 12px;
+    font-size: 12px;
 }
 
 .sort-button:hover {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
-    -fx-text-fill: #5BA08C;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
+    -fx-text-fill: #14B8A6;
 }
 
-/* ==================== Sidebar ==================== */
-
+/* ==================== Sidebar (macOS Source List) ==================== */
 .sidebar {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 0 1 0 0;
     border-width: 0 1 0 0;
 }
 
 .section-title {
-    -fx-text-fill: #E0DCE8;
+    -fx-text-fill: #71717A;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 8 0;
+    -fx-text-transform: uppercase;
 }
 
 /* ==================== Card Grid ==================== */
-
 .card-scroll-pane {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-background: #1A1625;
-    background: #1A1625;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-background: transparent;
+    background: transparent;
     -fx-border-width: 0;
     border-width: 0;
 }
 
-.card-scroll-pane .viewport {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+.card-scroll-pane>.viewport {
+    -fx-background-color: transparent;
+    background-color: transparent;
 }
 
 .card-grid {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: transparent;
+    background-color: transparent;
 }
 
-/* ==================== Business Card ==================== */
-
+/* ==================== Business Card (Apple App Store Cards) ==================== */
 .business-card {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
-    border-radius: 12;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    border-radius: 14;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
     -fx-cursor: hand;
     cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);
 }
 
 .business-card:hover {
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 16, 0, 0, 6);
+    -fx-border-color: #3F3F46;
+    border-color: #3F3F46;
 }
 
 .card-image-container {
-    -fx-background-radius: 12 12 0 0;
-    -fx-background-color: #352D45;
-    background-color: #352D45;
+    -fx-background-radius: 14 14 0 0;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
 }
 
 .card-info {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-background-radius: 0 0 12 12;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-background-radius: 0 0 14 14;
 }
 
 .card-title {
-    -fx-font-weight: bold;
-    font-weight: bold;
-    -fx-font-size: 14px;
-    font-size: 14px;
-    -fx-text-fill: #E0DCE8;
-}
-
-.card-category-badge {
-    -fx-background-radius: 10;
-    -fx-padding: 2 8;
-    padding: 2 8;
-    -fx-font-size: 10px;
-    font-size: 10px;
-    -fx-font-weight: bold;
-    font-weight: bold;
-    -fx-text-fill: white;
-}
-
-.badge-food {
-    -fx-background-color: #20C997;
-    -fx-text-fill: white;
-    -fx-background-radius: 12;
-    -fx-padding: 2 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-}
-
-.badge-retail {
-    -fx-background-color: #FD7E14;
-    -fx-text-fill: white;
-    -fx-background-radius: 12;
-    -fx-padding: 2 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-}
-
-.badge-services {
-    -fx-background-color: #FA5252;
-    -fx-text-fill: white;
-    -fx-background-radius: 12;
-    -fx-padding: 2 10;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 700;
+    font-weight: 700;
+    -fx-font-size: 15px;
+    font-size: 15px;
+    -fx-text-fill: #FAFAFA;
 }
 
 .card-price {
-    -fx-text-fill: #888;
+    -fx-text-fill: #A1A1AA;
     -fx-font-size: 12px;
     font-size: 12px;
 }
 
 .card-rating-stars {
-    -fx-text-fill: #D4A843;
+    -fx-text-fill: #F59E0B;
     -fx-font-size: 12px;
     font-size: 12px;
 }
 
 .card-rating-number {
-    -fx-text-fill: #E0DCE8;
-    -fx-font-weight: bold;
-    font-weight: bold;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+    font-weight: 700;
     -fx-font-size: 12px;
     font-size: 12px;
 }
 
 .card-address {
-    -fx-text-fill: #777;
-    -fx-font-size: 11px;
-    font-size: 11px;
+    -fx-text-fill: #A1A1AA;
+    -fx-font-size: 12px;
+    font-size: 12px;
 }
 
 .card-heart-button {
-    -fx-background-color: rgba(37, 31, 51, 0.9);
-    background-color: rgba(37, 31, 51, 0.9);
+    -fx-background-color: rgba(39, 39, 42, 0.85);
+    background-color: rgba(39, 39, 42, 0.85);
     -fx-background-radius: 50;
-    -fx-padding: 4 6;
-    padding: 4 6;
-    -fx-font-size: 16px;
-    font-size: 16px;
+    -fx-padding: 6 8;
+    padding: 6 8;
+    -fx-font-size: 15px;
+    font-size: 15px;
     -fx-cursor: hand;
     cursor: hand;
     -fx-border-width: 0;
     border-width: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 6, 0, 0, 1);
 }
 
-/* ==================== Detail Pane ==================== */
+.card-heart-button:hover {
+    -fx-background-color: #3F3F46;
+    background-color: #3F3F46;
+}
 
+/* ==================== Category Badges (Apple Tags) ==================== */
+.card-category-badge {
+    -fx-background-radius: 12;
+    -fx-padding: 3 10;
+    padding: 3 10;
+    -fx-font-size: 11px;
+    font-size: 11px;
+    -fx-font-weight: 700;
+    font-weight: 700;
+}
+
+.badge-food {
+    -fx-background-color: #133A26;
+    -fx-text-fill: #A3E635;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10;
+}
+
+.badge-retail {
+    -fx-background-color: #4C260D;
+    -fx-text-fill: #FB923C;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10;
+}
+
+.badge-services {
+    -fx-background-color: #172A45;
+    -fx-text-fill: #60A5FA;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10;
+}
+
+/* ==================== Detail Pane (macOS Inspector Sidebar) ==================== */
 .detail-scroll-pane {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-background: #251F33;
-    background: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-background: #18181B;
+    background: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 0 0 0 1;
     border-width: 0 0 0 1;
 }
 
 .detail-scroll-pane>.viewport {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
 }
 
 .detail-pane {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
 }
 
 .detail-title {
-    -fx-text-fill: #E0DCE8;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-size: 18px;
+    font-size: 18px;
+    -fx-font-weight: 700;
 }
 
 .detail-description {
-    -fx-text-fill: #999;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-size: 13px;
+    font-size: 13px;
+    -fx-line-spacing: 4;
 }
 
 .deals-header {
-    -fx-text-fill: #5BA08C;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
 }
 
 .deals-list {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-border-radius: 10;
+    border-radius: 10;
+    -fx-background-radius: 10;
 }
 
-/* ==================== Action Buttons ==================== */
-
+/* ==================== Action Buttons (Apple Style Pill Buttons) ==================== */
 .action-button {
-    -fx-background-color: #5BA08C;
-    background-color: #5BA08C;
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-    padding: 10 20;
+    -fx-background-color: #14B8A6;
+    background-color: #14B8A6;
+    -fx-text-fill: #09090B;
+    -fx-background-radius: 10;
+    -fx-padding: 10 24;
+    padding: 10 24;
     -fx-cursor: hand;
     cursor: hand;
-    -fx-font-weight: bold;
-    font-weight: bold;
+    -fx-font-weight: 700;
+    font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.2), 6, 0, 0, 2);
 }
 
 .action-button:hover {
-    -fx-background-color: #4A9079;
-    background-color: #4A9079;
+    -fx-background-color: #2DD4BF;
+    background-color: #2DD4BF;
+    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.35), 8, 0, 0, 3);
 }
 
 .action-button-outline {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: #14B8A6;
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
     -fx-border-width: 1.5;
     border-width: 1.5;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-padding: 10 20;
-    padding: 10 20;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    border-radius: 10;
+    -fx-padding: 10 24;
+    padding: 10 24;
     -fx-cursor: hand;
     cursor: hand;
+    -fx-font-weight: 700;
+    font-weight: 700;
 }
 
-/* ==================== ListView ==================== */
+.action-button-outline:hover {
+    -fx-background-color: #115E59;
+    background-color: #115E59;
+}
 
+/* ==================== ListView & ListCell (Source List Components) ==================== */
 .list-view {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-border-width: 1;
-    border-width: 1;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
 }
 
 .list-cell {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #E0DCE8;
-    -fx-padding: 10 12;
-    padding: 10 12;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-border-width: 0 0 1 0;
-    border-width: 0 0 1 0;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: #FAFAFA;
+    -fx-padding: 8 12;
+    padding: 8 12;
+    -fx-border-width: 0;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
 }
 
 .list-cell:odd {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: transparent;
 }
 
 .list-cell:selected {
-    -fx-background-color: #1E3A32;
-    background-color: #1E3A32;
-    -fx-text-fill: #5BA08C;
+    -fx-background-color: #115E59;
+    background-color: #115E59;
+    -fx-text-fill: #2DD4BF;
+    -fx-font-weight: 700;
 }
 
 .list-cell:hover {
-    -fx-background-color: #2A2340;
-    background-color: #2A2340;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
 }
 
 .list-cell:empty {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-border-width: 0;
-    border-width: 0;
 }
 
 /* ==================== My Impact Tab ==================== */
-
 .impact-scroll-pane {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-background: #1A1625;
-    background: #1A1625;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-background: #09090B;
+    background: #09090B;
 }
 
 .impact-scroll-pane>.viewport {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
 }
 
 .impact-content {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
 }
 
 .impact-title {
-    -fx-text-fill: #E0DCE8;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
 }
 
 .impact-subtitle {
-    -fx-text-fill: #777;
+    -fx-text-fill: #A1A1AA;
+    -fx-font-size: 14px;
+    font-size: 14px;
 }
 
 .chart-title {
-    -fx-text-fill: #E0DCE8;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
 }
 
 .stat-card {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-background-radius: 12;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-background-radius: 14;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 12;
-    border-radius: 12;
-    -fx-padding: 20;
-    padding: 20;
+    -fx-border-radius: 14;
+    border-radius: 14;
+    -fx-padding: 24;
+    padding: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);
 }
 
 .stat-card-purple {
-    -fx-background-color: #2D223B;
-    background-color: #2D223B;
-    -fx-border-color: #483361;
-    border-color: #483361;
+    -fx-background-color: #1E112F;
+    -fx-border-color: #3B0764;
 }
-
 .stat-card-purple .stat-number {
-    -fx-text-fill: #AF7AC5;
+    -fx-text-fill: #C084FC;
 }
 
 .stat-card-orange {
-    -fx-background-color: #3D2920;
-    background-color: #3D2920;
-    -fx-border-color: #63402E;
-    border-color: #63402E;
+    -fx-background-color: #2A170A;
+    -fx-border-color: #431407;
 }
-
 .stat-card-orange .stat-number {
-    -fx-text-fill: #E67E22;
+    -fx-text-fill: #FB923C;
 }
 
 .stat-card-blue {
-    -fx-background-color: #202C3D;
-    background-color: #202C3D;
-    -fx-border-color: #2E4763;
-    border-color: #2E4763;
+    -fx-background-color: #0F172A;
+    -fx-border-color: #1E3A8A;
 }
-
 .stat-card-blue .stat-number {
-    -fx-text-fill: #5DADE2;
+    -fx-text-fill: #60A5FA;
 }
 
 .stat-card-green {
-    -fx-background-color: #203D32;
-    background-color: #203D32;
-    -fx-border-color: #2E6350;
-    border-color: #2E6350;
+    -fx-background-color: #042F2E;
+    -fx-border-color: #115E59;
 }
-
 .stat-card-green .stat-number {
-    -fx-text-fill: #48C9B0;
+    -fx-text-fill: #2DD4BF;
 }
 
 .stat-number {
-    -fx-text-fill: #5BA08C;
+    -fx-text-fill: #FAFAFA;
+    -fx-letter-spacing: -1px;
 }
 
 .stat-label {
-    -fx-text-fill: #888;
+    -fx-text-fill: #A1A1AA;
     -fx-font-size: 12px;
     font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-transform: uppercase;
 }
 
 .impact-chart {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-width: 1;
+    border-width: 1;
+    -fx-border-radius: 14;
+    border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-padding: 16;
+    padding: 16;
+}
+
+/* ==================== JavaFX Chart Custom Colors (Dark) ==================== */
+.chart-bar {
+    -fx-bar-fill: #14B8A6;
+    -fx-background-color: linear-gradient(to top, #0F766E, #14B8A6);
+    -fx-background-radius: 4 4 0 0;
+}
+.default-color0.chart-bar { -fx-bar-fill: #14B8A6; -fx-background-color: linear-gradient(to top, #0F766E, #14B8A6); }
+.default-color1.chart-bar { -fx-bar-fill: #3B82F6; -fx-background-color: linear-gradient(to top, #1D4ED8, #3B82F6); }
+.default-color2.chart-bar { -fx-bar-fill: #F59E0B; -fx-background-color: linear-gradient(to top, #B45309, #F59E0B); }
+
+.chart-pie-slice {
+    -fx-border-color: #18181B;
+    -fx-border-width: 1.5;
+}
+.default-color0.chart-pie { -fx-pie-color: #14B8A6; -fx-background-color: #14B8A6; }
+.default-color1.chart-pie { -fx-pie-color: #3B82F6; -fx-background-color: #3B82F6; }
+.default-color2.chart-pie { -fx-pie-color: #EC4899; -fx-background-color: #EC4899; }
+.default-color3.chart-pie { -fx-pie-color: #F59E0B; -fx-background-color: #F59E0B; }
+.default-color4.chart-pie { -fx-pie-color: #8B5CF6; -fx-background-color: #8B5CF6; }
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: #27272A;
+    -fx-stroke-dash-array: 2 4;
+}
+.axis {
+    -fx-tick-label-fill: #71717A;
+    -fx-tick-mark-stroke: #27272A;
+    -fx-axis-label-fill: #FAFAFA;
 }
 
 /* ==================== Recommendation Section ==================== */
-
 .recommendation-section {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1 0 0 0;
     border-width: 1 0 0 0;
 }
 
 .recommendation-title {
-    -fx-text-fill: #E0DCE8;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
 }
 
 .mini-card {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-    -fx-background-radius: 10;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
+    -fx-background-color: #09090B;
+    background-color: #09090B;
+    -fx-background-radius: 12;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
     -fx-border-width: 1;
     border-width: 1;
-    -fx-border-radius: 10;
-    border-radius: 10;
+    -fx-border-radius: 12;
+    border-radius: 12;
+    -fx-cursor: hand;
+    cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 4, 0, 0, 1);
+}
+
+.mini-card:hover {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 8, 0, 0, 2);
 }
 
 /* ==================== Tag Cloud / Smart Search ==================== */
+.tag-cloud {
+    -fx-padding: 5 0;
+    padding: 5 0;
+}
 
 .tag-chip {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #8B7BB8;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-border-width: 1;
-    border-width: 1;
-    -fx-border-radius: 16;
-    border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-padding: 4 12;
-    padding: 4 12;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+    -fx-text-fill: #FAFAFA;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-radius: 14;
+    border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-padding: 5 14;
+    padding: 5 14;
     -fx-cursor: hand;
     cursor: hand;
     -fx-font-size: 11px;
     font-size: 11px;
+    -fx-font-weight: 600;
+    font-weight: 600;
 }
 
 .tag-chip:hover {
-    -fx-background-color: #352D45;
-    background-color: #352D45;
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
-    -fx-text-fill: #5BA08C;
+    -fx-background-color: #14B8A6;
+    background-color: #14B8A6;
+    -fx-text-fill: #09090B;
 }
 
-/* ==================== Inline Result Banner ==================== */
+.smart-search-bar {
+    -fx-padding: 0;
+    padding: 0;
+}
 
+/* ==================== Inline Result Banner (Apple Alert Pill - Dark) ==================== */
 .result-banner {
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    border-radius: 8;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    border-radius: 10;
     -fx-border-width: 1;
     border-width: 1;
+    -fx-margin: 10 20;
 }
 
 .result-banner-success {
-    -fx-background-color: #0F2A20;
-    background-color: #0F2A20;
-    -fx-border-color: #2D6A52;
-    border-color: #2D6A52;
+    -fx-background-color: #064E3B;
+    background-color: #064E3B;
+    -fx-border-color: #059669;
+    border-color: #059669;
 }
-
 .result-banner-success .label {
-    -fx-text-fill: #6BAF9C;
+    -fx-text-fill: #A7F3D0;
+    -fx-font-weight: 600;
 }
 
 .result-banner-warning {
-    -fx-background-color: #2A2200;
-    background-color: #2A2200;
-    -fx-border-color: #6B5200;
-    border-color: #6B5200;
+    -fx-background-color: #451A03;
+    background-color: #451A03;
+    -fx-border-color: #D97706;
+    border-color: #D97706;
 }
-
 .result-banner-warning .label {
-    -fx-text-fill: #D4A843;
+    -fx-text-fill: #FEF3C7;
+    -fx-font-weight: 600;
 }
 
 .result-banner-error {
-    -fx-background-color: #2A0F0F;
-    background-color: #2A0F0F;
-    -fx-border-color: #6B1A1A;
-    border-color: #6B1A1A;
+    -fx-background-color: #7F1D1D;
+    background-color: #7F1D1D;
+    -fx-border-color: #DC2626;
+    border-color: #DC2626;
 }
-
 .result-banner-error .label {
-    -fx-text-fill: #E88;
+    -fx-text-fill: #FEE2E2;
+    -fx-font-weight: 600;
 }
 
 .banner-close-button {
     -fx-background-color: transparent;
     background-color: transparent;
-    -fx-text-fill: #666;
+    -fx-text-fill: #A1A1AA;
     -fx-cursor: hand;
     cursor: hand;
+    -fx-font-size: 14px;
+    font-size: 14px;
+    -fx-padding: 0 4;
+    padding: 0 4;
+}
+.banner-close-button:hover {
+    -fx-text-fill: #FAFAFA;
 }
 
-/* ==================== Separator ==================== */
-
-.separator {
-    -fx-background-color: #352D45;
-    background-color: #352D45;
-}
-
-/* ==================== Scrollbar ==================== */
-
-.scroll-bar {
-    -fx-background-color: transparent;
-    background-color: transparent;
-}
-
-.scroll-bar .thumb {
-    -fx-background-color: #352D45;
-    background-color: #352D45;
-    -fx-background-radius: 4;
-}
-
-.scroll-bar .thumb:hover {
-    -fx-background-color: #4A4060;
-    background-color: #4A4060;
-}
-
-.scroll-bar .track {
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-}
-
-/* ==================== TextField & TextArea (Dark) ==================== */
-
-.text-field {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-padding: 8 12;
-    padding: 8 12;
-}
-
-.text-field:focused {
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
-    -fx-background-color: #1A1625;
-    background-color: #1A1625;
-}
-
-.text-area {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.text-area .content {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-}
-
-/* ==================== Buttons (Dark) ==================== */
-
-.primary-button {
-    -fx-background-color: #5BA08C;
-    background-color: #5BA08C;
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-    padding: 10 20;
-    -fx-cursor: hand;
-    cursor: hand;
-    -fx-font-weight: bold;
-    font-weight: bold;
-}
-
-.secondary-button {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-text-fill: #E0DCE8;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-border-width: 1.5;
-    border-width: 1.5;
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-padding: 10 20;
-    padding: 10 20;
-    -fx-cursor: hand;
-    cursor: hand;
-}
-
-/* ==================== Dialogs & Verification (Dark) ==================== */
-
-.dialog-title {
-    -fx-text-fill: #E0DCE8;
-}
-
-.field-label {
-    -fx-text-fill: #999;
-}
-
-.rating-display {
-    -fx-text-fill: #D4A843;
-}
-
-.verification-box {
-    -fx-background-color: #1E3A32;
-    background-color: #1E3A32;
-    -fx-border-color: #5BA08C;
-    border-color: #5BA08C;
-    -fx-border-width: 1.5;
-    border-width: 1.5;
-    -fx-border-radius: 8;
-    border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.bot-question {
-    -fx-text-fill: #6BAF9C;
-}
-
-.help-text {
-    -fx-text-fill: #666;
-}
-
+/* ==================== Loading & Skeleton UI ==================== */
 .loading-label {
-    -fx-text-fill: #666;
+    -fx-text-fill: #71717A;
+    -fx-font-size: 14px;
+    font-size: 14px;
+    -fx-padding: 40 0;
+    padding: 40 0;
 }
 
-/* ==================== ComboBox (Dark) ==================== */
-
-.combo-box {
-    -fx-background-color: #251F33;
-    background-color: #251F33;
-    -fx-border-color: #352D45;
-    border-color: #352D45;
-    -fx-text-fill: #E0DCE8;
-}
-
-/* ==================== Slider (Dark) ==================== */
-
-.slider .track {
-    -fx-background-color: #352D45;
-    background-color: #352D45;
-}
-
-.slider .thumb {
-    -fx-background-color: #5BA08C;
-    background-color: #5BA08C;
-}
-
-/* ==================== Sentiment Warning ==================== */
-
-.sentiment-warning {
-    -fx-background-color: #2A2200;
-    background-color: #2A2200;
-    -fx-border-color: #D4A843;
-    border-color: #D4A843;
-    -fx-border-width: 1;
-    border-width: 1;
-    -fx-border-radius: 6;
-    border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8;
-    padding: 8;
-}
-
-.sentiment-warning .label {
-    -fx-text-fill: #D4A843;
-}
-
-/* ==================== Skeleton Loading ==================== */
 .skeleton-card {
-    -fx-background-color: #2A2A3E;
-    -fx-background-radius: 16;
+    -fx-background-color: #27272A;
+    -fx-background-radius: 14;
     -fx-pref-width: 260px;
     -fx-pref-height: 240px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 2);
 }
 .skeleton-image {
-    -fx-background-color: linear-gradient(to right, #2A2A3E, #353550, #2A2A3E);
-    -fx-background-radius: 12 12 0 0;
+    -fx-background-color: linear-gradient(to right, #27272A, #3F3F46, #27272A);
+    -fx-background-radius: 14 14 0 0;
     -fx-pref-height: 160px;
     -fx-pref-width: 260px;
 }
 .skeleton-line {
-    -fx-background-color: linear-gradient(to right, #2A2A3E, #353550, #2A2A3E);
+    -fx-background-color: linear-gradient(to right, #27272A, #3F3F46, #27272A);
     -fx-background-radius: 4;
     -fx-pref-height: 14px;
     -fx-max-width: 220px;
 }
 .skeleton-line-short {
-    -fx-background-color: linear-gradient(to right, #2A2A3E, #353550, #2A2A3E);
+    -fx-background-color: linear-gradient(to right, #27272A, #3F3F46, #27272A);
     -fx-background-radius: 4;
     -fx-pref-height: 12px;
     -fx-max-width: 140px;
 }
 
-/* ==================== Empty State ==================== */
+/* ==================== Empty State Panel ==================== */
 .empty-state-container {
     -fx-alignment: center;
     -fx-spacing: 12;
@@ -923,45 +843,35 @@
 }
 .empty-state-title {
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #E8E0F5;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FAFAFA;
 }
 .empty-state-subtitle {
     -fx-font-size: 13px;
-    -fx-text-fill: #888;
+    -fx-text-fill: #A1A1AA;
     -fx-wrap-text: true;
     -fx-text-alignment: center;
 }
 
-/* ==================== Recommendation Explainability ==================== */
-.rec-why-label {
-    -fx-font-size: 10px;
-    -fx-text-fill: #5BA08C;
-    -fx-font-weight: bold;
-    -fx-wrap-text: true;
-}
-.rec-tag-highlight {
-    -fx-text-fill: #4A9079;
-    -fx-font-weight: bold;
-}
-
 /* ==================== Local Jobs Impact Banner ==================== */
 .jobs-impact-banner {
-    -fx-background-color: linear-gradient(to right, #5BA08C, #4A9079);
-    -fx-background-radius: 12;
-    -fx-padding: 16 24;
+    -fx-background-color: linear-gradient(to right, #10B981, #059669);
+    -fx-background-radius: 14;
+    -fx-padding: 18 26;
     -fx-spacing: 16;
     -fx-alignment: center-left;
 }
 .jobs-impact-number {
-    -fx-text-fill: white;
-    -fx-font-size: 36px;
-    -fx-font-weight: bold;
+    -fx-text-fill: #09090B;
+    -fx-font-size: 38px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: -1px;
 }
 .jobs-impact-label {
-    -fx-text-fill: rgba(255,255,255,0.92);
-    -fx-font-size: 13px;
+    -fx-text-fill: rgba(9, 9, 11, 0.95);
+    -fx-font-size: 14px;
     -fx-wrap-text: true;
+    -fx-font-weight: 600;
 }
 .jobs-impact-emoji {
     -fx-font-size: 32px;
@@ -969,12 +879,14 @@
 
 /* ==================== Review Cards ==================== */
 .review-card {
-    -fx-background-color: #1E1E2E;
+    -fx-background-color: #27272A;
+    background-color: #27272A;
     -fx-background-radius: 10;
-    -fx-border-color: #3A3555;
+    -fx-border-color: #3F3F46;
+    border-color: #3F3F46;
     -fx-border-width: 1;
-    -fx-border-radius: 10;
-    -fx-padding: 10 12;
+    border-width: 1;
+    -fx-padding: 12 14;
     -fx-spacing: 4;
 }
 .review-stars {
@@ -982,139 +894,402 @@
     -fx-text-fill: #F59E0B;
 }
 .review-text {
-    -fx-font-size: 12px;
-    -fx-text-fill: #E8E0F5;
+    -fx-font-size: 13px;
+    -fx-text-fill: #FAFAFA;
     -fx-wrap-text: true;
 }
 .review-timestamp {
-    -fx-font-size: 10px;
-    -fx-text-fill: #999;
+    -fx-font-size: 11px;
+    -fx-text-fill: #A1A1AA;
 }
 .review-count-label {
     -fx-font-size: 12px;
-    -fx-text-fill: #5BA08C;
-    -fx-font-weight: bold;
+    -fx-text-fill: #14B8A6;
+    -fx-font-weight: 700;
 }
 
-/* ==================== Static Map ==================== */
-.detail-map-image {
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
-}
-
-/* ==================== Onboarding Wizard ==================== */
-.onboarding-root {
-    -fx-background-color: linear-gradient(to bottom right, #5BA08C, #D8D0E8);
-    -fx-alignment: center;
-    -fx-spacing: 20;
-    -fx-padding: 40;
-}
-.onboarding-card {
-    -fx-background-color: #1a1a2e;
-    -fx-background-radius: 24;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 6);
-    -fx-padding: 40 50;
-    -fx-spacing: 20;
-    -fx-alignment: center;
-    -fx-pref-width: 420;
-    -fx-pref-height: 380;
-}
-.onboarding-title {
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #E8E0F5;
-    -fx-text-alignment: center;
-}
-.onboarding-subtitle {
-    -fx-font-size: 14px;
-    -fx-text-fill: #aaa;
-    -fx-text-alignment: center;
-    -fx-wrap-text: true;
-}
-.onboarding-dot {
-    -fx-background-color: #3A3555;
-    -fx-background-radius: 50;
-    -fx-pref-width: 10;
-    -fx-pref-height: 10;
-    -fx-min-width: 10;
-    -fx-min-height: 10;
-}
-.onboarding-dot-active {
-    -fx-background-color: #5BA08C;
-    -fx-background-radius: 50;
-    -fx-pref-width: 10;
-    -fx-pref-height: 10;
-    -fx-min-width: 10;
-    -fx-min-height: 10;
-}
-.onboarding-next-btn {
-    -fx-background-color: #5BA08C;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-background-radius: 20;
-    -fx-padding: 10 40;
-    -fx-cursor: hand;
-}
-.onboarding-next-btn:hover {
-    -fx-background-color: #4A9079;
-}
-.onboarding-skip-btn {
+/* ==================== Scrollbar Override ==================== */
+.scroll-bar {
     -fx-background-color: transparent;
-    -fx-text-fill: #666;
-    -fx-font-size: 12px;
-    -fx-cursor: hand;
+    background-color: transparent;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #3F3F46;
+    background-color: #3F3F46;
+    -fx-background-radius: 8;
+}
+.scroll-bar .thumb:hover {
+    -fx-background-color: #52525B;
+    background-color: #52525B;
+}
+.scroll-bar .track {
+    -fx-background-color: transparent;
+    background-color: transparent;
+}
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-padding: 0;
+}
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* ==================== Dialog Styles ==================== */
+.dialog-title {
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+}
+
+.field-label {
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 600;
+}
+
+.rating-display {
+    -fx-text-fill: #F59E0B;
+}
+
+.verification-box {
+    -fx-background-color: #042F2E;
+    background-color: #042F2E;
+    -fx-border-color: #115E59;
+    border-color: #115E59;
+    -fx-border-width: 1.5;
+    border-width: 1.5;
+    -fx-border-radius: 10;
+    border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.bot-question {
+    -fx-text-fill: #2DD4BF;
+    -fx-font-weight: 700;
+}
+
+.help-text {
+    -fx-text-fill: #A1A1AA;
+}
+
+/* ==================== Form Inputs (Dark Mode) ==================== */
+.combo-box {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-width: 1;
+    border-width: 1;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.combo-box .list-view {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+}
+.combo-box .list-view .list-cell {
+    -fx-padding: 8 12;
+}
+.combo-box .list-view .list-cell:selected {
+    -fx-background-color: #115E59;
+    -fx-text-fill: #2DD4BF;
+}
+
+.text-field {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    padding: 8 12;
+    -fx-text-fill: #FAFAFA;
+}
+.text-field:focused {
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
+    -fx-border-width: 1.5;
+    border-width: 1.5;
+}
+
+.text-area {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+    -fx-border-color: #27272A;
+    border-color: #27272A;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #FAFAFA;
+}
+.text-area .content {
+    -fx-background-color: #18181B;
+    background-color: #18181B;
+}
+.text-area:focused {
+    -fx-border-color: #14B8A6;
+    border-color: #14B8A6;
+}
+
+.slider .track {
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+    -fx-background-radius: 4;
+    -fx-pref-height: 6;
+}
+.slider .thumb {
+    -fx-background-color: #14B8A6;
+    background-color: #14B8A6;
+    -fx-background-radius: 20;
+    -fx-pref-width: 18;
+    -fx-pref-height: 18;
+}
+
+.separator .line {
+    -fx-background-color: #27272A;
+    background-color: #27272A;
     -fx-border-color: transparent;
 }
-.onboarding-category-toggle {
-    -fx-background-color: #251F33;
-    -fx-text-fill: #E8E0F5;
-    -fx-font-weight: bold;
-    -fx-background-radius: 12;
-    -fx-padding: 12 20;
-    -fx-cursor: hand;
-    -fx-font-size: 13px;
+
+/* ==================== Sentiment Warning ==================== */
+.sentiment-warning {
+    -fx-background-color: #451A03;
+    background-color: #451A03;
+    -fx-border-color: #D97706;
+    border-color: #D97706;
+    -fx-border-width: 1;
+    border-width: 1;
+    -fx-border-radius: 8;
+    border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    padding: 10;
 }
-.onboarding-category-toggle:selected {
-    -fx-background-color: #5BA08C;
-    -fx-text-fill: white;
-}
-.onboarding-zip-field {
-    -fx-background-color: #1E1E2E;
-    -fx-border-color: #3A3555;
-    -fx-border-width: 2;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-padding: 12 16;
-    -fx-font-size: 16px;
-    -fx-text-fill: #E8E0F5;
-    -fx-pref-width: 280;
-}
-.onboarding-zip-field:focused {
-    -fx-border-color: #5BA08C;
+.sentiment-warning .label {
+    -fx-text-fill: #FEF3C7;
 }
 
 /* ==================== Live Filter Search ==================== */
 .live-search-field {
-    -fx-background-color: #1E1E2E;
-    -fx-border-color: #3A3555;
+    -fx-background-color: #09090B;
+    -fx-border-color: #27272A;
     -fx-border-width: 1.5;
     -fx-border-radius: 20;
     -fx-background-radius: 20;
     -fx-padding: 7 16;
     -fx-font-size: 12px;
-    -fx-text-fill: #E8E0F5;
-    -fx-prompt-text-fill: #555;
+    -fx-text-fill: #FAFAFA;
+    -fx-prompt-text-fill: #52525B;
     -fx-pref-width: 180;
 }
 .live-search-field:focused {
-    -fx-border-color: #5BA08C;
+    -fx-border-color: #14B8A6;
     -fx-border-width: 2;
 }
 
 /* ==================== Distance Label ==================== */
 .distance-label {
     -fx-font-size: 11px;
-    -fx-text-fill: #5BA08C;
-    -fx-font-weight: bold;
+    -fx-text-fill: #14B8A6;
+    -fx-font-weight: 700;
+}
+
+/* ==================== Onboarding Wizard (Dark Styles) ==================== */
+.onboarding-root {
+    -fx-background-color: linear-gradient(to bottom right, #09090B, #18181B);
+    -fx-alignment: center;
+    -fx-spacing: 20;
+    -fx-padding: 40;
+}
+.onboarding-card {
+    -fx-background-color: #18181B;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 25, 0, 0, 8);
+    -fx-padding: 40 50;
+    -fx-spacing: 20;
+    -fx-alignment: center;
+    -fx-pref-width: 420;
+    -fx-pref-height: 380;
+    -fx-border-color: #27272A;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+.onboarding-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FAFAFA;
+    -fx-text-alignment: center;
+}
+.onboarding-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #A1A1AA;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+.onboarding-dot {
+    -fx-background-color: #27272A;
+    -fx-background-radius: 50;
+    -fx-pref-width: 8;
+    -fx-pref-height: 8;
+    -fx-min-width: 8;
+    -fx-min-height: 8;
+}
+.onboarding-dot-active {
+    -fx-background-color: #14B8A6;
+    -fx-background-radius: 50;
+    -fx-pref-width: 8;
+    -fx-pref-height: 8;
+    -fx-min-width: 8;
+    -fx-min-height: 8;
+}
+.onboarding-next-btn {
+    -fx-background-color: #14B8A6;
+    -fx-text-fill: #09090B;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10;
+    -fx-padding: 10 40;
+    -fx-cursor: hand;
+}
+.onboarding-next-btn:hover {
+    -fx-background-color: #2DD4BF;
+}
+.onboarding-skip-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #71717A;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+.onboarding-category-toggle {
+    -fx-background-color: #18181B;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 600;
+    -fx-background-radius: 10;
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-border-color: #27272A;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+.onboarding-category-toggle:selected {
+    -fx-background-color: #14B8A6;
+    -fx-text-fill: #09090B;
+    -fx-border-color: transparent;
+}
+.onboarding-zip-field {
+    -fx-background-color: #09090B;
+    -fx-border-color: #27272A;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16;
+    -fx-font-size: 16px;
+    -fx-text-fill: #FAFAFA;
+    -fx-pref-width: 280;
+}
+.onboarding-zip-field:focused {
+    -fx-border-color: #14B8A6;
+}
+.onboarding-error-label {
+    -fx-text-fill: #EF4444;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* ==================== Login View Styles (Apple Style Forms - Dark) ==================== */
+.login-root {
+    -fx-background-color: linear-gradient(to bottom right, #09090B, #18181B);
+    -fx-alignment: center;
+}
+.login-logo {
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: -0.5px;
+}
+.login-header {
+    -fx-text-fill: #A1A1AA;
+    -fx-font-weight: 600;
+}
+.social-btn {
+    -fx-background-color: #18181B;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+    -fx-font-size: 16px;
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-max-width: 44;
+    -fx-max-height: 44;
+    -fx-background-radius: 50;
+    -fx-border-color: #27272A;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 50;
+    -fx-cursor: hand;
+}
+.social-btn:hover {
+    -fx-background-color: #27272A;
+    -fx-border-color: #3F3F46;
+}
+.login-separator {
+    -fx-background-color: #27272A;
+    background-color: #27272A;
+}
+.login-or-label {
+    -fx-text-fill: #71717A;
+}
+.login-field {
+    -fx-background-color: #18181B;
+    -fx-border-color: #27272A;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #FAFAFA;
+    -fx-prompt-text-fill: #71717A;
+    -fx-padding: 11 15;
+}
+.login-field:focused {
+    -fx-border-color: #14B8A6;
+}
+.login-btn-primary {
+    -fx-background-color: #14B8A6;
+    -fx-text-fill: #09090B;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+.login-btn-primary:hover {
+    -fx-background-color: #2DD4BF;
+}
+.login-btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FAFAFA;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-border-color: #3F3F46;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+.login-btn-secondary:hover {
+    -fx-background-color: #27272A;
+}
+.skip-captcha-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F97316;
+    -fx-border-color: #4C260D;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+.skip-captcha-btn:hover {
+    -fx-background-color: #2A170A;
 }

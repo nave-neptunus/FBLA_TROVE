@@ -14,19 +14,19 @@
       xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.fbla.businessboost.controller.LoginController"
       stylesheets="@../styles.css"
-      style="-fx-background-color: linear-gradient(to bottom right, #5BA08C, #D8D0E8);">
+      styleClass="login-root">
     <padding>
         <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
     </padding>
 
     <!-- Branding -->
-    <Label text="🚀 Commercio" textFill="white">
+    <Label text="🚀 Commercio" styleClass="login-logo">
         <font>
             <Font name="System Bold" size="32.0" />
         </font>
     </Label>
 
-    <Label text="Create Account" textFill="#3D3555">
+    <Label text="Create Account" styleClass="login-header">
         <font>
             <Font name="System Bold" size="18.0" />
         </font>
@@ -35,36 +35,36 @@
     <!-- Social Login Circles -->
     <HBox spacing="14.0" alignment="CENTER">
         <Button fx:id="facebookBtn" text="f" onAction="#handleFacebookLogin"
-                style="-fx-background-color: transparent; -fx-text-fill: #3D3555; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40; -fx-background-radius: 50; -fx-border-color: #3D3555; -fx-border-width: 1.5; -fx-border-radius: 50; -fx-cursor: hand;"/>
+                styleClass="social-btn, social-facebook"/>
         <Button fx:id="googleBtn" text="G" onAction="#handleGoogleLogin"
-                style="-fx-background-color: transparent; -fx-text-fill: #3D3555; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40; -fx-background-radius: 50; -fx-border-color: #3D3555; -fx-border-width: 1.5; -fx-border-radius: 50; -fx-cursor: hand;"/>
+                styleClass="social-btn, social-google"/>
         <Button fx:id="yahooBtn" text="Y" onAction="#handleYahooLogin"
-                style="-fx-background-color: transparent; -fx-text-fill: #3D3555; -fx-font-weight: bold; -fx-font-size: 16; -fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40; -fx-background-radius: 50; -fx-border-color: #3D3555; -fx-border-width: 1.5; -fx-border-radius: 50; -fx-cursor: hand;"/>
+                styleClass="social-btn, social-yahoo"/>
     </HBox>
 
     <!-- Separator -->
     <HBox alignment="CENTER" spacing="10" maxWidth="320.0">
-        <Separator prefWidth="100" style="-fx-background-color: rgba(61,53,85,0.2);"/>
-        <Label text="or use your email" textFill="rgba(61,53,85,0.6)">
+        <Separator prefWidth="100" styleClass="login-separator"/>
+        <Label text="or use your email" styleClass="login-or-label">
             <font><Font size="11.0"/></font>
         </Label>
-        <Separator prefWidth="100" style="-fx-background-color: rgba(61,53,85,0.2);"/>
+        <Separator prefWidth="100" styleClass="login-separator"/>
     </HBox>
 
     <!-- Input Fields -->
     <VBox spacing="10.0" maxWidth="320.0">
         <TextField fx:id="usernameField" promptText="👤  Username" 
-                   style="-fx-background-color: rgba(255,255,255,0.25); -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3D3555; -fx-prompt-text-fill: rgba(61,53,85,0.5); -fx-padding: 10 14;"/>
+                   styleClass="login-field"/>
         <PasswordField fx:id="passwordField" promptText="🔒  Password"
-                       style="-fx-background-color: rgba(255,255,255,0.25); -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 8; -fx-background-radius: 8; -fx-text-fill: #3D3555; -fx-prompt-text-fill: rgba(61,53,85,0.5); -fx-padding: 10 14;"/>
+                       styleClass="login-field"/>
     </VBox>
 
     <!-- Login / Register Buttons -->
     <VBox spacing="10.0" maxWidth="320.0" alignment="CENTER">
         <Button text="Sign In" onAction="#handleLogin" prefWidth="320" prefHeight="38"
-                style="-fx-background-color: #5BA08C; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                styleClass="login-btn-primary"/>
         <Button text="Sign Up" onAction="#handleRegister" prefWidth="320" prefHeight="38"
-                style="-fx-background-color: transparent; -fx-text-fill: #3D3555; -fx-font-weight: bold; -fx-font-size: 13; -fx-border-color: rgba(61,53,85,0.4); -fx-border-width: 1.5; -fx-border-radius: 20; -fx-background-radius: 20; -fx-cursor: hand;"/>
+                styleClass="login-btn-secondary"/>
     </VBox>
 
     <!-- Status Label -->
