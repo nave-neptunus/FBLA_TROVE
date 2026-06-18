@@ -68,6 +68,6 @@
     </VBox>
 
     <!-- Status Label -->
-    <Label fx:id="statusLabel" text="" textFill="#FFB4B4" wrapText="true" maxWidth="320.0"/>
+    <Label fx:id="statusLabel" text="" styleClass="status-error" wrapText="true" maxWidth="320.0"/>
     <Label fx:id="captchaStatusLabel" text="" managed="false" visible="false"/>
 </VBox>

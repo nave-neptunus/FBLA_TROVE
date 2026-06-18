@@ -234,7 +234,7 @@
                                     <Label text="local jobs" styleClass="jobs-impact-label"/>
                                 </HBox>
                                 <Label text="Based on the U.S. SBA avg. of 4.7 employees per small business"
-                                       style="-fx-text-fill: rgba(255,255,255,0.65); -fx-font-size: 11px;"/>
+                                       styleClass="jobs-impact-caption"/>
                             </VBox>
                         </HBox>
 

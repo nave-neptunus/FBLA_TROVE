@@ -3,6 +3,8 @@ package com.fbla.businessboost.controller;
 import com.fbla.businessboost.model.Business;
 import com.fbla.businessboost.model.Review;
 import com.fbla.businessboost.util.*;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,6 +24,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.*;
@@ -348,17 +351,14 @@ public class MainController {
 
         Label icon = new Label("🗺️");
         icon.getStyleClass().add("empty-state-icon");
-        icon.setStyle("-fx-font-size: 52px;");
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("empty-state-title");
         titleLabel.setWrapText(true);
-        titleLabel.setStyle("-fx-text-alignment: center;");
 
         Label subtitleLabel = new Label(subtitle);
         subtitleLabel.getStyleClass().add("empty-state-subtitle");
         subtitleLabel.setWrapText(true);
-        subtitleLabel.setStyle("-fx-text-alignment: center;");
 
         emptyState.getChildren().addAll(icon, titleLabel, subtitleLabel);
         pane.getChildren().add(emptyState);
@@ -426,8 +426,8 @@ public class MainController {
         imageView.setSmooth(true);
 
         Rectangle clip = new Rectangle(260, 160);
-        clip.setArcWidth(16);
-        clip.setArcHeight(16);
+        clip.setArcWidth(12);
+        clip.setArcHeight(12);
         imageView.setClip(clip);
 
         String imgUrl = business.getImageUrl();
@@ -436,7 +436,7 @@ public class MainController {
                 Image image = new Image(imgUrl, 260, 160, false, true, true);
                 imageView.setImage(image);
             } catch (Exception e) {
-                imageView.setStyle("-fx-background-color: #e0e0e0;");
+                imageView.getStyleClass().add("card-image-placeholder");
             }
         }
 
@@ -501,6 +501,18 @@ public class MainController {
         infoBox.getChildren().addAll(nameLabel, metaRow, ratingRow, addressLabel);
         card.getChildren().addAll(imageContainer, infoBox);
         card.setOnMouseClicked(e -> selectBusiness(business));
+
+        // Subtle hover scale animation (Apple-style lift)
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(150), card);
+        scaleUp.setToX(1.02);
+        scaleUp.setToY(1.02);
+        scaleUp.setInterpolator(Interpolator.EASE_BOTH);
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(150), card);
+        scaleDown.setToX(1.0);
+        scaleDown.setToY(1.0);
+        scaleDown.setInterpolator(Interpolator.EASE_BOTH);
+        card.setOnMouseEntered(e -> scaleUp.playFromStart());
+        card.setOnMouseExited(e -> scaleDown.playFromStart());
 
         return card;
     }
@@ -597,7 +609,7 @@ public class MainController {
                     reviewsContainer.getChildren().clear();
                     if (reviews == null || reviews.isEmpty()) {
                         Label noReview = new Label("No reviews yet — be the first!");
-                        noReview.setStyle("-fx-text-fill: #aaa; -fx-font-size: 12px; -fx-padding: 8 0;");
+                        noReview.getStyleClass().add("detail-caption");
                         reviewsContainer.getChildren().add(noReview);
                         reviewCountLabel.setText("");
                     } else {
@@ -613,7 +625,7 @@ public class MainController {
         fetchReviewsTask.setOnFailed(e -> Platform.runLater(() -> {
             if (selectedBusiness == business) {
                 Label errLabel = new Label("Could not load reviews.");
-                errLabel.setStyle("-fx-text-fill: #aaa; -fx-font-size: 12px;");
+                errLabel.getStyleClass().add("detail-caption");
                 reviewsContainer.getChildren().setAll(errLabel);
             }
         }));
@@ -797,9 +809,8 @@ public class MainController {
         card.setPadding(new Insets(10));
 
         Label name = new Label(business.getName());
-        name.getStyleClass().add("card-title");
+        name.getStyleClass().addAll("card-title", "mini-card-name");
         name.setWrapText(true);
-        name.setStyle("-fx-font-size: 12px;");
 
         Label category = new Label(business.getCategory() + " · " + buildStarString(business.getRating()));
         category.getStyleClass().add("card-address");
@@ -869,10 +880,10 @@ public class MainController {
                 dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
                         switch (cat) {
-                            case "Food":     newNode.setStyle("-fx-bar-fill: #E67E22;"); break;
-                            case "Retail":   newNode.setStyle("-fx-bar-fill: #3498DB;"); break;
-                            case "Services": newNode.setStyle("-fx-bar-fill: #9B59B6;"); break;
-                            default:         newNode.setStyle("-fx-bar-fill: #5BA08C;"); break;
+                            case "Food":     newNode.getStyleClass().add("chart-bar-food"); break;
+                            case "Retail":   newNode.getStyleClass().add("chart-bar-retail"); break;
+                            case "Services": newNode.getStyleClass().add("chart-bar-services"); break;
+                            default:         newNode.getStyleClass().add("chart-bar-default"); break;
                         }
                     }
                 });
@@ -895,10 +906,10 @@ public class MainController {
                 ratingPieChart.getData().add(slice);
                 slice.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
-                        if (label.contains("4.5+"))     newNode.setStyle("-fx-pie-color: #2ECC71;");
-                        else if (label.contains("4.0")) newNode.setStyle("-fx-pie-color: #F1C40F;");
-                        else if (label.contains("3.5")) newNode.setStyle("-fx-pie-color: #E67E22;");
-                        else                             newNode.setStyle("-fx-pie-color: #E74C3C;");
+                        if (label.contains("4.5+"))     newNode.getStyleClass().add("pie-excellent");
+                        else if (label.contains("4.0")) newNode.getStyleClass().add("pie-good");
+                        else if (label.contains("3.5")) newNode.getStyleClass().add("pie-fair");
+                        else                             newNode.getStyleClass().add("pie-poor");
                     }
                 });
             });

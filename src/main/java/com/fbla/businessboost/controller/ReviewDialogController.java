@@ -104,7 +104,7 @@ public class ReviewDialogController {
                 captchaVerified = true;
                 Platform.runLater(() -> {
                     captchaStatusLabel.setText("✅ Verification complete");
-                    captchaStatusLabel.setStyle("-fx-text-fill: #22c55e;");
+                    captchaStatusLabel.getStyleClass().add("caption-success");
                 });
             }
         });
@@ -195,7 +195,7 @@ public class ReviewDialogController {
         this.captchaVerified = true;
         Platform.runLater(() -> {
             captchaStatusLabel.setText("✅ Presentation Mode: Captcha Skipped");
-            captchaStatusLabel.setStyle("-fx-text-fill: #22c55e;");
+            captchaStatusLabel.getStyleClass().add("caption-success");
         });
     }
 
