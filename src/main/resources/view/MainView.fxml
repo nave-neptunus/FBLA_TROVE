@@ -18,11 +18,10 @@
     <top>
         <VBox styleClass="header">
             <HBox alignment="CENTER_LEFT" spacing="15">
-                <Label text="ن Trove" styleClass="app-title">
-                    <font>
-                        <Font name="System Bold" size="26"/>
-                    </font>
-                </Label>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="ن" styleClass="app-logo-symbol"/>
+                    <Label text="Trove" styleClass="app-logo-text"/>
+                </HBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="search-bar-container">
                     <TextField fx:id="zipCodeField" promptText="Enter zip code..." prefWidth="180" 
@@ -341,6 +340,58 @@
                             </padding>
                         </FlowPane>
                     </ScrollPane>
+                </VBox>
+            </Tab>
+            
+            <!-- ==================== TAB 4: LEADERBOARD ==================== -->
+            <Tab text="Leaderboard" styleClass="leaderboard-tab">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="25" right="30" bottom="25" left="30"/>
+                    </padding>
+                    
+                    <Label text="Local Impact Leaderboard" styleClass="impact-title">
+                        <font>
+                            <Font name="System Bold" size="22"/>
+                        </font>
+                    </Label>
+                    <Label text="Compare your support for local businesses with other community members." 
+                           styleClass="impact-subtitle"/>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="leaderboard-toolbar">
+                        <ToggleButton fx:id="btnGlobalRank" text="Global Rank" styleClass="leaderboard-toggle" selected="true"/>
+                        <ToggleButton fx:id="btnMonthlyRank" text="Monthly Champions" styleClass="leaderboard-toggle"/>
+                        <ToggleButton fx:id="btnCategoryRank" text="Category Masters" styleClass="leaderboard-toggle"/>
+                        <ToggleButton fx:id="btnStreakRank" text="Streak Superstars" styleClass="leaderboard-toggle"/>
+                    </HBox>
+                    
+                    <TableView fx:id="leaderboardTable" VBox.vgrow="ALWAYS" styleClass="leaderboard-table">
+                        <columns>
+                            <TableColumn fx:id="colRank" text="Rank" prefWidth="70" resizable="false"/>
+                            <TableColumn fx:id="colUser" text="Community Member" prefWidth="250"/>
+                            <TableColumn fx:id="colScore" text="Impact Score" prefWidth="120"/>
+                            <TableColumn fx:id="colBadge" text="Category Specialty" prefWidth="150"/>
+                            <TableColumn fx:id="colStreak" text="Streak" prefWidth="100"/>
+                            <TableColumn fx:id="colTitle" text="Honorary Title" prefWidth="180"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                    </TableView>
+                    
+                    <!-- Current User Rank Footer Banner -->
+                    <HBox fx:id="userRankBanner" styleClass="user-rank-banner" spacing="20" alignment="CENTER_LEFT">
+                        <padding>
+                            <Insets top="12" right="20" bottom="12" left="20"/>
+                        </padding>
+                        <Label text="Your Standing:" styleClass="user-rank-title"/>
+                        <Label fx:id="lblUserRank" text="#6" styleClass="user-rank-value"/>
+                        <Separator orientation="VERTICAL" prefHeight="20"/>
+                        <Label text="Your Score:" styleClass="user-rank-title"/>
+                        <Label fx:id="lblUserScore" text="0 pts" styleClass="user-rank-value"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblUserPercentile" text="Top 100% of community supporters" styleClass="user-rank-percentile"/>
+                    </HBox>
                 </VBox>
             </Tab>
             

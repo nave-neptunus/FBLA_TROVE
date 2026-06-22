@@ -28,7 +28,10 @@
         <!-- Header area inside left pane -->
         <VBox alignment="TOP_LEFT" spacing="10.0" StackPane.alignment="TOP_LEFT">
             <HBox alignment="CENTER_LEFT" prefWidth="310.0">
-                <Label text="ن Trove" styleClass="login-logo-left"/>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label text="ن" styleClass="login-logo-symbol"/>
+                    <Label text="Trove" styleClass="login-logo-text"/>
+                </HBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="Back to website →" styleClass="back-website-btn" onAction="#handleBackToWebsite"/>
             </HBox>

@@ -105,6 +105,22 @@ public class MainController {
     @FXML private FlowPane smartSearchResults;
     @FXML private FlowPane tagCloudPane;
 
+    // --- Leaderboard Tab ---
+    @FXML private ToggleButton btnGlobalRank;
+    @FXML private ToggleButton btnMonthlyRank;
+    @FXML private ToggleButton btnCategoryRank;
+    @FXML private ToggleButton btnStreakRank;
+    @FXML private TableView<LeaderboardUser> leaderboardTable;
+    @FXML private TableColumn<LeaderboardUser, Integer> colRank;
+    @FXML private TableColumn<LeaderboardUser, String> colUser;
+    @FXML private TableColumn<LeaderboardUser, Integer> colScore;
+    @FXML private TableColumn<LeaderboardUser, String> colBadge;
+    @FXML private TableColumn<LeaderboardUser, String> colStreak;
+    @FXML private TableColumn<LeaderboardUser, String> colTitle;
+    @FXML private Label lblUserRank;
+    @FXML private Label lblUserScore;
+    @FXML private Label lblUserPercentile;
+
     // ==================== Data ====================
 
     /** Master list of all loaded businesses. */
@@ -188,11 +204,16 @@ public class MainController {
         refreshCardGrid();
         clearDetailPane();
         buildTagCloud();
+        setupLeaderboard();
 
-        // Refresh charts when My Impact tab is selected
+        // Refresh charts/leaderboard when tabs are selected
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab != null && "📊 My Impact".equals(newTab.getText())) {
-                refreshCharts();
+            if (newTab != null) {
+                if ("My Impact".equals(newTab.getText())) {
+                    refreshCharts();
+                } else if ("Leaderboard".equals(newTab.getText())) {
+                    refreshLeaderboard();
+                }
             }
         });
 
@@ -1166,5 +1187,196 @@ public class MainController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // ==================== Leaderboard ====================
+
+    private void setupLeaderboard() {
+        colRank.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getRank()));
+        colUser.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEmail()));
+        colScore.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getScore()));
+        colBadge.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getCategoryBadge()));
+        colStreak.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStreak()));
+        colTitle.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getRankTitle()));
+
+        colRank.setCellFactory(column -> new TableCell<LeaderboardUser, Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(String.valueOf(item));
+                    if (item == 1) {
+                        setStyle("-fx-text-fill: #EAB308; -fx-font-weight: bold;");
+                    } else if (item == 2) {
+                        setStyle("-fx-text-fill: #94A3B8; -fx-font-weight: bold;");
+                    } else if (item == 3) {
+                        setStyle("-fx-text-fill: #B45309; -fx-font-weight: bold;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
+
+        ToggleGroup group = new ToggleGroup();
+        btnGlobalRank.setToggleGroup(group);
+        btnMonthlyRank.setToggleGroup(group);
+        btnCategoryRank.setToggleGroup(group);
+        btnStreakRank.setToggleGroup(group);
+
+        group.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                oldVal.setSelected(true);
+            } else {
+                refreshLeaderboard();
+            }
+        });
+    }
+
+    private void refreshLeaderboard() {
+        String mode = "Global";
+        if (btnMonthlyRank.isSelected()) {
+            mode = "Monthly";
+        } else if (btnCategoryRank.isSelected()) {
+            mode = "Category";
+        } else if (btnStreakRank.isSelected()) {
+            mode = "Streak";
+        }
+        refreshLeaderboard(mode);
+    }
+
+    private void refreshLeaderboard(String mode) {
+        String currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null || currentUser.isEmpty()) {
+            currentUser = "you@example.com";
+        }
+
+        int totalFavs = favoritedBusinesses.size();
+        int reviews = SessionManager.getReviewCount();
+        int streakWeeks = 3;
+        int userScore = (totalFavs * 10) + (reviews * 25) + (streakWeeks * 50);
+
+        String specialty = "Local Explorer";
+        if (!favoritedBusinesses.isEmpty()) {
+            Map<String, Long> categoryCounts = favoritedBusinesses.stream()
+                    .collect(Collectors.groupingBy(Business::getCategory, Collectors.counting()));
+            String topCat = categoryCounts.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("");
+            if (!topCat.isEmpty()) {
+                specialty = topCat + " Supporter";
+            }
+        }
+
+        String userTitle;
+        if (userScore >= 300) {
+            userTitle = "Trove Legend";
+        } else if (userScore >= 150) {
+            userTitle = "Community Hero";
+        } else if (userScore >= 50) {
+            userTitle = "Local Advocate";
+        } else {
+            userTitle = "Rising Star";
+        }
+
+        List<LeaderboardRaw> rawData = new ArrayList<>();
+        rawData.add(new LeaderboardRaw("sarah.jones@example.com", 450, 120, "Food Supporter", 12, "Trove Legend"));
+        rawData.add(new LeaderboardRaw("michael.smith@example.com", 380, 140, "Retail Supporter", 8, "Pillar of Community"));
+        rawData.add(new LeaderboardRaw("emily.davis@example.com", 310, 95, "Service Supporter", 5, "Community Hero"));
+        rawData.add(new LeaderboardRaw("david.brown@example.com", 220, 80, "Local Supporter", 4, "Local Advocate"));
+        rawData.add(new LeaderboardRaw("jessica.wilson@example.com", 140, 60, "Retail Supporter", 2, "Rising Star"));
+        
+        int userMonthlyScore = userScore / 2 + 10;
+        rawData.add(new LeaderboardRaw(currentUser, userScore, userMonthlyScore, specialty, streakWeeks, userTitle));
+
+        if ("Monthly".equals(mode)) {
+            rawData.sort((a, b) -> Integer.compare(b.monthlyScore, a.monthlyScore));
+        } else if ("Streak".equals(mode)) {
+            rawData.sort((a, b) -> Integer.compare(b.streakWeeks, a.streakWeeks));
+        } else if ("Category".equals(mode)) {
+            rawData.sort((a, b) -> {
+                int cmp = a.specialty.compareTo(b.specialty);
+                if (cmp == 0) {
+                    return Integer.compare(b.globalScore, a.globalScore);
+                }
+                return cmp;
+            });
+        } else {
+            rawData.sort((a, b) -> Integer.compare(b.globalScore, a.globalScore));
+        }
+
+        ObservableList<LeaderboardUser> usersList = FXCollections.observableArrayList();
+        int userRankPosition = 6;
+        int displayScore = 0;
+
+        for (int i = 0; i < rawData.size(); i++) {
+            LeaderboardRaw raw = rawData.get(i);
+            int rank = i + 1;
+            int score = "Monthly".equals(mode) ? raw.monthlyScore : raw.globalScore;
+            String streakDisplay = raw.streakWeeks + (raw.streakWeeks == 1 ? " week" : " weeks");
+
+            LeaderboardUser lUser = new LeaderboardUser(rank, raw.email, score, raw.specialty, streakDisplay, raw.title);
+            usersList.add(lUser);
+
+            if (raw.email.equals(currentUser)) {
+                userRankPosition = rank;
+                displayScore = score;
+            }
+        }
+
+        leaderboardTable.setItems(usersList);
+
+        lblUserRank.setText("#" + userRankPosition);
+        lblUserScore.setText(displayScore + " pts");
+        double percentile = ((7.0 - userRankPosition) / 6.0) * 100.0;
+        if (percentile > 100) percentile = 100;
+        lblUserPercentile.setText(String.format("Top %.0f%% of community supporters", percentile));
+    }
+
+    private static class LeaderboardRaw {
+        String email;
+        int globalScore;
+        int monthlyScore;
+        String specialty;
+        int streakWeeks;
+        String title;
+
+        LeaderboardRaw(String email, int globalScore, int monthlyScore, String specialty, int streakWeeks, String title) {
+            this.email = email;
+            this.globalScore = globalScore;
+            this.monthlyScore = monthlyScore;
+            this.specialty = specialty;
+            this.streakWeeks = streakWeeks;
+            this.title = title;
+        }
+    }
+
+    public static class LeaderboardUser {
+        private final int rank;
+        private final String email;
+        private final int score;
+        private final String categoryBadge;
+        private final String streak;
+        private final String rankTitle;
+
+        public LeaderboardUser(int rank, String email, int score, String categoryBadge, String streak, String rankTitle) {
+            this.rank = rank;
+            this.email = email;
+            this.score = score;
+            this.categoryBadge = categoryBadge;
+            this.streak = streak;
+            this.rankTitle = rankTitle;
+        }
+
+        public int getRank() { return rank; }
+        public String getEmail() { return email; }
+        public int getScore() { return score; }
+        public String getCategoryBadge() { return categoryBadge; }
+        public String getStreak() { return streak; }
+        public String getRankTitle() { return rankTitle; }
     }
 }

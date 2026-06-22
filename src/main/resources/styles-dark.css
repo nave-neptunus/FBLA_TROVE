@@ -1157,13 +1157,37 @@
     -fx-border-radius: 16 0 0 16;
 }
 
-.login-logo-left {
+.login-logo-symbol {
+    -fx-text-fill: #A855F7;
+    -fx-font-family: 'Inter', sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 38px;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.4), 8, 0, 0, 0);
+}
+
+.login-logo-text {
     -fx-text-fill: linear-gradient(to right, #FFFFFF, #E2E8F0);
     -fx-font-family: 'Inter', sans-serif;
     -fx-font-weight: 900;
-    -fx-font-size: 30px;
+    -fx-font-size: 34px;
     -fx-letter-spacing: -1.2px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.app-logo-symbol {
+    -fx-text-fill: #A855F7;
+    -fx-font-family: 'Inter', sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 30px;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.3), 6, 0, 0, 0);
+}
+
+.app-logo-text {
+    -fx-text-fill: -color-text-primary;
+    -fx-font-family: 'Inter', sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 26px;
+    -fx-letter-spacing: -0.8px;
 }
 
 .back-website-btn {
@@ -1375,4 +1399,80 @@
 .status-error {
     -fx-text-fill: -color-danger;
     -fx-font-size: 13px;
+}
+
+/* ==================== Leaderboard Tab ==================== */
+.leaderboard-toggle {
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-text-secondary;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.leaderboard-toggle:selected {
+    -fx-background-color: #A855F7;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #A855F7;
+}
+.leaderboard-table {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 5;
+}
+.leaderboard-table .column-header-background {
+    -fx-background-color: -color-bg-muted;
+    -fx-background-radius: 12 12 0 0;
+}
+.leaderboard-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-primary;
+    -fx-border-width: 0;
+}
+.leaderboard-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 0;
+}
+.leaderboard-table .table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.015);
+}
+.leaderboard-table .table-row-cell:selected {
+    -fx-background-color: rgba(168, 85, 247, 0.1);
+}
+.leaderboard-table .table-cell {
+    -fx-alignment: center-left;
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 13px;
+}
+.user-rank-banner {
+    -fx-background-color: rgba(168, 85, 247, 0.08);
+    -fx-border-color: rgba(168, 85, 247, 0.25);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+.user-rank-title {
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.user-rank-value {
+    -fx-text-fill: #A855F7;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+}
+.user-rank-percentile {
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
 }
