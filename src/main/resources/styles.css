@@ -1140,91 +1140,201 @@
     -fx-font-weight: 600;
 }
 
-/* ==================== Login View ==================== */
+/* ==================== Login View Redesign ==================== */
 .login-root {
-    -fx-background-color: linear-gradient(to bottom right, -color-bg-canvas, #ECECEF);
+    -fx-background-color: -color-bg-canvas;
     -fx-alignment: center;
 }
-.login-logo {
-    -fx-text-fill: -color-text-primary;
+
+/* Left Pane (Hero Image / Carousel) */
+.login-left-pane {
+    -fx-background-image: url("/icons/login_bg.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-radius: 16 0 0 16;
+    -fx-border-radius: 16 0 0 16;
+}
+
+.login-logo-left {
+    -fx-text-fill: linear-gradient(to right, #FFFFFF, #E2E8F0);
+    -fx-font-family: 'Inter', sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 30px;
+    -fx-letter-spacing: -1.2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 6, 0, 0, 2);
+}
+
+.back-website-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 12;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+.back-website-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.22);
+}
+.back-website-btn:armed {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: 'Inter', sans-serif;
     -fx-font-weight: 700;
+    -fx-font-size: 24px;
+    -fx-line-spacing: 4;
+}
+
+.carousel-dot {
+    -fx-fill: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-dot-active {
+    -fx-fill: #FFFFFF;
+}
+
+/* Right Pane (Form panel) */
+.login-right-pane {
+    -fx-background-color: -color-bg-surface;
+    -fx-background-radius: 0 16 16 0;
+    -fx-border-radius: 0 16 16 0;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1 1 1 0;
+}
+
+.login-title {
+    -fx-text-fill: -color-text-primary;
+    -fx-font-family: 'Inter', sans-serif;
+    -fx-font-weight: 700;
+    -fx-font-size: 26px;
     -fx-letter-spacing: -0.5px;
 }
-.login-header {
+
+.login-subtitle {
     -fx-text-fill: -color-text-secondary;
-    -fx-font-weight: 600;
+    -fx-font-size: 13px;
 }
-.social-btn {
-    -fx-background-color: -color-bg-surface;
-    -fx-text-fill: -color-text-primary;
-    -fx-font-weight: 700;
-    -fx-font-size: 16px;
-    -fx-min-width: 44;
-    -fx-min-height: 44;
-    -fx-max-width: 44;
-    -fx-max-height: 44;
-    -fx-background-radius: 50;
+
+.login-subtitle-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8B5CF6; /* Elegant purple accent matching the button */
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+.login-subtitle-link:hover {
+    -fx-text-fill: #7C3AED;
+}
+
+.login-field {
+    -fx-background-color: -color-bg-canvas;
     -fx-border-color: -color-border;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 50;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: -color-text-primary;
+    -fx-prompt-text-fill: -color-text-tertiary;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-pref-width: 320;
+}
+.login-field:focused {
+    -fx-border-color: #8B5CF6;
+    -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.15), 4, 0, 0, 0);
+    -fx-background-color: -color-bg-surface;
+}
+
+.password-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text-secondary;
+    -fx-cursor: hand;
+    -fx-padding: 4;
+    -fx-font-size: 16px;
+}
+.password-toggle-btn:hover {
+    -fx-text-fill: -color-text-primary;
+}
+
+.terms-checkbox {
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 12px;
+}
+.terms-checkbox .box {
+    -fx-background-color: -color-bg-canvas;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+.terms-checkbox:selected .box {
+    -fx-background-color: #8B5CF6;
+    -fx-border-color: #8B5CF6;
+}
+.terms-checkbox:selected .mark {
+    -fx-background-color: #FFFFFF;
+}
+
+.terms-link-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8B5CF6;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-underline: true;
+}
+.terms-link-btn:hover {
+    -fx-text-fill: #7C3AED;
+}
+
+.login-btn-primary {
+    -fx-background-color: #8B5CF6; /* Premium Purple accent matching mockup */
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
     -fx-cursor: hand;
 }
-.social-btn:hover {
-    -fx-background-color: -color-bg-canvas;
-    -fx-border-color: -color-border-strong;
+.login-btn-primary:hover {
+    -fx-background-color: #7C3AED;
 }
-.social-btn:armed {
-    -fx-background-color: -color-bg-muted;
+.login-btn-primary:armed {
+    -fx-background-color: #6D28D9;
 }
+
 .login-separator {
     -fx-background-color: -color-border;
 }
 .login-or-label {
-    -fx-text-fill: -color-text-secondary;
+    -fx-text-fill: -color-text-tertiary;
+    -fx-font-size: 12px;
 }
-.login-field {
+
+.oauth-btn {
     -fx-background-color: -color-bg-surface;
+    -fx-text-fill: -color-text-primary;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
     -fx-border-color: -color-border;
+    -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-text-fill: -color-text-primary;
-    -fx-prompt-text-fill: -color-text-secondary;
-    -fx-padding: 12 16;
-}
-.login-field:focused {
-    -fx-border-color: -color-accent;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.15), 4, 0, 0, 0);
-}
-.login-btn-primary {
-    -fx-background-color: -color-accent;
-    -fx-text-fill: -color-text-on-accent;
-    -fx-font-weight: 700;
-    -fx-font-size: 14px;
-    -fx-background-radius: 10;
     -fx-cursor: hand;
 }
-.login-btn-primary:hover {
-    -fx-background-color: -color-accent-hover;
-}
-.login-btn-primary:armed {
-    -fx-background-color: -color-accent-pressed;
-}
-.login-btn-secondary {
-    -fx-background-color: transparent;
-    -fx-text-fill: -color-text-primary;
-    -fx-font-weight: 700;
-    -fx-font-size: 14px;
+.oauth-btn:hover {
+    -fx-background-color: -color-bg-canvas;
     -fx-border-color: -color-border-strong;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-cursor: hand;
 }
-.login-btn-secondary:hover {
+.oauth-btn:armed {
     -fx-background-color: -color-bg-muted;
-}
-.login-btn-secondary:armed {
-    -fx-background-color: derive(-color-bg-muted, -5%);
 }
 
 /* ==================== Skip Captcha / Special Buttons ==================== */
@@ -1244,7 +1354,7 @@
     -fx-background-color: #FFEDD5;
 }
 
-/* ==================== Utility Classes (Java inline style replacements) ==================== */
+/* ==================== Utility Classes ==================== */
 .caption-success {
     -fx-text-fill: -color-success;
     -fx-font-size: 11px;

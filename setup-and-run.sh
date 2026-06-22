@@ -18,8 +18,15 @@ fi
 echo "✅ Java found: $(java --version | head -n 1)"
 echo ""
 
-# Create lib directory if it doesn't exist
+# Create lib and bin directories
 mkdir -p lib
+mkdir -p bin
+
+# Compile macOS Biometric Helper if on Darwin (macOS)
+if [ "$(uname -s)" = "Darwin" ]; then
+    echo "🍎 Compiling macOS Biometric Helper..."
+    swiftc src/main/resources/bin/BiometricHelper.swift -o bin/BiometricHelper
+fi
 
 # Download org.json if it doesn't exist
 if [ ! -f "lib/json-20240303.jar" ]; then
@@ -31,6 +38,12 @@ fi
 if [ ! -f "lib/openpdf-1.3.30.jar" ]; then
     echo "📦 Downloading OpenPDF..."
     curl -s -L -o lib/openpdf-1.3.30.jar https://repo1.maven.org/maven2/com/github/librepdf/openpdf/1.3.30/openpdf-1.3.30.jar
+fi
+
+# Download jBCrypt if it doesn't exist
+if [ ! -f "lib/jbcrypt-0.4.jar" ]; then
+    echo "📦 Downloading jBCrypt..."
+    curl -s -L -o lib/jbcrypt-0.4.jar https://repo1.maven.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar
 fi
 
 # Check if JavaFX is already downloaded

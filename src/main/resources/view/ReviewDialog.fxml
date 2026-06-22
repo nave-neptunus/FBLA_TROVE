@@ -17,7 +17,7 @@
     </padding>
     
     <!-- Title -->
-    <Label text="📝 Submit Your Review" styleClass="dialog-title">
+    <Label text="Submit Your Review" styleClass="dialog-title">
         <font>
             <Font name="System Bold" size="20"/>
         </font>
@@ -60,12 +60,12 @@
     <HBox fx:id="sentimentWarningBox" styleClass="sentiment-warning" 
           managed="false" visible="false" alignment="CENTER_LEFT" spacing="6">
         <Label fx:id="sentimentWarningLabel" wrapText="true" 
-               text="⚠ Your rating seems low for such a positive review. Is this correct?"/>
+               text="Your rating seems low for such a positive review. Is this correct?"/>
     </HBox>
     
     <!-- Google reCAPTCHA Section -->
     <VBox spacing="8" styleClass="verification-box">
-        <Label text="🛡 Verify you're human" styleClass="bot-question">
+        <Label text="Verify you're human" styleClass="bot-question">
             <font>
                 <Font name="System Bold" size="14"/>
             </font>

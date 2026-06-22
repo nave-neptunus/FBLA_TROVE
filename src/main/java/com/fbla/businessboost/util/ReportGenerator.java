@@ -86,7 +86,7 @@ public class ReportGenerator {
             String timestamp = LocalDateTime.now().format(TIMESTAMP_FORMAT);
 
             // ================= Cover Page =================
-            Paragraph appName = new Paragraph("🚀 Commercio", titleFont);
+            Paragraph appName = new Paragraph("Trove", titleFont);
             appName.setAlignment(Paragraph.ALIGN_CENTER);
             appName.setSpacingAfter(4);
             document.add(appName);
@@ -109,7 +109,7 @@ public class ReportGenerator {
             Paragraph coverMeta = new Paragraph(
                     "\nGenerated for: " + (username != null ? username : "Guest") +
                     "\nDate: " + timestamp +
-                    "\nPowered by Commercio — FBLA Business Boost",
+                    "\nPowered by Trove — FBLA Business Boost",
                     subtitleFont);
             coverMeta.setAlignment(Paragraph.ALIGN_CENTER);
             coverMeta.setSpacingAfter(30);

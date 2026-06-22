@@ -2,72 +2,113 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Rectangle?>
 
-<VBox alignment="CENTER" spacing="14.0" xmlns="http://javafx.com/javafx/21" 
+<HBox alignment="CENTER" xmlns="http://javafx.com/javafx/21" 
       xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.fbla.businessboost.controller.LoginController"
       stylesheets="@../styles.css"
       styleClass="login-root">
-    <padding>
-        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
-    </padding>
 
-    <!-- Branding -->
-    <Label text="🚀 Commercio" styleClass="login-logo">
-        <font>
-            <Font name="System Bold" size="32.0" />
-        </font>
-    </Label>
+    <!-- Left Pane (Hero/Carousel Panel) -->
+    <StackPane fx:id="leftPane" prefWidth="380.0" minWidth="380.0" maxWidth="380.0" styleClass="login-left-pane">
+        <padding>
+            <Insets bottom="40.0" left="35.0" right="35.0" top="40.0"/>
+        </padding>
+        
+        <!-- Header area inside left pane -->
+        <VBox alignment="TOP_LEFT" spacing="10.0" StackPane.alignment="TOP_LEFT">
+            <HBox alignment="CENTER_LEFT" prefWidth="310.0">
+                <Label text="ن Trove" styleClass="login-logo-left"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Back to website →" styleClass="back-website-btn" onAction="#handleBackToWebsite"/>
+            </HBox>
+        </VBox>
+        
+        <!-- Sliding Text and indicators inside left pane -->
+        <VBox alignment="BOTTOM_LEFT" spacing="24.0" StackPane.alignment="BOTTOM_LEFT">
+            <VBox spacing="10.0">
+                <Label fx:id="carouselText" text="Capturing Moments, Creating Memories" wrapText="true" styleClass="carousel-title" prefWidth="310.0"/>
+            </VBox>
+            <HBox spacing="6.0" alignment="CENTER_LEFT">
+                <Rectangle fx:id="indicator0" width="24.0" height="4.0" arcWidth="4.0" arcHeight="4.0" styleClass="carousel-dot-active"/>
+                <Rectangle fx:id="indicator1" width="8.0" height="4.0" arcWidth="4.0" arcHeight="4.0" styleClass="carousel-dot"/>
+                <Rectangle fx:id="indicator2" width="8.0" height="4.0" arcWidth="4.0" arcHeight="4.0" styleClass="carousel-dot"/>
+            </HBox>
+        </VBox>
+    </StackPane>
 
-    <Label text="Create Account" styleClass="login-header">
-        <font>
-            <Font name="System Bold" size="18.0" />
-        </font>
-    </Label>
+    <!-- Right Pane (Forms Panel) -->
+    <VBox alignment="CENTER_LEFT" spacing="24.0" HBox.hgrow="ALWAYS" styleClass="login-right-pane">
+        <padding>
+            <Insets bottom="40.0" left="45.0" right="45.0" top="40.0"/>
+        </padding>
 
-    <!-- Social Login Circles -->
-    <HBox spacing="14.0" alignment="CENTER">
-        <Button fx:id="facebookBtn" text="f" onAction="#handleFacebookLogin"
-                styleClass="social-btn, social-facebook"/>
-        <Button fx:id="googleBtn" text="G" onAction="#handleGoogleLogin"
-                styleClass="social-btn, social-google"/>
-        <Button fx:id="yahooBtn" text="Y" onAction="#handleYahooLogin"
-                styleClass="social-btn, social-yahoo"/>
-    </HBox>
+        <!-- Mode Title -->
+        <VBox spacing="6.0">
+            <Label fx:id="titleLabel" text="Create an account" styleClass="login-title"/>
+            <HBox spacing="4.0" alignment="CENTER_LEFT">
+                <Label fx:id="subtitleText" text="Already have an account?" styleClass="login-subtitle"/>
+                <Button fx:id="subtitleLink" text="Log in" onAction="#handleToggleMode" styleClass="login-subtitle-link"/>
+            </HBox>
+        </VBox>
 
-    <!-- Separator -->
-    <HBox alignment="CENTER" spacing="10" maxWidth="320.0">
-        <Separator prefWidth="100" styleClass="login-separator"/>
-        <Label text="or use your email" styleClass="login-or-label">
-            <font><Font size="11.0"/></font>
-        </Label>
-        <Separator prefWidth="100" styleClass="login-separator"/>
-    </HBox>
+        <!-- Input Fields -->
+        <VBox spacing="14.0">
+            <!-- Side-by-side First/Last Name (Sign Up only) -->
+            <HBox fx:id="nameFieldsBox" spacing="12.0" alignment="CENTER">
+                <TextField fx:id="firstNameField" promptText="First name" styleClass="login-field" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="lastNameField" promptText="Last name" styleClass="login-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            
+            <!-- Email -->
+            <TextField fx:id="usernameField" promptText="Email" styleClass="login-field"/>
+            
+            <!-- Password with Show/Hide toggle -->
+            <StackPane alignment="CENTER_RIGHT">
+                <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-field"/>
+                <TextField fx:id="passwordTextField" promptText="Enter your password" styleClass="login-field" visible="false"/>
+                <Button fx:id="passwordToggleBtn" text="👁" onAction="#togglePasswordVisibility" styleClass="password-toggle-btn">
+                    <StackPane.margin>
+                        <Insets right="12.0"/>
+                    </StackPane.margin>
+                </Button>
+            </StackPane>
+            
+            <!-- Terms Checkbox (Sign Up only) -->
+            <HBox fx:id="termsContainer" spacing="6.0" alignment="CENTER_LEFT">
+                <CheckBox fx:id="termsCheckbox" text="I agree to the" styleClass="terms-checkbox"/>
+                <Button text="Terms &amp; Conditions" onAction="#handleShowTerms" styleClass="terms-link-btn"/>
+            </HBox>
+        </VBox>
 
-    <!-- Input Fields -->
-    <VBox spacing="10.0" maxWidth="320.0">
-        <TextField fx:id="usernameField" promptText="👤  Username" 
-                   styleClass="login-field"/>
-        <PasswordField fx:id="passwordField" promptText="🔒  Password"
-                       styleClass="login-field"/>
+        <!-- Action Button -->
+        <Button fx:id="actionButton" text="Create account" onAction="#handleMainAction" prefWidth="999.0" prefHeight="44.0" styleClass="login-btn-primary"/>
+
+        <!-- Separator -->
+        <HBox alignment="CENTER" spacing="12.0">
+            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
+            <Label fx:id="dividerLabel" text="Or register with" styleClass="login-or-label"/>
+            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
+        </HBox>
+
+        <!-- Social login buttons (Google / Apple) -->
+        <HBox spacing="14.0" alignment="CENTER">
+            <Button fx:id="googleBtn" text="Google" onAction="#handleGoogleLogin" styleClass="oauth-btn, oauth-google" HBox.hgrow="ALWAYS" prefWidth="180.0" prefHeight="38.0"/>
+            <Button fx:id="appleBtn" text="Apple" onAction="#handleAppleLogin" styleClass="oauth-btn, oauth-apple" HBox.hgrow="ALWAYS" prefWidth="180.0" prefHeight="38.0"/>
+        </HBox>
+
+        <!-- Error/Status Info -->
+        <Label fx:id="statusLabel" text="" styleClass="status-error" wrapText="true" maxWidth="400.0"/>
+        <Label fx:id="captchaStatusLabel" text="" managed="false" visible="false"/>
     </VBox>
-
-    <!-- Login / Register Buttons -->
-    <VBox spacing="10.0" maxWidth="320.0" alignment="CENTER">
-        <Button text="Sign In" onAction="#handleLogin" prefWidth="320" prefHeight="38"
-                styleClass="login-btn-primary"/>
-        <Button text="Sign Up" onAction="#handleRegister" prefWidth="320" prefHeight="38"
-                styleClass="login-btn-secondary"/>
-    </VBox>
-
-    <!-- Status Label -->
-    <Label fx:id="statusLabel" text="" styleClass="status-error" wrapText="true" maxWidth="320.0"/>
-    <Label fx:id="captchaStatusLabel" text="" managed="false" visible="false"/>
-</VBox>
+</HBox>

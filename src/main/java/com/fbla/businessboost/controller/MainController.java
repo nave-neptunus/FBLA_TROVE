@@ -991,11 +991,11 @@ public class MainController {
         stylesheets.clear();
         if (darkMode) {
             stylesheets.add(lightCss);
-            themeToggleButton.setText("🌙");
+            themeToggleButton.setText("Theme: Dark");
             darkMode = false;
         } else {
             stylesheets.add(darkCss);
-            themeToggleButton.setText("☀️");
+            themeToggleButton.setText("Theme: Light");
             darkMode = true;
         }
     }
@@ -1006,8 +1006,10 @@ public class MainController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
             Stage stage = (Stage) themeToggleButton.getScene().getWindow();
-            stage.setTitle("Commercio — Sign In");
-            stage.setScene(new Scene(loader.load(), 500, 600));
+            stage.setTitle("Trove — Sign In");
+            stage.setScene(new Scene(loader.load(), 850, 550));
+            stage.setMinWidth(850);
+            stage.setMinHeight(550);
         } catch (Exception e) {
             e.printStackTrace();
         }

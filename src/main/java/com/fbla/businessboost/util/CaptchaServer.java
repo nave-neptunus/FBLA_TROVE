@@ -71,6 +71,12 @@ public class CaptchaServer {
                         "#720E9E", "#fff", "🟣"));
             });
 
+            // ---- Apple login page ----
+            server.createContext("/oauth/apple", exchange -> {
+                sendHtml(exchange, buildSimpleOAuthPage("Apple",
+                        "#000000", "#fff", ""));
+            });
+
             server.setExecutor(java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
                 Thread t = new Thread(r, "CaptchaServer");
                 t.setDaemon(true);
@@ -195,7 +201,7 @@ public class CaptchaServer {
     }
 
     /**
-     * Simple OAuth login page for Facebook/Yahoo (demo — collects name/email).
+     * Simple OAuth login page for Facebook/Yahoo/Apple (demo — collects name/email).
      */
     private String buildSimpleOAuthPage(String provider, String brandColor, String textColor, String icon) {
         return "<!DOCTYPE html>\n"
@@ -224,7 +230,7 @@ public class CaptchaServer {
                 + "<div class='card'>\n"
                 + "  <div class='logo'>" + icon + "</div>\n"
                 + "  <h2>Sign in with " + provider + "</h2>\n"
-                + "  <p class='subtitle'>to continue to Commercio</p>\n"
+                + "  <p class='subtitle'>to continue to Trove</p>\n"
                 + "  <form onsubmit='handleSubmit(event)'>\n"
                 + "    <label>Email</label>\n"
                 + "    <input type='email' id='email' placeholder='you@example.com' required />\n"
@@ -232,7 +238,7 @@ public class CaptchaServer {
                 + "    <input type='text' id='name' placeholder='Your name' required />\n"
                 + "    <button type='submit'>Sign in</button>\n"
                 + "  </form>\n"
-                + "  <p class='footer'>By signing in, you agree to Commercio's Terms of Service.</p>\n"
+                + "  <p class='footer'>By signing in, you agree to Trove's Terms of Service.</p>\n"
                 + "</div>\n"
                 + "<script>\n"
                 + "function handleSubmit(e) {\n"

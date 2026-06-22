@@ -144,7 +144,7 @@ public class BusinessFetcher {
         URL overpassUrl = URI.create(overpassUrlStr).toURL();
         HttpURLConnection overpassCon = (HttpURLConnection) overpassUrl.openConnection();
         overpassCon.setRequestMethod("GET");
-        overpassCon.setRequestProperty("User-Agent", "Commercio/1.0");
+        overpassCon.setRequestProperty("User-Agent", "Trove/1.0");
 
         int responseCode = overpassCon.getResponseCode();
         if (responseCode != 200) {

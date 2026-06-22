@@ -12,6 +12,6 @@ echo ""
 java -Dprism.order=sw \
      -Dprism.verbose=true \
      --module-path lib/javafx-sdk-21.0.1/lib \
-     --add-modules javafx.controls,javafx.fxml \
-     -cp out/production/classes:lib/json-20240303.jar \
+     --add-modules javafx.controls,javafx.fxml,javafx.web \
+     -cp out/production/classes:lib/json-20240303.jar:lib/openpdf-1.3.30.jar:lib/jbcrypt-0.4.jar \
      com.fbla.businessboost.Main

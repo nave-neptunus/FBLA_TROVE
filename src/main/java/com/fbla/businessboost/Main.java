@@ -63,7 +63,7 @@ public class Main extends Application {
                 // First login — show onboarding wizard
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OnboardingView.fxml"));
                 Scene scene = new Scene(loader.load(), 600, 500);
-                primaryStage.setTitle("Welcome to Commercio!");
+                primaryStage.setTitle("Welcome to Trove!");
                 primaryStage.setScene(scene);
                 primaryStage.setMinWidth(500);
                 primaryStage.setMinHeight(460);
@@ -71,7 +71,7 @@ public class Main extends Application {
                 // Returning user — go straight to the dashboard
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
                 Scene scene = new Scene(loader.load(), 1200, 750);
-                primaryStage.setTitle("Commercio — Logged in as: " + user);
+                primaryStage.setTitle("Trove — Logged in as: " + user);
                 primaryStage.setScene(scene);
                 primaryStage.setMinWidth(900);
                 primaryStage.setMinHeight(600);
@@ -79,11 +79,11 @@ public class Main extends Application {
         } else {
             // Not logged in — show login screen
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
-            Scene scene = new Scene(loader.load(), 500, 600);
-            primaryStage.setTitle("Commercio — Sign In");
+            Scene scene = new Scene(loader.load(), 850, 550);
+            primaryStage.setTitle("Trove — Sign In");
             primaryStage.setScene(scene);
-            primaryStage.setMinWidth(400);
-            primaryStage.setMinHeight(500);
+            primaryStage.setMinWidth(850);
+            primaryStage.setMinHeight(550);
         }
 
         primaryStage.show();

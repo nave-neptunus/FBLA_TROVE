@@ -150,7 +150,7 @@ public class OnboardingController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) step1.getScene().getWindow();
-            stage.setTitle("Commercio — Logged in as: " + SessionManager.getCurrentUser());
+            stage.setTitle("Trove — Logged in as: " + SessionManager.getCurrentUser());
             stage.setScene(new Scene(root, 1200, 750));
             stage.setMinWidth(900);
             stage.setMinHeight(600);
