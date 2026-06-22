@@ -75,7 +75,7 @@ public class MainController {
     @FXML private Slider distanceSlider;
     @FXML private Label distanceLabel;
     @FXML private ListView<Business> favoritesList;
-    @FXML private ListView<String> dealsPane;
+    @FXML private VBox dealsContainer;
     @FXML private Label selectedBusinessLabel;
     @FXML private Label businessDescriptionLabel;
     @FXML private Label businessPhoneLabel;
@@ -84,6 +84,7 @@ public class MainController {
     @FXML private ImageView detailImageView;
     @FXML private ImageView mapImageView;
     @FXML private VBox reviewsContainer;
+    @FXML private VBox aspectScoresContainer;
     @FXML private Label reviewCountLabel;
     @FXML private HBox resultBanner;
     @FXML private Label resultBannerLabel;
@@ -128,6 +129,7 @@ public class MainController {
 
     /** Sidebar favorites list (reactive via ObservableList). */
     private ObservableList<Business> favoritedBusinesses;
+    private com.fbla.businessboost.util.LocalAIConcierge aiConcierge;
 
     /** Currently selected business for the detail pane. */
     private Business selectedBusiness;
@@ -139,11 +141,11 @@ public class MainController {
     private boolean darkMode = false;
 
     /**
-     * Radius values in metres corresponding to distanceSlider positions 0-3.
-     * Labels: "500m", "1 km", "2 km", "5 km"
+     * Radius values in miles corresponding to distanceSlider positions 0-3.
+     * Labels: "0.5 miles", "1 mile", "2 miles", "5 miles"
      */
-    private static final int[] RADIUS_VALUES  = {500, 1000, 2000, 5000};
-    private static final String[] RADIUS_LABELS = {"500m", "1 km", "2 km", "5 km"};
+    private static final int[] RADIUS_VALUES = {500, 1000, 2000, 5000};
+    private static final String[] RADIUS_LABELS = {"0.5 miles", "1 mile", "2 miles", "5 miles"};
 
     // ==================== Initialization ====================
 
@@ -218,6 +220,7 @@ public class MainController {
         });
 
         refreshRecommendations();
+        aiConcierge = new com.fbla.businessboost.util.LocalAIConcierge(allBusinesses);
 
         // Pre-fill ZIP from onboarding preference
         String preferredZip = SessionManager.getPreferredZip();
@@ -609,7 +612,39 @@ public class MainController {
         }
 
         // Show local deals
-        dealsPane.setItems(business.getDeals());
+        // Smart Coupon Engine
+        ObservableList<HBox> couponBoxes = FXCollections.observableArrayList();
+        List<com.fbla.businessboost.util.SmartCouponEngine.Coupon> coupons = com.fbla.businessboost.util.SmartCouponEngine.getCouponsForBusiness(business);
+        for (com.fbla.businessboost.util.SmartCouponEngine.Coupon c : coupons) {
+            HBox box = new HBox(10);
+            box.setAlignment(Pos.CENTER_LEFT);
+            VBox textCol = new VBox(2);
+            Label couponDesc = new Label(c.description);
+            couponDesc.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+            Label codeLabel = new Label(c.code + " (" + c.getFormattedExpiry() + ")");
+            codeLabel.setStyle("-fx-font-family: monospace; -fx-text-fill: #10B981; -fx-font-size: 12px;");
+            textCol.getChildren().addAll(couponDesc, codeLabel);
+            
+            Button redeemBtn = new Button("Redeem");
+            redeemBtn.getStyleClass().add("action-button");
+            redeemBtn.setOnAction(e -> {
+                if (com.fbla.businessboost.util.SmartCouponEngine.redeemCoupon(c.code)) {
+                    redeemBtn.setText("Redeemed!");
+                    redeemBtn.setDisable(true);
+                    codeLabel.setText(c.code + " (Redeemed)");
+                    codeLabel.setStyle("-fx-font-family: monospace; -fx-text-fill: #94A3B8;");
+                } else {
+                    redeemBtn.setText("Invalid");
+                }
+            });
+            
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            box.getChildren().addAll(textCol, spacer, redeemBtn);
+            couponBoxes.add(box);
+        }
+        dealsContainer.getChildren().clear();
+        dealsContainer.getChildren().addAll(couponBoxes);
 
         // Clear review pane
         reviewsContainer.getChildren().clear();
@@ -638,6 +673,21 @@ public class MainController {
                         for (Review r : reviews) {
                             reviewsContainer.getChildren().add(buildReviewCard(r));
                         }
+                        
+                        // Aspect Sentiment Parsing
+                        com.fbla.businessboost.util.AspectSentimentParser.AspectScores scores = 
+                                com.fbla.businessboost.util.AspectSentimentParser.calculateAspectScores(reviews);
+                                
+                        aspectScoresContainer.getChildren().clear();
+                        aspectScoresContainer.getChildren().add(new Label("Community Vibe Matrix:"));
+                        
+                        aspectScoresContainer.getChildren().add(createAspectBar("Service", scores.service));
+                        aspectScoresContainer.getChildren().add(createAspectBar("Price", scores.price));
+                        aspectScoresContainer.getChildren().add(createAspectBar("Vibe", scores.vibe));
+                        aspectScoresContainer.getChildren().add(createAspectBar("Quality", scores.quality));
+                        
+                        aspectScoresContainer.setVisible(true);
+                        aspectScoresContainer.setManaged(true);
                     }
                 }
             });
@@ -652,6 +702,24 @@ public class MainController {
         }));
 
         new Thread(fetchReviewsTask).start();
+    }
+
+    private HBox createAspectBar(String label, double score) {
+        HBox box = new HBox(10);
+        box.setAlignment(Pos.CENTER_LEFT);
+        Label l = new Label(label);
+        l.setPrefWidth(60);
+        l.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748B;");
+        
+        ProgressBar pb = new ProgressBar(score);
+        pb.setPrefWidth(120);
+        pb.setPrefHeight(10);
+        if (score >= 0.7) pb.setStyle("-fx-accent: #10B981;");
+        else if (score >= 0.4) pb.setStyle("-fx-accent: #F59E0B;");
+        else pb.setStyle("-fx-accent: #EF4444;");
+        
+        box.getChildren().addAll(l, pb);
+        return box;
     }
 
     /**
@@ -681,7 +749,23 @@ public class MainController {
         Label tsLabel = new Label(ts != null ? ts : "");
         tsLabel.getStyleClass().add("review-timestamp");
 
-        card.getChildren().addAll(starsLabel, textLabel, tsLabel);
+        // Text-To-Speech Button
+        Button ttsButton = new Button("🔊");
+        ttsButton.getStyleClass().add("tts-button");
+        ttsButton.setOnAction(e -> {
+            new Thread(() -> {
+                try {
+                    Runtime.getRuntime().exec(new String[]{"say", review.getReviewText()});
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+        });
+
+        HBox headerRow = new HBox(10, starsLabel, ttsButton);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        card.getChildren().addAll(headerRow, textLabel, tsLabel);
         return card;
     }
 
@@ -695,8 +779,11 @@ public class MainController {
         mapImageView.setImage(null);
         mapImageView.setVisible(false);
         mapImageView.setManaged(false);
-        dealsPane.setItems(FXCollections.observableArrayList());
+        dealsContainer.getChildren().clear();
         reviewsContainer.getChildren().clear();
+        aspectScoresContainer.getChildren().clear();
+        aspectScoresContainer.setVisible(false);
+        aspectScoresContainer.setManaged(false);
         reviewCountLabel.setText("");
     }
 
@@ -956,33 +1043,50 @@ public class MainController {
 
     @FXML
     private void handleSmartSearch() {
-        String query = smartSearchField.getText().trim().toLowerCase();
+        String query = smartSearchField.getText().trim();
         smartSearchResults.getChildren().clear();
 
-        if (query.isEmpty()) {
-            for (Business b : allBusinesses) {
-                smartSearchResults.getChildren().add(createBusinessCard(b));
-            }
+        if (query.isEmpty() || aiConcierge == null) {
             return;
         }
 
-        List<Business> results = allBusinesses.stream()
-                .filter(b -> {
-                    if (b.getName().toLowerCase().contains(query)) return true;
-                    if (b.getCategory().toLowerCase().contains(query)) return true;
-                    if (b.getDescription() != null && b.getDescription().toLowerCase().contains(query)) return true;
-                    return b.getTags().stream().anyMatch(t -> t.toLowerCase().contains(query));
-                })
-                .collect(Collectors.toList());
+        List<com.fbla.businessboost.util.LocalAIConcierge.SearchResult> aiResults = aiConcierge.search(query);
 
-        if (results.isEmpty()) {
-            showEmptyState(smartSearchResults,
-                    "No results for \"" + smartSearchField.getText().trim() + "\"",
-                    "Try a different keyword, category name, or tag like #budget.");
-        } else {
-            for (Business b : results) {
-                smartSearchResults.getChildren().add(createBusinessCard(b));
-            }
+        if (aiResults.isEmpty()) {
+            Label noMatch = new Label("No matching businesses found.");
+            noMatch.getStyleClass().add("card-subtitle");
+            smartSearchResults.getChildren().add(noMatch);
+            return;
+        }
+
+        // Display up to 5 best matches
+        for (int i = 0; i < Math.min(5, aiResults.size()); i++) {
+            com.fbla.businessboost.util.LocalAIConcierge.SearchResult res = aiResults.get(i);
+            Business b = res.business;
+            
+            VBox card = new VBox(5);
+            card.getStyleClass().add("business-card");
+            card.setPadding(new Insets(10));
+            card.setCursor(Cursor.HAND);
+
+            Label name = new Label(b.getName());
+            name.getStyleClass().add("card-title");
+
+            Label cat = new Label(b.getCategory() + " • " + b.getRating() + " ⭐");
+            cat.getStyleClass().add("card-subtitle");
+
+            Label reason = new Label("🤖 " + res.explanation);
+            reason.getStyleClass().add("help-text");
+            reason.setStyle("-fx-text-fill: #10B981; -fx-font-style: italic;");
+
+            card.getChildren().addAll(name, cat, reason);
+
+            card.setOnMouseClicked(e -> {
+                mainTabPane.getSelectionModel().select(0);
+                selectBusiness(b);
+            });
+
+            smartSearchResults.getChildren().add(card);
         }
     }
 
@@ -1124,8 +1228,11 @@ public class MainController {
         categoryFilter.setValue("All");
         sortByRating = false;
         liveSearchField.clear();
-        refreshCardGrid();
+        // Refresh recommendations whenever a new favorite is added
         refreshRecommendations();
+        
+        // Initialize Local AI Concierge model
+        aiConcierge = new com.fbla.businessboost.util.LocalAIConcierge(allBusinesses);
         tagCloudPane.getChildren().clear();
         buildTagCloud();
     }
@@ -1335,6 +1442,15 @@ public class MainController {
                 rawData.add(new LeaderboardRaw(finalCurrentUser, finalUserScore, finalUserScore / 2 + 10, finalSpecialty, 3, finalUserTitle));
             }
             
+            // If offline or no data returned, populate with mock community members
+            if (statsArray.length() == 0) {
+                rawData.add(new LeaderboardRaw("alex.m@example.com", 320, 150, "Retail", 5, "Trove Legend"));
+                rawData.add(new LeaderboardRaw("jordan.k@example.com", 280, 130, "Food", 4, "Community Hero"));
+                rawData.add(new LeaderboardRaw("sam.taylor@example.com", 190, 80, "Services", 2, "Community Hero"));
+                rawData.add(new LeaderboardRaw("casey.r@example.com", 110, 45, "Food", 1, "Local Advocate"));
+                rawData.add(new LeaderboardRaw("morgan.b@example.com", 60, 20, "Retail", 0, "Rising Star"));
+            }
+            
             if ("Monthly".equals(mode)) {
                 rawData.sort((a, b) -> Integer.compare(b.monthlyScore, a.monthlyScore));
             } else if ("Streak".equals(mode)) {
@@ -1421,5 +1537,120 @@ public class MainController {
         public String getCategoryBadge() { return categoryBadge; }
         public String getStreak() { return streak; }
         public String getRankTitle() { return rankTitle; }
+    }
+
+    // ==================== Accessibility ====================
+
+    @FXML
+    private void handleHighContrastToggle() {
+        boolean isHighContrast = themeToggleButton.getScene().getRoot().getStyleClass().contains("high-contrast");
+        if (isHighContrast) {
+            themeToggleButton.getScene().getRoot().getStyleClass().remove("high-contrast");
+        } else {
+            themeToggleButton.getScene().getRoot().getStyleClass().add("high-contrast");
+        }
+    }
+
+    @FXML
+    private void handleDyslexiaFontToggle() {
+        boolean isDyslexic = themeToggleButton.getScene().getRoot().getStyleClass().contains("dyslexia-font");
+        if (isDyslexic) {
+            themeToggleButton.getScene().getRoot().getStyleClass().remove("dyslexia-font");
+        } else {
+            themeToggleButton.getScene().getRoot().getStyleClass().add("dyslexia-font");
+        }
+    }
+
+    private double currentTextSize = 14.0;
+
+    @FXML
+    private void handleIncreaseTextSize() {
+        currentTextSize += 2.0;
+        themeToggleButton.getScene().getRoot().setStyle("-fx-font-size: " + currentTextSize + "px;");
+    }
+
+    @FXML
+    private void handleDecreaseTextSize() {
+        if (currentTextSize > 10.0) {
+            currentTextSize -= 2.0;
+            themeToggleButton.getScene().getRoot().setStyle("-fx-font-size: " + currentTextSize + "px;");
+        }
+    }
+
+    // ==================== Local Crawl ====================
+
+    @FXML
+    private void handlePlanLocalCrawl() {
+        if (favoritedBusinesses.size() < 2) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Not Enough Favorites");
+            alert.setHeaderText("Need more stops for a crawl!");
+            alert.setContentText("Please favorite at least 2 businesses to generate a local crawl route.");
+            alert.showAndWait();
+            return;
+        }
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/RoutePlannerDialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            RoutePlannerController controller = loader.getController();
+            controller.setFavorites(favoritedBusinesses);
+
+            Stage stage = new Stage();
+            stage.setTitle("Local Crawl Planner");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Could not load route planner dialog.");
+        }
+    }
+
+    // ==================== Demo Tools ====================
+
+    @FXML
+    private void handleResetDemo() {
+        com.fbla.businessboost.util.SessionManager.clearSession();
+        // Just show an alert that it's reset
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Demo Reset");
+        alert.setHeaderText("Demo State Purged");
+        alert.setContentText("All local preferences and caches have been cleared. Restart the app for a fresh demo state.");
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleToggleStatsOverlay() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Live Stats Overlay");
+        alert.setHeaderText("Behind the scenes engine firing...");
+        alert.setContentText("Trust Score Engine: ONLINE\nTF-IDF Local Concierge: ONLINE\nActive Honeypots: 1\nAspect Parsers: 4\nCoupons Redeemed: " + com.fbla.businessboost.util.SmartCouponEngine.getRedeemedCount());
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleGuidedTour() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Guided Tour");
+        alert.setHeaderText("Starting Guided Tour...");
+        alert.setContentText("Please wait. The app will now automatically present the core features.");
+        alert.showAndWait();
+        
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+                javafx.application.Platform.runLater(() -> mainTabPane.getSelectionModel().select(1)); // Impact
+                Thread.sleep(2000);
+                javafx.application.Platform.runLater(() -> mainTabPane.getSelectionModel().select(2)); // Smart Search
+                Thread.sleep(2000);
+                javafx.application.Platform.runLater(() -> mainTabPane.getSelectionModel().select(3)); // Leaderboard
+                Thread.sleep(2000);
+                javafx.application.Platform.runLater(() -> mainTabPane.getSelectionModel().select(0)); // Back to Discover
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }

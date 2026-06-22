@@ -44,6 +44,15 @@ public class SessionManager {
         prefs.remove(PREF_KEY);
     }
 
+    public static void clearSession() {
+        try {
+            prefs.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        currentUsername = null;
+    }
+
     // ==================== Favorites Persistence ====================
 
     /**

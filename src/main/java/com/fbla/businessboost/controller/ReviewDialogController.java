@@ -38,8 +38,15 @@ public class ReviewDialogController {
     private HBox sentimentWarningBox;
     @FXML
     private Label sentimentWarningLabel;
+    @FXML
+    private TextField honeypotField;
+    @FXML
+    private Label mathChallengeLabel;
+    @FXML
+    private TextField mathAnswerField;
 
     private Business business;
+    private int expectedMathAnswer;
 
     /** Whether the reCAPTCHA has been successfully completed */
     private boolean captchaVerified = false;
@@ -82,6 +89,11 @@ public class ReviewDialogController {
 
         // Add sentiment check on text change too
         reviewTextArea.textProperty().addListener((obs, oldVal, newVal) -> checkSentiment());
+
+        // Setup Proof of Work Math Challenge
+        int[] pow = com.fbla.businessboost.util.ReviewTrustEngine.generateProofOfWork();
+        mathChallengeLabel.setText("What is " + pow[0] + " + " + pow[1] + "?");
+        expectedMathAnswer = pow[2];
 
         // Load reCAPTCHA
         loadRecaptcha();
@@ -158,9 +170,34 @@ public class ReviewDialogController {
      */
     @FXML
     private void handleSubmit() {
-        // Step 1: reCAPTCHA verification
+        // Step 0: Rate Limiting
+        String username = com.fbla.businessboost.util.SessionManager.getCurrentUser();
+        if (com.fbla.businessboost.util.ReviewTrustEngine.isRateLimited(username)) {
+            showError("You are submitting reviews too quickly. Please wait 10 seconds before trying again.");
+            return;
+        }
+
+        // Step 1: Layered Bot Defenses
         if (!captchaVerified) {
             showError("Please complete the reCAPTCHA verification to prove you're human.");
+            return;
+        }
+        
+        // Honeypot check (bots fill hidden fields)
+        if (honeypotField != null && !honeypotField.getText().isEmpty()) {
+            showError("Automated bot submission detected (honeypot triggered).");
+            return;
+        }
+        
+        // Proof of Work check
+        try {
+            int answer = Integer.parseInt(mathAnswerField.getText().trim());
+            if (answer != expectedMathAnswer) {
+                showError("Incorrect math answer. Please try again.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showError("Please enter a valid number for the math challenge.");
             return;
         }
 
@@ -171,10 +208,11 @@ public class ReviewDialogController {
             return;
         }
 
-        // Step 3: Update business rating with weighted average
+        // Step 3: Update business rating with TRULY weighted average using TrustEngine
         double currentRating = business.getRating();
         double newRating = ratingSlider.getValue();
-        final double updatedRating = Math.round(((currentRating * 5 + newRating) / 6.0) * 10.0) / 10.0;
+        // Assume base business has 5 reviews for weighting math
+        final double updatedRating = com.fbla.businessboost.util.ReviewTrustEngine.weightRating(username, newRating, currentRating, 5);
         business.setRating(updatedRating);
 
         // Step 4: Save review to Supabase and track locally

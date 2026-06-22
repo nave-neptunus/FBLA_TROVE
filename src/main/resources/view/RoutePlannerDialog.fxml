@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/21" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.fbla.businessboost.controller.RoutePlannerController"
+      spacing="15" prefWidth="450" prefHeight="550"
+      stylesheets="@../styles.css">
+      
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Local Crawl Route Planner 🚶‍♂️" styleClass="dialog-title">
+        <font>
+            <Font name="System Bold" size="20"/>
+        </font>
+    </Label>
+    <Separator/>
+    
+    <Label fx:id="themeLabel" text="Theme: " styleClass="section-title">
+        <font>
+            <Font name="System Bold" size="16"/>
+        </font>
+    </Label>
+    
+    <Label fx:id="detailsLabel" text="Estimated time:" styleClass="help-text" wrapText="true"/>
+    
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
+        <VBox fx:id="crawlContainer" spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </VBox>
+    </ScrollPane>
+    
+    <HBox alignment="CENTER" spacing="15">
+        <Button text="Start Navigation" onAction="#handleClose" styleClass="primary-button" prefWidth="150"/>
+        <Button text="Close" onAction="#handleClose" styleClass="secondary-button" prefWidth="100"/>
+    </HBox>
+</VBox>

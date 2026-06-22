@@ -56,6 +56,19 @@
                   VBox.vgrow="ALWAYS"/>
     </VBox>
     
+    <!-- Bot Honeypot (Invisible to humans, bots will fill it) -->
+    <TextField fx:id="honeypotField" visible="false" managed="false"/>
+    
+    <!-- Proof of Work Math Challenge -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="mathChallengeLabel" text="What is 5 + 3?" styleClass="field-label">
+            <font>
+                <Font name="System Bold" size="14"/>
+            </font>
+        </Label>
+        <TextField fx:id="mathAnswerField" prefWidth="60"/>
+    </HBox>
+    
     <!-- Sentiment Warning (hidden by default) -->
     <HBox fx:id="sentimentWarningBox" styleClass="sentiment-warning" 
           managed="false" visible="false" alignment="CENTER_LEFT" spacing="6">

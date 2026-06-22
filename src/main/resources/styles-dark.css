@@ -1476,3 +1476,44 @@
     -fx-font-size: 13px;
     -fx-font-style: italic;
 }
+
+/* ==================== Accessibility Modes ==================== */
+.high-contrast {
+    -color-bg-canvas: #000000;
+    -color-bg-surface: #000000;
+    -color-bg-subtle: #111111;
+    -color-bg-muted: #222222;
+    -color-text-primary: #FFFF00;
+    -color-text-secondary: #FFFFFF;
+    -color-text-tertiary: #DDDDDD;
+    -color-text-on-accent: #000000;
+    -color-border: #FFFFFF;
+    -color-border-strong: #FFFFFF;
+    -color-accent: #FFFF00;
+    -color-accent-hover: #DDDD00;
+    -color-accent-pressed: #BBBB00;
+    -color-accent-subtle: #222200;
+    -color-success: #00FF00;
+    -color-warning: #FF9F0A;
+    -color-danger: #FF0000;
+    -color-rating: #FFFF00;
+}
+
+.high-contrast .button, .high-contrast .text-field, .high-contrast .list-cell, .high-contrast .table-cell {
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 2px;
+}
+
+.high-contrast .label {
+    -fx-font-weight: bold;
+}
+
+.dyslexia-font {
+    -fx-font-family: 'Comic Sans MS', 'OpenDyslexic', sans-serif !important;
+}
+
+.dyslexia-font .label, .dyslexia-font .text, .dyslexia-font .button {
+    -fx-font-family: 'Comic Sans MS', 'OpenDyslexic', sans-serif !important;
+    -fx-letter-spacing: 1px;
+    -fx-line-spacing: 4px;
+}
