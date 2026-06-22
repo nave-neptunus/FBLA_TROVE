@@ -34,6 +34,6 @@ public class Review {
 
     @Override
     public String toString() {
-        return String.format("%.1f ⭐ - \"%s\"", rating, reviewText);
+        return String.format("%.1f / 5.0 - \"%s\"", rating, reviewText);
     }
 }

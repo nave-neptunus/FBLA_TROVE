@@ -115,7 +115,7 @@ public class ReviewDialogController {
             if (newTitle != null && newTitle.startsWith("CAPTCHA_OK:")) {
                 captchaVerified = true;
                 Platform.runLater(() -> {
-                    captchaStatusLabel.setText("✅ Verification complete");
+                    captchaStatusLabel.setText("Verification complete");
                     captchaStatusLabel.getStyleClass().add("caption-success");
                 });
             }
@@ -139,9 +139,9 @@ public class ReviewDialogController {
         boolean hasNegative = Arrays.stream(NEGATIVE_WORDS).anyMatch(lowerText::contains);
 
         if (rating <= 2 && hasPositive && !hasNegative) {
-            showSentimentWarning("⚠ Your rating seems low for such a positive review. Is this intentional?");
+            showSentimentWarning("Warning: Your rating seems low for such a positive review. Is this intentional?");
         } else if (rating >= 4 && hasNegative && !hasPositive) {
-            showSentimentWarning("⚠ Your rating seems high given the negative feedback. Is this intentional?");
+            showSentimentWarning("Warning: Your rating seems high given the negative feedback. Is this intentional?");
         } else {
             hideSentimentWarning();
         }
@@ -221,7 +221,7 @@ public class ReviewDialogController {
             SupabaseClient.saveReview(business.getName(), newRating, reviewText.trim());
             Platform.runLater(() -> {
                 showSuccess("Review submitted successfully! Rating updated to "
-                        + String.format("%.1f", updatedRating) + " ⭐");
+                        + String.format("%.1f", updatedRating) + " ★");
             });
         }).start();
 
@@ -232,7 +232,7 @@ public class ReviewDialogController {
     private void handleSkipCaptcha() {
         this.captchaVerified = true;
         Platform.runLater(() -> {
-            captchaStatusLabel.setText("✅ Presentation Mode: Captcha Skipped");
+            captchaStatusLabel.setText("Presentation Mode: Captcha Skipped");
             captchaStatusLabel.getStyleClass().add("caption-success");
         });
     }

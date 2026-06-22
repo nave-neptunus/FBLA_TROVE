@@ -62,13 +62,13 @@ public class CaptchaServer {
             // ---- Facebook login page ----
             server.createContext("/oauth/facebook", exchange -> {
                 sendHtml(exchange, buildSimpleOAuthPage("Facebook",
-                        "#1877F2", "#fff", "🔷"));
+                        "#1877F2", "#fff", ""));
             });
 
             // ---- Yahoo login page ----
             server.createContext("/oauth/yahoo", exchange -> {
                 sendHtml(exchange, buildSimpleOAuthPage("Yahoo",
-                        "#720E9E", "#fff", "🟣"));
+                        "#720E9E", "#fff", ""));
             });
 
             // ---- Apple login page ----

@@ -40,10 +40,10 @@
     -color-border-strong:   #D1D1D6;
 
     /* Accent */
-    -color-accent:          #0D9488;
-    -color-accent-hover:    #0F766E;
-    -color-accent-pressed:  #115E59;
-    -color-accent-subtle:   #F0FDFA;
+    -color-accent:          #7C3AED;
+    -color-accent-hover:    #6D28D9;
+    -color-accent-pressed:  #5B21B6;
+    -color-accent-subtle:   #F5F3FF;
 
     /* Semantic */
     -color-success:         #34C759;
@@ -52,11 +52,11 @@
     -color-rating:          #FF9500;
 
     /* Chart palette */
-    -color-chart-1:         #0D9488;
-    -color-chart-2:         #3B82F6;
-    -color-chart-3:         #F59E0B;
-    -color-chart-4:         #EC4899;
-    -color-chart-5:         #8B5CF6;
+    -color-chart-1:         #7C3AED;
+    -color-chart-2:         #8B5CF6;
+    -color-chart-3:         #A78BFA;
+    -color-chart-4:         #C4B5FD;
+    -color-chart-5:         #D8B4FE;
 
     /* Apply base tokens */
     -fx-background-color: -color-bg-canvas;
@@ -65,17 +65,17 @@
 
 /* ==================== Global Focus Indicator ==================== */
 .button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.35), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.35), 6, 0, 0, 0);
 }
 .toggle-button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.35), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.35), 6, 0, 0, 0);
 }
 .combo-box:focused {
     -fx-border-color: -color-accent;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.15), 4, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.15), 4, 0, 0, 0);
 }
 .slider:focused .thumb {
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.4), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.4), 6, 0, 0, 0);
 }
 
 /* ==================== Header (macOS Unified Titlebar) ==================== */
@@ -112,7 +112,7 @@
 .search-field:focused {
     -fx-border-color: -color-accent;
     -fx-background-color: -color-bg-surface;
-    -fx-effect: dropshadow(three-pass-box, rgba(13, 148, 136, 0.15), 4, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(124, 58, 237, 0.15), 4, 0, 0, 0);
 }
 
 .search-button {
@@ -340,22 +340,22 @@
 }
 
 .badge-food {
-    -fx-background-color: #E6F4EA;
-    -fx-text-fill: #137333;
+    -fx-background-color: #F5F3FF;
+    -fx-text-fill: #6D28D9;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
 
 .badge-retail {
-    -fx-background-color: #FEF7E0;
-    -fx-text-fill: #B06000;
+    -fx-background-color: #FAF5FF;
+    -fx-text-fill: #7E22CE;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
 
 .badge-services {
-    -fx-background-color: #E8F0FE;
-    -fx-text-fill: #1A73E8;
+    -fx-background-color: #FDF4FF;
+    -fx-text-fill: #A21CAF;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
@@ -418,18 +418,18 @@
     -fx-padding: 10 24;
     -fx-cursor: hand;
     -fx-font-weight: 600;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.2), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.2), 6, 0, 0, 2);
 }
 .action-button:hover {
     -fx-background-color: -color-accent-hover;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.35), 8, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.35), 8, 0, 0, 3);
 }
 .action-button:armed {
     -fx-background-color: -color-accent-pressed;
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.15), 4, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.15), 4, 0, 0, 1);
 }
 .action-button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(13, 148, 136, 0.45), 8, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.45), 8, 0, 0, 0);
 }
 
 .action-button-outline {
@@ -528,27 +528,27 @@
 }
 
 .stat-card-orange {
-    -fx-background-color: #FFFDF9;
-    -fx-border-color: #FFEDD5;
+    -fx-background-color: #FAF5FF;
+    -fx-border-color: #E9D5FF;
 }
 .stat-card-orange .stat-number {
-    -fx-text-fill: #EA580C;
+    -fx-text-fill: #9333EA;
 }
 
 .stat-card-blue {
-    -fx-background-color: #F9FBFF;
-    -fx-border-color: #DBEAFE;
+    -fx-background-color: #F5F3FF;
+    -fx-border-color: #DDD6FE;
 }
 .stat-card-blue .stat-number {
-    -fx-text-fill: #2563EB;
+    -fx-text-fill: #7C3AED;
 }
 
 .stat-card-green {
-    -fx-background-color: #FAFFFD;
-    -fx-border-color: #CCFBF1;
+    -fx-background-color: #FDF4FF;
+    -fx-border-color: #F5D0FE;
 }
 .stat-card-green .stat-number {
-    -fx-text-fill: -color-accent;
+    -fx-text-fill: #C026D3;
 }
 
 .stat-number {
@@ -575,12 +575,12 @@
 /* ==================== Chart Colors ==================== */
 .chart-bar {
     -fx-bar-fill: -color-chart-1;
-    -fx-background-color: linear-gradient(to top, #0D9488, #2DD4BF);
+    -fx-background-color: linear-gradient(to top, #6D28D9, #A78BFA);
     -fx-background-radius: 4 4 0 0;
 }
-.default-color0.chart-bar { -fx-bar-fill: -color-chart-1; -fx-background-color: linear-gradient(to top, #0D9488, #2DD4BF); }
-.default-color1.chart-bar { -fx-bar-fill: -color-chart-2; -fx-background-color: linear-gradient(to top, #3B82F6, #60A5FA); }
-.default-color2.chart-bar { -fx-bar-fill: -color-chart-3; -fx-background-color: linear-gradient(to top, #F59E0B, #FBBF24); }
+.default-color0.chart-bar { -fx-bar-fill: -color-chart-1; -fx-background-color: linear-gradient(to top, #6D28D9, #A78BFA); }
+.default-color1.chart-bar { -fx-bar-fill: -color-chart-2; -fx-background-color: linear-gradient(to top, #7C3AED, #C4B5FD); }
+.default-color2.chart-bar { -fx-bar-fill: -color-chart-3; -fx-background-color: linear-gradient(to top, #8B5CF6, #DDD6FE); }
 
 .chart-pie-slice {
     -fx-border-color: -color-bg-surface;
@@ -606,16 +606,16 @@
 }
 
 /* Chart bar category colors (applied from Java) */
-.chart-bar-food     { -fx-bar-fill: #E67E22; -fx-background-color: #E67E22; }
-.chart-bar-retail   { -fx-bar-fill: #3498DB; -fx-background-color: #3498DB; }
-.chart-bar-services { -fx-bar-fill: #9B59B6; -fx-background-color: #9B59B6; }
-.chart-bar-default  { -fx-bar-fill: #5BA08C; -fx-background-color: #5BA08C; }
+.chart-bar-food     { -fx-bar-fill: #7C3AED; -fx-background-color: #7C3AED; }
+.chart-bar-retail   { -fx-bar-fill: #9333EA; -fx-background-color: #9333EA; }
+.chart-bar-services { -fx-bar-fill: #C026D3; -fx-background-color: #C026D3; }
+.chart-bar-default  { -fx-bar-fill: #6B21A8; -fx-background-color: #6B21A8; }
 
 /* Pie chart rating colors (applied from Java) */
-.pie-excellent { -fx-pie-color: #2ECC71; -fx-background-color: #2ECC71; }
-.pie-good      { -fx-pie-color: #F1C40F; -fx-background-color: #F1C40F; }
-.pie-fair      { -fx-pie-color: #E67E22; -fx-background-color: #E67E22; }
-.pie-poor      { -fx-pie-color: #E74C3C; -fx-background-color: #E74C3C; }
+.pie-excellent { -fx-pie-color: #6D28D9; -fx-background-color: #6D28D9; }
+.pie-good      { -fx-pie-color: #8B5CF6; -fx-background-color: #8B5CF6; }
+.pie-fair      { -fx-pie-color: #C084FC; -fx-background-color: #C084FC; }
+.pie-poor      { -fx-pie-color: #9CA3AF; -fx-background-color: #9CA3AF; }
 
 /* ==================== Recommendation Section ==================== */
 .recommendation-section {

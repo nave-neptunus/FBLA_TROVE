@@ -294,7 +294,7 @@ public class LoginController {
         Stage captchaStage = new Stage();
         captchaStage.initModality(Modality.APPLICATION_MODAL);
         captchaStage.initOwner(usernameField.getScene().getWindow());
-        captchaStage.setTitle("🛡 Verify You're Human");
+        captchaStage.setTitle("Verify You're Human");
         captchaStage.setResizable(false);
 
         WebView webView = new WebView();
@@ -310,7 +310,7 @@ public class LoginController {
                 captchaVerified = true;
                 Platform.runLater(() -> {
                     captchaStage.close();
-                    statusLabel.setText("✅ Verified! Creating account...");
+                    statusLabel.setText("Verified! Creating account...");
                     onVerified.run();
                 });
             }

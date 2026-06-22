@@ -79,7 +79,7 @@ public class OfflineCache {
             root.put("businesses", arr);
 
             Files.writeString(CACHE_FILE, root.toString(2), StandardCharsets.UTF_8);
-            System.out.println("✅ Offline cache saved: " + businesses.size() + " businesses for ZIP " + zipCode);
+            System.out.println("Offline cache saved: " + businesses.size() + " businesses for ZIP " + zipCode);
         } catch (Exception e) {
             System.err.println("Failed to write offline cache: " + e.getMessage());
         }
@@ -143,7 +143,7 @@ public class OfflineCache {
 
                 result.add(b);
             }
-            System.out.println("📦 Loaded " + result.size() + " businesses from offline cache.");
+            System.out.println("Loaded " + result.size() + " businesses from offline cache.");
         } catch (Exception e) {
             System.err.println("Failed to load offline cache: " + e.getMessage());
         }

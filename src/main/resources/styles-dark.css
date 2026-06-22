@@ -40,10 +40,10 @@
     -color-border-strong:   #3F3F46;
 
     /* Accent */
-    -color-accent:          #14B8A6;
-    -color-accent-hover:    #2DD4BF;
-    -color-accent-pressed:  #5EEAD4;
-    -color-accent-subtle:   #042F2E;
+    -color-accent:          #A78BFA;
+    -color-accent-hover:    #C4B5FD;
+    -color-accent-pressed:  #DDD6FE;
+    -color-accent-subtle:   #2E1065;
 
     /* Semantic */
     -color-success:         #30D158;
@@ -52,11 +52,11 @@
     -color-rating:          #F59E0B;
 
     /* Chart palette */
-    -color-chart-1:         #0D9488;
-    -color-chart-2:         #3B82F6;
-    -color-chart-3:         #F59E0B;
-    -color-chart-4:         #EC4899;
-    -color-chart-5:         #8B5CF6;
+    -color-chart-1:         #A78BFA;
+    -color-chart-2:         #8B5CF6;
+    -color-chart-3:         #C4B5FD;
+    -color-chart-4:         #D8B4FE;
+    -color-chart-5:         #E879F9;
 
     /* Apply base tokens */
     -fx-background-color: -color-bg-canvas;
@@ -65,17 +65,17 @@
 
 /* ==================== Global Focus Indicator ==================== */
 .button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.35), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.35), 6, 0, 0, 0);
 }
 .toggle-button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.35), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.35), 6, 0, 0, 0);
 }
 .combo-box:focused {
     -fx-border-color: -color-accent;
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.15), 4, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.15), 4, 0, 0, 0);
 }
 .slider:focused .thumb {
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.4), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.4), 6, 0, 0, 0);
 }
 
 /* ==================== Header (macOS Unified Titlebar) ==================== */
@@ -112,7 +112,7 @@
 .search-field:focused {
     -fx-border-color: -color-accent;
     -fx-background-color: -color-bg-surface;
-    -fx-effect: dropshadow(three-pass-box, rgba(20, 184, 166, 0.15), 4, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(167, 139, 250, 0.15), 4, 0, 0, 0);
 }
 
 .search-button {
@@ -340,22 +340,22 @@
 }
 
 .badge-food {
-    -fx-background-color: #133A26;
-    -fx-text-fill: #A3E635;
+    -fx-background-color: #2E1065;
+    -fx-text-fill: #C4B5FD;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
 
 .badge-retail {
-    -fx-background-color: #4C260D;
-    -fx-text-fill: #FB923C;
+    -fx-background-color: #3B0764;
+    -fx-text-fill: #D8B4FE;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
 
 .badge-services {
-    -fx-background-color: #172A45;
-    -fx-text-fill: #60A5FA;
+    -fx-background-color: #4A044E;
+    -fx-text-fill: #E879F9;
     -fx-background-radius: 12;
     -fx-padding: 4 12;
 }
@@ -418,18 +418,18 @@
     -fx-padding: 10 24;
     -fx-cursor: hand;
     -fx-font-weight: 700;
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.2), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.2), 6, 0, 0, 2);
 }
 .action-button:hover {
     -fx-background-color: -color-accent-hover;
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.35), 8, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.35), 8, 0, 0, 3);
 }
 .action-button:armed {
     -fx-background-color: -color-accent-pressed;
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.15), 4, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.15), 4, 0, 0, 1);
 }
 .action-button:focused {
-    -fx-effect: dropshadow(gaussian, rgba(20, 184, 166, 0.45), 8, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(167, 139, 250, 0.45), 8, 0, 0, 0);
 }
 
 .action-button-outline {
@@ -469,8 +469,8 @@
     -fx-background-color: transparent;
 }
 .list-cell:selected {
-    -fx-background-color: #115E59;
-    -fx-text-fill: #2DD4BF;
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent;
     -fx-font-weight: 600;
 }
 .list-cell:hover {
@@ -528,27 +528,27 @@
 }
 
 .stat-card-orange {
-    -fx-background-color: #2A170A;
-    -fx-border-color: #431407;
+    -fx-background-color: #2E1065;
+    -fx-border-color: #5B21B6;
 }
 .stat-card-orange .stat-number {
-    -fx-text-fill: #FB923C;
+    -fx-text-fill: #D8B4FE;
 }
 
 .stat-card-blue {
-    -fx-background-color: #0F172A;
-    -fx-border-color: #1E3A8A;
+    -fx-background-color: #3B0764;
+    -fx-border-color: #6D28D9;
 }
 .stat-card-blue .stat-number {
-    -fx-text-fill: #60A5FA;
+    -fx-text-fill: #C4B5FD;
 }
 
 .stat-card-green {
-    -fx-background-color: #042F2E;
-    -fx-border-color: #115E59;
+    -fx-background-color: #4A044E;
+    -fx-border-color: #701A75;
 }
 .stat-card-green .stat-number {
-    -fx-text-fill: #2DD4BF;
+    -fx-text-fill: #E879F9;
 }
 
 .stat-number {
@@ -575,12 +575,12 @@
 /* ==================== Chart Colors ==================== */
 .chart-bar {
     -fx-bar-fill: -color-chart-1;
-    -fx-background-color: linear-gradient(to top, #0F766E, #14B8A6);
+    -fx-background-color: linear-gradient(to top, #2E1065, #A78BFA);
     -fx-background-radius: 4 4 0 0;
 }
-.default-color0.chart-bar { -fx-bar-fill: -color-chart-1; -fx-background-color: linear-gradient(to top, #0F766E, #14B8A6); }
-.default-color1.chart-bar { -fx-bar-fill: -color-chart-2; -fx-background-color: linear-gradient(to top, #1D4ED8, #3B82F6); }
-.default-color2.chart-bar { -fx-bar-fill: -color-chart-3; -fx-background-color: linear-gradient(to top, #B45309, #F59E0B); }
+.default-color0.chart-bar { -fx-bar-fill: -color-chart-1; -fx-background-color: linear-gradient(to top, #2E1065, #A78BFA); }
+.default-color1.chart-bar { -fx-bar-fill: -color-chart-2; -fx-background-color: linear-gradient(to top, #3B0764, #C4B5FD); }
+.default-color2.chart-bar { -fx-bar-fill: -color-chart-3; -fx-background-color: linear-gradient(to top, #4A044E, #DDD6FE); }
 
 .chart-pie-slice {
     -fx-border-color: #18181B;
@@ -606,16 +606,16 @@
 }
 
 /* Chart bar category colors (applied from Java) */
-.chart-bar-food     { -fx-bar-fill: #E67E22; -fx-background-color: #E67E22; }
-.chart-bar-retail   { -fx-bar-fill: #3498DB; -fx-background-color: #3498DB; }
-.chart-bar-services { -fx-bar-fill: #9B59B6; -fx-background-color: #9B59B6; }
-.chart-bar-default  { -fx-bar-fill: #5BA08C; -fx-background-color: #5BA08C; }
+.chart-bar-food     { -fx-bar-fill: #A78BFA; -fx-background-color: #A78BFA; }
+.chart-bar-retail   { -fx-bar-fill: #D8B4FE; -fx-background-color: #D8B4FE; }
+.chart-bar-services { -fx-bar-fill: #E879F9; -fx-background-color: #E879F9; }
+.chart-bar-default  { -fx-bar-fill: #6D28D9; -fx-background-color: #6D28D9; }
 
 /* Pie chart rating colors (applied from Java) */
-.pie-excellent { -fx-pie-color: #2ECC71; -fx-background-color: #2ECC71; }
-.pie-good      { -fx-pie-color: #F1C40F; -fx-background-color: #F1C40F; }
-.pie-fair      { -fx-pie-color: #E67E22; -fx-background-color: #E67E22; }
-.pie-poor      { -fx-pie-color: #E74C3C; -fx-background-color: #E74C3C; }
+.pie-excellent { -fx-pie-color: #8B5CF6; -fx-background-color: #8B5CF6; }
+.pie-good      { -fx-pie-color: #C4B5FD; -fx-background-color: #C4B5FD; }
+.pie-fair      { -fx-pie-color: #D8B4FE; -fx-background-color: #D8B4FE; }
+.pie-poor      { -fx-pie-color: #4B5563; -fx-background-color: #4B5563; }
 
 /* ==================== Recommendation Section ==================== */
 .recommendation-section {
