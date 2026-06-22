@@ -391,7 +391,7 @@ public class SupabaseClient {
     /**
      * Saves/updates the current snapshot of user stats in Supabase.
      */
-    public static boolean saveUserStats(String username, int totalFavorites, double avgRating, String topCategory) {
+    public static boolean saveUserStats(String username, int totalFavorites, double avgRating, String topCategory, int totalReviews, int userScore) {
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_stats").toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -409,6 +409,8 @@ public class SupabaseClient {
             jsonBody.put("total_favorites", totalFavorites);
             jsonBody.put("avg_rating", avgRating);
             jsonBody.put("top_category", topCategory);
+            jsonBody.put("total_reviews", totalReviews);
+            jsonBody.put("user_score", userScore);
 
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
@@ -457,6 +459,38 @@ public class SupabaseClient {
             System.err.println("Error fetching user stats: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Fetches all user stats for the leaderboard.
+     */
+    public static JSONArray getAllUserStats() {
+        try {
+            URL url = URI.create(SUPABASE_URL + "/rest/v1/user_stats?select=username,total_favorites,avg_rating,top_category,total_reviews,user_score")
+                    .toURL();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("apikey", SUPABASE_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
+            conn.setConnectTimeout(NETWORK_TIMEOUT_MS);
+            conn.setReadTimeout(NETWORK_TIMEOUT_MS);
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    return new JSONArray(response.toString());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching all user stats: " + e.getMessage());
+        }
+        return new JSONArray();
     }
 
     // ==================== Local Offline Fallback Implementation ====================

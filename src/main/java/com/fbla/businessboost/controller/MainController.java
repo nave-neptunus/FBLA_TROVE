@@ -940,7 +940,9 @@ public class MainController {
             final double finalAvgRating = avgRating;
             final String finalTopCat = topCat;
             if (user != null) {
-                new Thread(() -> SupabaseClient.saveUserStats(user, totalFavs, finalAvgRating, finalTopCat)).start();
+                int totalReviews = SessionManager.getReviewCount();
+                int score = (totalFavs * 10) + (totalReviews * 25) + (3 * 50);
+                new Thread(() -> SupabaseClient.saveUserStats(user, totalFavs, finalAvgRating, finalTopCat, totalReviews, score)).start();
             }
         } else {
             statAvgRating.setText("0.0");
@@ -1152,6 +1154,7 @@ public class MainController {
             dialogStage.showAndWait();
 
             selectBusiness(selectedBusiness);
+            refreshLeaderboard();
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Failed to load review dialog: " + e.getMessage());
         }
@@ -1283,58 +1286,98 @@ public class MainController {
             userTitle = "Rising Star";
         }
 
-        List<LeaderboardRaw> rawData = new ArrayList<>();
-        rawData.add(new LeaderboardRaw("sarah.jones@example.com", 450, 120, "Food Supporter", 12, "Trove Legend"));
-        rawData.add(new LeaderboardRaw("michael.smith@example.com", 380, 140, "Retail Supporter", 8, "Pillar of Community"));
-        rawData.add(new LeaderboardRaw("emily.davis@example.com", 310, 95, "Service Supporter", 5, "Community Hero"));
-        rawData.add(new LeaderboardRaw("david.brown@example.com", 220, 80, "Local Supporter", 4, "Local Advocate"));
-        rawData.add(new LeaderboardRaw("jessica.wilson@example.com", 140, 60, "Retail Supporter", 2, "Rising Star"));
+        final String finalCurrentUser = currentUser;
+        final int finalUserScore = userScore;
+        final String finalSpecialty = specialty;
+        final String finalUserTitle = userTitle;
+        final int finalReviews = reviews;
         
-        int userMonthlyScore = userScore / 2 + 10;
-        rawData.add(new LeaderboardRaw(currentUser, userScore, userMonthlyScore, specialty, streakWeeks, userTitle));
-
-        if ("Monthly".equals(mode)) {
-            rawData.sort((a, b) -> Integer.compare(b.monthlyScore, a.monthlyScore));
-        } else if ("Streak".equals(mode)) {
-            rawData.sort((a, b) -> Integer.compare(b.streakWeeks, a.streakWeeks));
-        } else if ("Category".equals(mode)) {
-            rawData.sort((a, b) -> {
-                int cmp = a.specialty.compareTo(b.specialty);
-                if (cmp == 0) {
-                    return Integer.compare(b.globalScore, a.globalScore);
+        // Ensure user stats are saved to Supabase before fetching leaderboard
+        new Thread(() -> {
+            SupabaseClient.saveUserStats(finalCurrentUser, totalFavs, 5.0, finalSpecialty, finalReviews, finalUserScore);
+            org.json.JSONArray statsArray = SupabaseClient.getAllUserStats();
+            List<LeaderboardRaw> rawData = new ArrayList<>();
+            boolean currentUserFound = false;
+            
+            Set<String> seenEmails = new HashSet<>();
+            for (int i = 0; i < statsArray.length(); i++) {
+                org.json.JSONObject obj = statsArray.getJSONObject(i);
+                String email = obj.optString("username", "unknown");
+                if (seenEmails.contains(email)) continue;
+                seenEmails.add(email);
+                
+                int f = obj.optInt("total_favorites", 0);
+                double avg = obj.optDouble("avg_rating", 0.0);
+                String cat = obj.optString("top_category", "Local");
+                
+                int r = obj.optInt("total_reviews", f / 2);
+                int fakeStreak = (f % 5) + 1;
+                int score = obj.optInt("user_score", (f * 10) + (r * 25) + (fakeStreak * 50));
+                int monthlyScore = score / 2 + 10;
+                
+                String s = cat == null || cat.isEmpty() ? "Local Explorer" : cat + " Supporter";
+                String title;
+                if (score >= 300) title = "Trove Legend";
+                else if (score >= 150) title = "Community Hero";
+                else if (score >= 50) title = "Local Advocate";
+                else title = "Rising Star";
+                
+                if (email.equals(finalCurrentUser)) {
+                    // Use local computed stats for current user
+                    rawData.add(new LeaderboardRaw(finalCurrentUser, finalUserScore, finalUserScore / 2 + 10, finalSpecialty, 3, finalUserTitle));
+                    currentUserFound = true;
+                } else {
+                    rawData.add(new LeaderboardRaw(email, score, monthlyScore, s, fakeStreak, title));
                 }
-                return cmp;
-            });
-        } else {
-            rawData.sort((a, b) -> Integer.compare(b.globalScore, a.globalScore));
-        }
-
-        ObservableList<LeaderboardUser> usersList = FXCollections.observableArrayList();
-        int userRankPosition = 6;
-        int displayScore = 0;
-
-        for (int i = 0; i < rawData.size(); i++) {
-            LeaderboardRaw raw = rawData.get(i);
-            int rank = i + 1;
-            int score = "Monthly".equals(mode) ? raw.monthlyScore : raw.globalScore;
-            String streakDisplay = raw.streakWeeks + (raw.streakWeeks == 1 ? " week" : " weeks");
-
-            LeaderboardUser lUser = new LeaderboardUser(rank, raw.email, score, raw.specialty, streakDisplay, raw.title);
-            usersList.add(lUser);
-
-            if (raw.email.equals(currentUser)) {
-                userRankPosition = rank;
-                displayScore = score;
             }
-        }
+            
+            if (!currentUserFound) {
+                rawData.add(new LeaderboardRaw(finalCurrentUser, finalUserScore, finalUserScore / 2 + 10, finalSpecialty, 3, finalUserTitle));
+            }
+            
+            if ("Monthly".equals(mode)) {
+                rawData.sort((a, b) -> Integer.compare(b.monthlyScore, a.monthlyScore));
+            } else if ("Streak".equals(mode)) {
+                rawData.sort((a, b) -> Integer.compare(b.streakWeeks, a.streakWeeks));
+            } else if ("Category".equals(mode)) {
+                rawData.sort((a, b) -> {
+                    int cmp = a.specialty.compareTo(b.specialty);
+                    if (cmp == 0) return Integer.compare(b.globalScore, a.globalScore);
+                    return cmp;
+                });
+            } else {
+                rawData.sort((a, b) -> Integer.compare(b.globalScore, a.globalScore));
+            }
 
-        leaderboardTable.setItems(usersList);
+            Platform.runLater(() -> {
+                ObservableList<LeaderboardUser> usersList = FXCollections.observableArrayList();
+                int userRankPosition = rawData.size() + 1;
+                int displayScore = 0;
 
-        lblUserRank.setText("#" + userRankPosition);
-        lblUserScore.setText(displayScore + " pts");
-        double percentile = ((7.0 - userRankPosition) / 6.0) * 100.0;
-        if (percentile > 100) percentile = 100;
-        lblUserPercentile.setText(String.format("Top %.0f%% of community supporters", percentile));
+                for (int i = 0; i < rawData.size(); i++) {
+                    LeaderboardRaw raw = rawData.get(i);
+                    int rank = i + 1;
+                    int score = "Monthly".equals(mode) ? raw.monthlyScore : raw.globalScore;
+                    String streakDisplay = raw.streakWeeks + (raw.streakWeeks == 1 ? " week" : " weeks");
+
+                    LeaderboardUser lUser = new LeaderboardUser(rank, raw.email, score, raw.specialty, streakDisplay, raw.title);
+                    usersList.add(lUser);
+
+                    if (raw.email.equals(finalCurrentUser)) {
+                        userRankPosition = rank;
+                        displayScore = score;
+                    }
+                }
+
+                leaderboardTable.setItems(usersList);
+
+                lblUserRank.setText("#" + userRankPosition);
+                lblUserScore.setText(displayScore + " pts");
+                double percentile = rawData.size() == 0 ? 100.0 : ((double)(rawData.size() - userRankPosition + 1) / rawData.size()) * 100.0;
+                if (percentile > 100) percentile = 100;
+                lblUserPercentile.setText(String.format("Top %.0f%% of community supporters", percentile));
+            });
+        }).start();
     }
 
     private static class LeaderboardRaw {
