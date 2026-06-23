@@ -1110,6 +1110,36 @@
     -fx-cursor: hand;
     -fx-border-color: transparent;
 }
+.onboarding-skip-btn:hover {
+    -fx-text-fill: -color-text-primary;
+}
+
+/* ==================== 10/10 Premium UI Polish Classes ==================== */
+.leaderboard-row {
+    -fx-padding: 8 12;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+}
+.leaderboard-row:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 2);
+}
+
+.empty-state-icon {
+    -fx-font-size: 48px;
+    -fx-opacity: 0.5;
+}
+
+.coupon-box {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-accent;
+    -fx-border-style: dashed;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12 16;
+}
 .onboarding-category-toggle {
     -fx-background-color: -color-bg-canvas;
     -fx-text-fill: -color-text-primary;
@@ -1454,7 +1484,11 @@
     -fx-background-color: rgba(255, 255, 255, 0.015);
 }
 .leaderboard-table .table-row-cell:selected {
+    -fx-background-color: rgba(168, 85, 247, 0.2);
+}
+.leaderboard-table .table-row-cell:hover {
     -fx-background-color: rgba(168, 85, 247, 0.1);
+    -fx-cursor: hand;
 }
 .leaderboard-table .table-cell {
     -fx-alignment: center-left;
