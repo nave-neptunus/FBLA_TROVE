@@ -32,21 +32,7 @@
                     <Button fx:id="themeToggleButton" text="Theme: Dark" onAction="#handleThemeToggle" 
                             styleClass="theme-toggle-button"
                             accessibleText="Toggle dark mode"/>
-                    <MenuButton text="Accessibility" styleClass="theme-toggle-button" accessibleText="Accessibility Options">
-                        <items>
-                            <MenuItem text="Toggle High Contrast" onAction="#handleHighContrastToggle"/>
-                            <MenuItem text="Toggle Dyslexia Font" onAction="#handleDyslexiaFontToggle"/>
-                            <MenuItem text="Increase Text Size" onAction="#handleIncreaseTextSize"/>
-                            <MenuItem text="Decrease Text Size" onAction="#handleDecreaseTextSize"/>
-                        </items>
-                    </MenuButton>
-                    <MenuButton text="Demo Tools" styleClass="theme-toggle-button" accessibleText="Demo presentation tools">
-                        <items>
-                            <MenuItem text="Reset Demo Data" onAction="#handleResetDemo"/>
-                            <MenuItem text="Toggle Live Stats Overlay" onAction="#handleToggleStatsOverlay"/>
-                            <MenuItem text="Run Guided Tour" onAction="#handleGuidedTour"/>
-                        </items>
-                    </MenuButton>
+
                     <Button text="Logout" onAction="#handleLogout" styleClass="theme-toggle-button"
                             accessibleText="Log out of Trove"/>
                 </HBox>
@@ -102,8 +88,8 @@
                                         majorTickUnit="1" minorTickCount="0" snapToTicks="true"
                                         showTickMarks="false" prefWidth="90"
                                         accessibleText="Search radius slider"/>
-                                <Button text="Rating" onAction="#handleSortByRating" styleClass="sort-button"
-                                        accessibleText="Sort businesses by rating descending"/>
+                                <Button text="Rating ⏷" onAction="#handleSortByRating" styleClass="sort-button"
+                                        accessibleText="Sort by rating"/>
                             </HBox>
                             
                             <!-- Inline Result Banner (hidden by default) -->
@@ -129,7 +115,7 @@
                             
                             <!-- Recommendation Section -->
                             <VBox fx:id="recommendationSection" spacing="8" styleClass="recommendation-section"
-                                  managed="false" visible="false">
+                                  managed="false" visible="false" minHeight="-Infinity">
                                 <padding>
                                     <Insets top="12" right="20" bottom="12" left="20"/>
                                 </padding>

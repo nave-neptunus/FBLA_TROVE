@@ -227,6 +227,22 @@ public class MainController {
         if (!preferredZip.isEmpty()) {
             zipCodeField.setText(preferredZip);
         }
+
+        Platform.runLater(() -> {
+            if (businessCardGrid.getScene() != null) {
+                businessCardGrid.getScene().setOnKeyPressed(e -> {
+                    if ((e.isControlDown() || e.isMetaDown()) && e.isShiftDown()) {
+                        if (e.getCode() == javafx.scene.input.KeyCode.D) {
+                            handleToggleStatsOverlay();
+                        } else if (e.getCode() == javafx.scene.input.KeyCode.R) {
+                            handleResetDemo();
+                        } else if (e.getCode() == javafx.scene.input.KeyCode.G) {
+                            handleGuidedTour();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     // ==================== Distance Slider ====================
@@ -467,15 +483,29 @@ public class MainController {
         // Heart button overlay with accessibility text
         Button heartBtn = new Button(business.isFavorite() ? "❤️" : "🤍");
         heartBtn.getStyleClass().add("card-heart-button");
+        if (business.isFavorite()) {
+            heartBtn.getStyleClass().add("favorite-active");
+        }
         heartBtn.setAccessibleText(business.isFavorite()
                 ? "Remove " + business.getName() + " from favorites"
                 : "Add " + business.getName() + " to favorites");
-        heartBtn.setOnAction(e -> {
-            business.setFavorite(!business.isFavorite());
-            heartBtn.setText(business.isFavorite() ? "❤️" : "🤍");
-            heartBtn.setAccessibleText(business.isFavorite()
+        
+        business.favoriteProperty().addListener((obs, oldVal, newVal) -> {
+            heartBtn.setText(newVal ? "❤️" : "🤍");
+            if (newVal) {
+                if (!heartBtn.getStyleClass().contains("favorite-active")) {
+                    heartBtn.getStyleClass().add("favorite-active");
+                }
+            } else {
+                heartBtn.getStyleClass().remove("favorite-active");
+            }
+            heartBtn.setAccessibleText(newVal
                     ? "Remove " + business.getName() + " from favorites"
                     : "Add " + business.getName() + " to favorites");
+        });
+
+        heartBtn.setOnAction(e -> {
+            business.setFavorite(!business.isFavorite());
         });
         StackPane.setAlignment(heartBtn, Pos.TOP_RIGHT);
         StackPane.setMargin(heartBtn, new Insets(8, 8, 0, 0));
@@ -568,13 +598,36 @@ public class MainController {
         businessDescriptionLabel.setText(desc != null && !desc.trim().isEmpty() ? desc : "");
 
         String phone = business.getPhone();
-        businessPhoneLabel.setText(phone != null && !phone.isEmpty() ? "📞 " + phone : "📞 Phone unavailable");
-
         String website = business.getWebsite();
-        businessWebsiteLabel.setText(website != null && !website.isEmpty() ? "🌐 " + website : "🌐 Website unavailable");
-
         String hours = business.getHours();
-        businessHoursLabel.setText(hours != null && !hours.isEmpty() ? "🕒 " + hours : "🕒 Hours unavailable");
+
+        boolean noPhone = phone == null || phone.isEmpty();
+        boolean noWeb = website == null || website.isEmpty();
+        boolean noHours = hours == null || hours.isEmpty();
+
+        if (noPhone && noWeb && noHours) {
+            businessPhoneLabel.setText("Contact business directly to confirm hours and details.");
+            businessPhoneLabel.setManaged(true);
+            businessPhoneLabel.setVisible(true);
+            
+            businessWebsiteLabel.setVisible(false);
+            businessWebsiteLabel.setManaged(false);
+            
+            businessHoursLabel.setVisible(false);
+            businessHoursLabel.setManaged(false);
+        } else {
+            businessPhoneLabel.setVisible(!noPhone);
+            businessPhoneLabel.setManaged(!noPhone);
+            if (!noPhone) businessPhoneLabel.setText("📞 " + phone);
+
+            businessWebsiteLabel.setVisible(!noWeb);
+            businessWebsiteLabel.setManaged(!noWeb);
+            if (!noWeb) businessWebsiteLabel.setText("🌐 " + website);
+
+            businessHoursLabel.setVisible(!noHours);
+            businessHoursLabel.setManaged(!noHours);
+            if (!noHours) businessHoursLabel.setText("🕒 " + hours);
+        }
 
         // Load business image
         String imgUrl = business.getImageUrl();
@@ -621,6 +674,8 @@ public class MainController {
             VBox textCol = new VBox(2);
             Label couponDesc = new Label(c.description);
             couponDesc.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+            couponDesc.setWrapText(true);
+            couponDesc.setTooltip(new Tooltip(c.description));
             Label codeLabel = new Label(c.code + " (" + c.getFormattedExpiry() + ")");
             codeLabel.setStyle("-fx-font-family: monospace; -fx-text-fill: #10B981; -fx-font-size: 12px;");
             textCol.getChildren().addAll(couponDesc, codeLabel);
@@ -826,7 +881,7 @@ public class MainController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setText(String.format("%s (%.1f⭐)", business.getName(), business.getRating()));
+                    setText(business.getName() + " " + buildStarString(business.getRating()) + " " + String.format("%.1f", business.getRating()));
                 }
             }
         });
@@ -936,6 +991,8 @@ public class MainController {
         if (!matchingTags.isEmpty()) {
             Label whyLabel = new Label("Because you love: " + String.join(" ", matchingTags));
             whyLabel.getStyleClass().add("rec-why-label");
+            whyLabel.setWrapText(true);
+            whyLabel.setTooltip(new Tooltip(whyLabel.getText()));
             whyLabel.setWrapText(true);
             card.getChildren().addAll(name, category, whyLabel);
         } else {
@@ -1121,11 +1178,11 @@ public class MainController {
         stylesheets.clear();
         if (darkMode) {
             stylesheets.add(lightCss);
-            themeToggleButton.setText("Theme: Dark");
+            themeToggleButton.setText("Switch to Dark Mode");
             darkMode = false;
         } else {
             stylesheets.add(darkCss);
-            themeToggleButton.setText("Theme: Light");
+            themeToggleButton.setText("Switch to Light Mode");
             darkMode = true;
         }
     }
@@ -1235,6 +1292,7 @@ public class MainController {
         liveSearchField.clear();
         // Refresh recommendations whenever a new favorite is added
         refreshRecommendations();
+        refreshCardGrid();
         
         // Initialize Local AI Concierge model
         aiConcierge = new com.fbla.businessboost.util.LocalAIConcierge(allBusinesses);
