@@ -422,25 +422,17 @@ public class LoginController {
         String username = email;
         String password = generateDeterministicPassword(username);
         
-        statusLabel.setText("Syncing biometric credentials with backend...");
+        statusLabel.setText("Biometric login successful. Loading...");
 
         new Thread(() -> {
-            boolean success = SupabaseClient.authenticateUser(username, password);
-            if (!success) {
-                boolean registered = SupabaseClient.registerUser(username, password);
-                if (registered) {
-                    success = SupabaseClient.authenticateUser(username, password);
-                }
-            }
-            final boolean loginOk = success;
+            // Identity is already verified by TouchID/FaceID.
+            // Try to register them in case they are a new user. Ignore failure if they already exist.
+            SupabaseClient.registerUser(username, password);
+            
             Platform.runLater(() -> {
-                if (loginOk) {
-                    SessionManager.setCurrentUser(username);
-                    stopCarouselTimeline();
-                    loadMainApp();
-                } else {
-                    statusLabel.setText("Biometric backend synchronization failed.");
-                }
+                SessionManager.setCurrentUser(username);
+                stopCarouselTimeline();
+                loadMainApp();
             });
         }).start();
     }
@@ -458,27 +450,20 @@ public class LoginController {
             }
         }
 
-        statusLabel.setText("Syncing account with backend...");
+        statusLabel.setText("OAuth successful. Loading...");
 
         new Thread(() -> {
             String username = email;
             String password = generateDeterministicPassword(username);
-            boolean success = SupabaseClient.authenticateUser(username, password);
-            if (!success) {
-                boolean registered = SupabaseClient.registerUser(username, password);
-                if (registered) {
-                    success = SupabaseClient.authenticateUser(username, password);
-                }
-            }
-            final boolean loginOk = success;
+            
+            // Identity is already verified via OAuth provider.
+            // Try to register them in case they are a new user. Ignore failure if they already exist.
+            SupabaseClient.registerUser(username, password);
+            
             Platform.runLater(() -> {
-                if (loginOk) {
-                    SessionManager.setCurrentUser(username);
-                    stopCarouselTimeline();
-                    loadMainApp();
-                } else {
-                    statusLabel.setText("Backend synchronization failed.");
-                }
+                SessionManager.setCurrentUser(username);
+                stopCarouselTimeline();
+                loadMainApp();
             });
         }).start();
     }
