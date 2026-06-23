@@ -12,14 +12,14 @@ import java.util.prefs.Preferences;
  */
 public class SessionManager {
 
-    private static String currentUsername = null;
+    private static volatile String currentUsername = null;
     private static final Preferences prefs = Preferences.userNodeForPackage(SessionManager.class);
     private static final String PREF_KEY = "logged_in_user";
     private static final String FAV_PREFIX = "favorites_";
 
     // ==================== Session ====================
 
-    public static void setCurrentUser(String username) {
+    public static synchronized void setCurrentUser(String username) {
         currentUsername = username;
         if (username != null) {
             prefs.put(PREF_KEY, username);
@@ -28,29 +28,46 @@ public class SessionManager {
         }
     }
 
-    public static String getCurrentUser() {
+    public static synchronized String getCurrentUser() {
         if (currentUsername == null) {
             currentUsername = prefs.get(PREF_KEY, null);
         }
         return currentUsername;
     }
 
-    public static boolean isLoggedIn() {
+    public static synchronized boolean isLoggedIn() {
         return getCurrentUser() != null;
     }
 
-    public static void logout() {
+    public static synchronized void logout() {
         currentUsername = null;
         prefs.remove(PREF_KEY);
     }
 
-    public static void clearSession() {
+    public static synchronized void clearSession() {
         try {
             prefs.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
         currentUsername = null;
+    }
+
+    public static synchronized void setFullName(String firstName, String lastName) {
+        String user = getCurrentUser();
+        if (user != null) {
+            prefs.put("first_name_" + user, firstName != null ? firstName : "");
+            prefs.put("last_name_" + user, lastName != null ? lastName : "");
+        }
+    }
+
+    public static synchronized String getFullName() {
+        String user = getCurrentUser();
+        if (user == null) return "Guest";
+        String first = prefs.get("first_name_" + user, "");
+        String last = prefs.get("last_name_" + user, "");
+        if (first.isEmpty() && last.isEmpty()) return user;
+        return (first + " " + last).trim();
     }
 
     // ==================== Favorites Persistence ====================

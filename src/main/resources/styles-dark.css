@@ -12,9 +12,9 @@
 }
 
 /* ===================================================================
-   Commercio — Premium Dark Theme
+   Trove — Premium Dark Theme
    Apple HIG-Inspired · Tokenized Color System · 8px Spacing Grid
-   Accent: Teal (#14B8A6)  ·  Font: Inter  ·  Radius: 8/10/12/20
+   Accent: Purple (#A78BFA)  ·  Font: Inter  ·  Radius: 8/10/12/20
    =================================================================== */
 
 /* ==================== Design Tokens ==================== */
@@ -44,6 +44,10 @@
     -color-accent-hover:    #C4B5FD;
     -color-accent-pressed:  #DDD6FE;
     -color-accent-subtle:   #2E1065;
+
+    /* Focus */
+    -fx-focus-color: -color-accent;
+    -fx-faint-focus-color: transparent;
 
     /* Semantic */
     -color-success:         #30D158;
@@ -519,35 +523,35 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 8, 0, 0, 2);
 }
 
-.stat-card-purple {
+.stat-card-primary {
     -fx-background-color: #1E112F;
     -fx-border-color: #3B0764;
 }
-.stat-card-purple .stat-number {
+.stat-card-primary .stat-number {
     -fx-text-fill: #C084FC;
 }
 
-.stat-card-orange {
+.stat-card-secondary {
     -fx-background-color: #2E1065;
     -fx-border-color: #5B21B6;
 }
-.stat-card-orange .stat-number {
+.stat-card-secondary .stat-number {
     -fx-text-fill: #D8B4FE;
 }
 
-.stat-card-blue {
+.stat-card-tertiary {
     -fx-background-color: #3B0764;
     -fx-border-color: #6D28D9;
 }
-.stat-card-blue .stat-number {
+.stat-card-tertiary .stat-number {
     -fx-text-fill: #C4B5FD;
 }
 
-.stat-card-green {
+.stat-card-quaternary {
     -fx-background-color: #4A044E;
     -fx-border-color: #701A75;
 }
-.stat-card-green .stat-number {
+.stat-card-quaternary .stat-number {
     -fx-text-fill: #E879F9;
 }
 
@@ -1493,6 +1497,10 @@
     -color-accent-hover: #DDDD00;
     -color-accent-pressed: #BBBB00;
     -color-accent-subtle: #222200;
+
+    /* Focus */
+    -fx-focus-color: -color-accent;
+    -fx-faint-focus-color: transparent;
     -color-success: #00FF00;
     -color-warning: #FF9F0A;
     -color-danger: #FF0000;

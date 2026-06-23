@@ -1,10 +1,10 @@
-# 🚀 Commercio
+# 🚀 Trove
 
 A professional JavaFX desktop application for discovering local businesses, submitting reviews, managing favorites, and generating impact reports.
 
 ## 🎯 Project Overview
 
-Built for the FBLA "Byte-Sized Business Boost" competition, Commercio demonstrates:
+Built for the FBLA "Byte-Sized Business Boost" competition, Trove demonstrates:
 - **MVC Architecture** with clear separation of concerns
 - **Modern Tabbed Interface** (Discover, My Impact, Smart Search)
 - **Intelligent Recommendation Engine** ("The Local Matchmaker")
@@ -92,7 +92,7 @@ This prevents a single review from causing dramatic rating swings while still re
 ## 📁 Project Structure
 
 ```
-commercio/
+trove/
 ├── pom.xml
 ├── src/
 │   └── main/

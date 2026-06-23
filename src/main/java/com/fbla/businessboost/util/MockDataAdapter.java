@@ -4,9 +4,8 @@ import com.fbla.businessboost.model.Business;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MockDataAdapter implements DataSourceAdapter {
+public class MockDataAdapter {
 
-    @Override
     public List<Business> fetchBusinesses() {
         List<Business> businesses = new ArrayList<>();
 

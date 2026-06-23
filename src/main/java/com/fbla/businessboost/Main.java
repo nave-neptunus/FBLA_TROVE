@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Main application entry point for FBLA Business Boost — Commercio.
+ * Main application entry point for FBLA Business Boost — Trove.
  *
  * <p>
  * <strong>Startup flow:</strong>
@@ -61,7 +61,9 @@ public class Main extends Application {
 
             if (!com.fbla.businessboost.util.SessionManager.isOnboardingComplete()) {
                 // First login — show onboarding wizard
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OnboardingView.fxml"));
+                java.net.URL resource = getClass().getResource("/view/OnboardingView.fxml");
+                if (resource == null) throw new IOException("Cannot find /view/OnboardingView.fxml");
+                FXMLLoader loader = new FXMLLoader(resource);
                 Scene scene = new Scene(loader.load(), 600, 500);
                 primaryStage.setTitle("Welcome to Trove!");
                 primaryStage.setScene(scene);
@@ -69,7 +71,9 @@ public class Main extends Application {
                 primaryStage.setMinHeight(460);
             } else {
                 // Returning user — go straight to the dashboard
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
+                java.net.URL resource = getClass().getResource("/view/MainView.fxml");
+                if (resource == null) throw new IOException("Cannot find /view/MainView.fxml");
+                FXMLLoader loader = new FXMLLoader(resource);
                 Scene scene = new Scene(loader.load(), 1200, 750);
                 primaryStage.setTitle("Trove — Logged in as: " + user);
                 primaryStage.setScene(scene);
@@ -78,7 +82,9 @@ public class Main extends Application {
             }
         } else {
             // Not logged in — show login screen
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
+            java.net.URL resource = getClass().getResource("/view/LoginView.fxml");
+            if (resource == null) throw new IOException("Cannot find /view/LoginView.fxml");
+            FXMLLoader loader = new FXMLLoader(resource);
             Scene scene = new Scene(loader.load(), 850, 550);
             primaryStage.setTitle("Trove — Sign In");
             primaryStage.setScene(scene);

@@ -22,22 +22,8 @@ import java.util.List;
  */
 public class DataManager {
 
-    private static DataSourceAdapter currentAdapter = new MockDataAdapter();
-
-    /**
-     * Sets the active data source adapter.
-     */
-    public static void setAdapter(DataSourceAdapter adapter) {
-        currentAdapter = adapter;
-    }
-
-    /**
-     * Initializes and returns business data from the currently configured adapter.
-     *
-     * @return ObservableList of Business objects ready for card grid display
-     */
     public static ObservableList<Business> initializeMockData() {
-        List<Business> data = currentAdapter.fetchBusinesses();
+        List<Business> data = new MockDataAdapter().fetchBusinesses();
         return FXCollections.observableArrayList(data);
     }
 

@@ -129,12 +129,12 @@ public class LoginController {
     private void updateCarousel() {
         carouselText.setText(carouselSlides[currentSlideIndex]);
         for (int i = 0; i < indicators.length; i++) {
+            indicators[i].getStyleClass().remove("carousel-dot-active");
+            indicators[i].getStyleClass().remove("carousel-dot");
             if (i == currentSlideIndex) {
-                indicators[i].getStyleClass().clear();
                 indicators[i].getStyleClass().add("carousel-dot-active");
                 indicators[i].setWidth(24.0);
             } else {
-                indicators[i].getStyleClass().clear();
                 indicators[i].getStyleClass().add("carousel-dot");
                 indicators[i].setWidth(8.0);
             }
@@ -150,6 +150,7 @@ public class LoginController {
 
     private void setMode(boolean signUpMode) {
         this.isSignUpMode = signUpMode;
+        this.captchaVerified = false; // Reset CAPTCHA state on mode switch
         statusLabel.setText("");
 
         if (signUpMode) {
@@ -220,6 +221,11 @@ public class LoginController {
             return;
         }
 
+        if (!username.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            statusLabel.setText("Please enter a valid email address.");
+            return;
+        }
+
         statusLabel.setText("Signing in...");
 
         new Thread(() -> {
@@ -254,10 +260,24 @@ public class LoginController {
             return;
         }
 
+        if (!username.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            statusLabel.setText("Please enter a valid email address.");
+            return;
+        }
+
+        if (password.length() < 8) {
+            statusLabel.setText("Password must be at least 8 characters.");
+            return;
+        }
+
         if (!termsCheckbox.isSelected()) {
             statusLabel.setText("You must agree to the Terms & Conditions.");
             return;
         }
+
+        // Save first and last name locally
+        java.util.prefs.Preferences.userNodeForPackage(LoginController.class).put("first_name_" + username, firstName);
+        java.util.prefs.Preferences.userNodeForPackage(LoginController.class).put("last_name_" + username, lastName);
 
         // If not yet verified, open captcha popup first
         if (!captchaVerified) {
@@ -398,12 +418,9 @@ public class LoginController {
         return false;
     }
 
-    /**
-     * Authenticates and registers a biometric credential against the backend.
-     */
     private void handleBiometricLogin(String provider, String email) {
         String username = email;
-        String password = "biometric_secure_pass_123!"; // Fixed secure password for biometric users
+        String password = generateDeterministicPassword(username);
         
         statusLabel.setText("Syncing biometric credentials with backend...");
 
@@ -433,11 +450,19 @@ public class LoginController {
         String prefKey = provider.toLowerCase() + "_remembered_email";
         java.util.prefs.Preferences.userNodeForPackage(LoginController.class).put(prefKey, email);
 
+        if (name != null) {
+            String[] nameParts = name.split(" ", 2);
+            java.util.prefs.Preferences.userNodeForPackage(LoginController.class).put("first_name_" + email, nameParts[0]);
+            if (nameParts.length > 1) {
+                java.util.prefs.Preferences.userNodeForPackage(LoginController.class).put("last_name_" + email, nameParts[1]);
+            }
+        }
+
         statusLabel.setText("Syncing account with backend...");
 
         new Thread(() -> {
             String username = email;
-            String password = "biometric_secure_pass_123!";
+            String password = generateDeterministicPassword(username);
             boolean success = SupabaseClient.authenticateUser(username, password);
             if (!success) {
                 boolean registered = SupabaseClient.registerUser(username, password);
@@ -476,6 +501,7 @@ public class LoginController {
             if (newTitle != null && newTitle.startsWith("OAUTH_OK:")) {
                 try {
                     String[] parts = newTitle.split(":", 4);
+                    if (parts.length < 3) throw new IllegalArgumentException("Invalid OAuth title format");
                     String name = java.net.URLDecoder.decode(parts[1], "UTF-8");
                     String email = java.net.URLDecoder.decode(parts[2], "UTF-8");
 
@@ -540,6 +566,22 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
             statusLabel.setText("Error loading main application.");
+        }
+    }
+
+    private String generateDeterministicPassword(String email) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest((email + "trove-biometric-salt").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString() + "!";
+        } catch (Exception e) {
+            return email + "_oauth_fallback!";
         }
     }
 }

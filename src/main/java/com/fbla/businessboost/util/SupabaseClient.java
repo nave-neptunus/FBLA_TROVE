@@ -37,9 +37,10 @@ public class SupabaseClient {
      * Saves a new review to the Supabase database. Falls back to local preferences if offline.
      */
     public static boolean saveReview(String businessName, double rating, String reviewText) {
+        HttpURLConnection conn = null;
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/reviews").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -76,12 +77,13 @@ public class SupabaseClient {
      */
     public static List<Review> getReviewsForBusiness(String businessName) {
         List<Review> reviews = new ArrayList<>();
+        HttpURLConnection conn = null;
         try {
             String encodedName = URLEncoder.encode(businessName, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/reviews?business_name=eq." + encodedName + "&select=*")
                     .toURL();
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -134,9 +136,11 @@ public class SupabaseClient {
         if (hashedPassword == null)
             return false;
 
+        HttpURLConnection conn = null;
+
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/app_users").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -186,12 +190,14 @@ public class SupabaseClient {
     public static boolean authenticateUser(String username, String password) {
         if (username == null || password == null) return false;
 
+        HttpURLConnection conn = null;
+
         try {
             String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/app_users?username=eq." + encodedUsername + "&select=password_hash")
                     .toURL();
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -231,11 +237,12 @@ public class SupabaseClient {
      */
     public static java.util.List<String> getUserFavorites(String username) {
         java.util.List<String> favorites = new java.util.ArrayList<>();
+        HttpURLConnection conn = null;
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&select=business_name")
                     .toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -267,9 +274,10 @@ public class SupabaseClient {
      * Adds a business to the user's favorites in Supabase.
      */
     public static boolean addFavorite(String username, String businessName) {
+        HttpURLConnection conn = null;
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_favorites").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -300,12 +308,13 @@ public class SupabaseClient {
      * Removes a business from the user's favorites in Supabase.
      */
     public static boolean removeFavorite(String username, String businessName) {
+        HttpURLConnection conn = null;
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             String encodedBusiness = URLEncoder.encode(businessName, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_favorites?username=eq." + encodedUser + "&business_name=eq." + encodedBusiness)
                     .toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -317,6 +326,10 @@ public class SupabaseClient {
         } catch (Exception e) {
             System.err.println("Failed to remove favorite: " + e.getMessage());
             return false;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 
@@ -324,9 +337,10 @@ public class SupabaseClient {
      * Saves a snapshot of generated report metadata to Supabase.
      */
     public static boolean saveReportMetadata(String username, int totalBusinesses, double avgRating, String categories) {
+        HttpURLConnection conn = null;
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_reports").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -359,11 +373,12 @@ public class SupabaseClient {
      * Fetches all past reports generated by a specific user.
      */
     public static JSONArray getUserReports(String username) {
+        HttpURLConnection conn = null;
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_reports?username=eq." + encodedUser + "&select=*&order=created_at.desc")
                     .toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -392,9 +407,10 @@ public class SupabaseClient {
      * Saves/updates the current snapshot of user stats in Supabase.
      */
     public static boolean saveUserStats(String username, int totalFavorites, double avgRating, String topCategory, int totalReviews, int userScore) {
+        HttpURLConnection conn = null;
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_stats").toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -429,11 +445,12 @@ public class SupabaseClient {
      * Fetches the latest stats snapshot for a specific user.
      */
     public static JSONObject getUserStats(String username) {
+        HttpURLConnection conn = null;
         try {
             String encodedUser = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_stats?username=eq." + encodedUser + "&select=*&order=updated_at.desc&limit=1")
                     .toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);
@@ -465,10 +482,11 @@ public class SupabaseClient {
      * Fetches all user stats for the leaderboard.
      */
     public static JSONArray getAllUserStats() {
+        HttpURLConnection conn = null;
         try {
             URL url = URI.create(SUPABASE_URL + "/rest/v1/user_stats?select=username,total_favorites,avg_rating,top_category,total_reviews,user_score")
                     .toURL();
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("apikey", SUPABASE_KEY);
             conn.setRequestProperty("Authorization", "Bearer " + SUPABASE_KEY);

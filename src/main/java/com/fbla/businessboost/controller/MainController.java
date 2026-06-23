@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Main controller for the Commercio dashboard.
+ * Main controller for the Trove dashboard.
  *
  * <p>
  * Manages the tabbed UI (Discover, My Impact, Smart Search), card grid,
@@ -755,7 +755,10 @@ public class MainController {
         ttsButton.setOnAction(e -> {
             new Thread(() -> {
                 try {
-                    Runtime.getRuntime().exec(new String[]{"say", review.getReviewText()});
+                    String safeText = review.getReviewText().replaceAll("[\"'-]", " ");
+                    if (!safeText.trim().isEmpty()) {
+                        Runtime.getRuntime().exec(new String[]{"say", safeText});
+                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -1131,7 +1134,9 @@ public class MainController {
     private void handleLogout() {
         SessionManager.logout();
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
+            java.net.URL resource = getClass().getResource("/view/LoginView.fxml");
+            if (resource == null) throw new java.io.IOException("Cannot find /view/LoginView.fxml");
+            FXMLLoader loader = new FXMLLoader(resource);
             Stage stage = (Stage) themeToggleButton.getScene().getWindow();
             stage.setTitle("Trove — Sign In");
             stage.setScene(new Scene(loader.load(), 850, 550));
@@ -1246,7 +1251,9 @@ public class MainController {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ReviewDialog.fxml"));
+            java.net.URL resource = getClass().getResource("/view/ReviewDialog.fxml");
+            if (resource == null) throw new java.io.IOException("Cannot find /view/ReviewDialog.fxml");
+            FXMLLoader loader = new FXMLLoader(resource);
             Scene scene = new Scene(loader.load());
             if (darkMode) {
                 scene.getStylesheets().add(getClass().getResource("/styles-dark.css").toExternalForm());
@@ -1591,7 +1598,9 @@ public class MainController {
         }
 
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/RoutePlannerDialog.fxml"));
+            java.net.URL resource = getClass().getResource("/view/RoutePlannerDialog.fxml");
+            if (resource == null) throw new java.io.IOException("Cannot find /view/RoutePlannerDialog.fxml");
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(resource);
             javafx.scene.Parent root = loader.load();
 
             RoutePlannerController controller = loader.getController();

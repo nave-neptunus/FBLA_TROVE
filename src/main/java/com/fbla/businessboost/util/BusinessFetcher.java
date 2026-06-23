@@ -121,6 +121,7 @@ public class BusinessFetcher {
             zipResponse.append(inputLine);
         }
         in.close();
+        zipCon.disconnect();
 
         JSONObject zipJson = new JSONObject(zipResponse.toString());
         JSONObject place = zipJson.getJSONArray("places").getJSONObject(0);
@@ -159,6 +160,7 @@ public class BusinessFetcher {
                 errorIn.close();
                 System.err.println("Overpass API Error Response: " + errorResponse.toString());
             }
+            overpassCon.disconnect();
             throw new Exception("Failed to fetch businesses from Overpass API. HTTP Code: " + responseCode);
         }
 
@@ -168,6 +170,7 @@ public class BusinessFetcher {
             opResponse.append(inputLine);
         }
         opIn.close();
+        overpassCon.disconnect();
 
         JSONObject opJson = new JSONObject(opResponse.toString());
         JSONArray elements = opJson.getJSONArray("elements");

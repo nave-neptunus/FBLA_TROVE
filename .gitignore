@@ -43,3 +43,6 @@ dist/
 
 # Environment Variables
 .env
+lib/
+*.log
+reports/

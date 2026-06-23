@@ -15,7 +15,7 @@ import java.nio.file.*;
  * so the app can still show data when there is no internet connection.
  *
  * <p>
- * <strong>Cache format:</strong> A JSON file at {@code ~/.commercio_cache.json}
+ * <strong>Cache format:</strong> A JSON file at {@code ~/.trove_cache.json}
  * containing a JSON object with a {@code zip} string and a {@code businesses}
  * array. Each business element stores the fields needed to reconstruct a
  * {@link Business} object for display.
@@ -33,7 +33,7 @@ public class OfflineCache {
 
     /** Path to the local cache file, stored in the user's home directory. */
     private static final Path CACHE_FILE =
-            Paths.get(System.getProperty("user.home"), ".commercio_cache.json");
+            Paths.get(System.getProperty("user.home"), ".trove_cache.json");
 
     /**
      * Serializes a list of businesses to the local cache file.

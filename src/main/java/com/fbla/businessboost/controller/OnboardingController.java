@@ -147,7 +147,9 @@ public class OnboardingController {
      */
     private void loadMainApp() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
+            java.net.URL resource = getClass().getResource("/view/MainView.fxml");
+            if (resource == null) throw new IOException("Cannot find /view/MainView.fxml");
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
             Stage stage = (Stage) step1.getScene().getWindow();
             stage.setTitle("Trove — Logged in as: " + SessionManager.getCurrentUser());
@@ -156,6 +158,13 @@ public class OnboardingController {
             stage.setMinHeight(600);
         } catch (IOException e) {
             e.printStackTrace();
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                alert.setTitle("Loading Error");
+                alert.setHeaderText("Could not load dashboard");
+                alert.setContentText("An error occurred while loading the main application interface: " + e.getMessage());
+                alert.showAndWait();
+            });
         }
     }
 }

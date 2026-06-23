@@ -98,10 +98,10 @@ public class Business {
     private final StringProperty hours;
 
     /** Geographic latitude from OpenStreetMap (used for static map thumbnail) */
-    private double latitude = 0.0;
+    private final DoubleProperty latitude;
 
     /** Geographic longitude from OpenStreetMap (used for static map thumbnail) */
-    private double longitude = 0.0;
+    private final DoubleProperty longitude;
 
     /**
      * Constructs a new Business with the specified attributes.
@@ -125,6 +125,8 @@ public class Business {
         this.phone = new SimpleStringProperty("");
         this.website = new SimpleStringProperty("");
         this.hours = new SimpleStringProperty("");
+        this.latitude = new SimpleDoubleProperty(0.0);
+        this.longitude = new SimpleDoubleProperty(0.0);
     }
 
     // ==================== Name Property ====================
@@ -346,7 +348,7 @@ public class Business {
      * @return latitude in decimal degrees, or 0.0 if not set
      */
     public double getLatitude() {
-        return latitude;
+        return latitude.get();
     }
 
     /**
@@ -355,7 +357,11 @@ public class Business {
      * @param latitude latitude in decimal degrees
      */
     public void setLatitude(double latitude) {
-        this.latitude = latitude;
+        this.latitude.set(latitude);
+    }
+
+    public DoubleProperty latitudeProperty() {
+        return latitude;
     }
 
     /**
@@ -364,7 +370,7 @@ public class Business {
      * @return longitude in decimal degrees, or 0.0 if not set
      */
     public double getLongitude() {
-        return longitude;
+        return longitude.get();
     }
 
     /**
@@ -373,11 +379,30 @@ public class Business {
      * @param longitude longitude in decimal degrees
      */
     public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        this.longitude.set(longitude);
+    }
+
+    public DoubleProperty longitudeProperty() {
+        return longitude;
     }
 
     @Override
     public String toString() {
         return String.format("%s (%s) - Rating: %.1f", getName(), getCategory(), getRating());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Business business = (Business) o;
+        return java.util.Objects.equals(getName(), business.getName()) &&
+               java.util.Objects.equals(getCategory(), business.getCategory()) &&
+               Double.compare(getRating(), business.getRating()) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(getName(), getCategory(), getRating());
     }
 }
