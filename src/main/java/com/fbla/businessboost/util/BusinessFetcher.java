@@ -75,7 +75,7 @@ public class BusinessFetcher {
     }
 
     // Load API Key securely from environment variable
-    private static final String GOOGLE_PLACES_API_KEY = System.getenv("GOOGLE_PLACES_API_KEY");
+    private static final String BRANDFETCH_API_KEY = "REDACTED_BRANDFETCH_KEY";
 
     /**
      * Fetches businesses near the given ZIP code with a default 2km radius.
@@ -208,10 +208,15 @@ public class BusinessFetcher {
                     b.setLatitude(node.optDouble("lat", 0.0));
                     b.setLongitude(node.optDouble("lon", 0.0));
 
-                    // Fetch real image if API key is set, otherwise fall back to stock image
-                    String realImageUrl = fetchGooglePlacePhoto(name, lat, lon);
-                    if (realImageUrl != null) {
-                        b.setImageUrl(realImageUrl);
+                    String website = tags.has("website") ? tags.getString("website")
+                            : (tags.has("contact:website") ? tags.getString("contact:website") : null);
+                    if (website != null) {
+                        b.setWebsite(website);
+                    }
+
+                    String logoUrl = fetchBrandfetchLogo(website);
+                    if (logoUrl != null) {
+                        b.setImageUrl(logoUrl);
                     } else {
                         b.setImageUrl(getImageForCategory(category));
                     }
@@ -225,12 +230,6 @@ public class BusinessFetcher {
                         b.setPhone(tags.getString("phone"));
                     } else if (tags.has("contact:phone")) {
                         b.setPhone(tags.getString("contact:phone"));
-                    }
-
-                    if (tags.has("website")) {
-                        b.setWebsite(tags.getString("website"));
-                    } else if (tags.has("contact:website")) {
-                        b.setWebsite(tags.getString("contact:website"));
                     }
 
                     if (tags.has("opening_hours")) {
@@ -526,93 +525,66 @@ public class BusinessFetcher {
     }
 
     /**
-     * Attempts to fetch real storefront photo from Google Places API (New V1).
+     * Attempts to fetch a real logo from Brandfetch API.
      */
-    private static String fetchGooglePlacePhoto(String businessName, double lat, double lon) {
-        if (GOOGLE_PLACES_API_KEY == null || GOOGLE_PLACES_API_KEY.trim().isEmpty()) {
-            System.err.println("❌ Google API Key is missing from .env file!");
-            return null; // Don't attempt if key isn't set securely via environment
+    private static String fetchBrandfetchLogo(String domain) {
+        if (domain == null || domain.trim().isEmpty()) {
+            return null;
         }
 
         try {
-            System.out.println("🔍 Searching Google Places (V1) for: " + businessName);
+            // 1. Sanitize the domain
+            String sanitizedDomain = domain.replaceFirst("^(https?://)?(www\\.)?", "").split("/")[0];
+            System.out.println("🔍 Searching Brandfetch for: " + sanitizedDomain);
 
-            // 1. Search for Place using Places API (New) via POST
-            String searchUrl = "https://places.googleapis.com/v1/places:searchText";
-            URL url1 = URI.create(searchUrl).toURL();
-            HttpURLConnection con1 = (HttpURLConnection) url1.openConnection();
-            con1.setRequestMethod("POST");
-            con1.setRequestProperty("Content-Type", "application/json");
-            con1.setRequestProperty("X-Goog-Api-Key", GOOGLE_PLACES_API_KEY);
-            con1.setRequestProperty("X-Goog-FieldMask", "places.id,places.photos");
-            con1.setConnectTimeout(3000);
-            con1.setReadTimeout(3000);
-            con1.setDoOutput(true);
+            // 2. Call Brandfetch API
+            String searchUrl = "https://api.brandfetch.io/v2/brands/" + URLEncoder.encode(sanitizedDomain, "UTF-8");
+            URL url = URI.create(searchUrl).toURL();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Authorization", "Bearer " + BRANDFETCH_API_KEY);
+            con.setConnectTimeout(3000);
+            con.setReadTimeout(3000);
 
-            // Create JSON payload targeting the specific business near the coordinates
-            String jsonPayload = String.format(
-                    "{\"textQuery\": \"%s\", \"locationBias\": {\"circle\": {\"center\": {\"latitude\": %f, \"longitude\": %f}, \"radius\": 2000.0}}}",
-                    businessName.replace("\"", "\\\""), lat, lon);
-
-            try (java.io.OutputStream os = con1.getOutputStream()) {
-                byte[] input = jsonPayload.getBytes("utf-8");
-                os.write(input, 0, input.length);
+            if (con.getResponseCode() != 200) {
+                System.err.println("⚠️ Brandfetch API Error: HTTP " + con.getResponseCode());
+                return null;
             }
 
-            if (con1.getResponseCode() != 200) {
-                java.io.InputStream errorStream = con1.getErrorStream();
-                if (errorStream != null) {
-                    BufferedReader errorIn = new BufferedReader(new InputStreamReader(errorStream));
-                    StringBuilder errorResponse = new StringBuilder();
-                    String line;
-                    while ((line = errorIn.readLine()) != null)
-                        errorResponse.append(line);
-                    errorIn.close();
-                    System.err.println(
-                            "⚠️ Google V1 API HTTP " + con1.getResponseCode() + ": " + errorResponse.toString());
-                } else {
-                    System.err.println("⚠️ Google V1 API Error: HTTP " + con1.getResponseCode());
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            JSONObject json = new JSONObject(response.toString());
+
+            if (!json.has("logos") || json.getJSONArray("logos").length() == 0) {
+                System.out.println("ℹ️ No logos found on Brandfetch for " + sanitizedDomain);
+                return null;
+            }
+
+            // Find the first 'logo' type image
+            JSONArray logos = json.getJSONArray("logos");
+            for (int i = 0; i < logos.length(); i++) {
+                JSONObject logo = logos.getJSONObject(i);
+                if ("logo".equals(logo.optString("type"))) {
+                    JSONArray formats = logo.getJSONArray("formats");
+                    if (formats.length() > 0) {
+                        String logoUrl = formats.getJSONObject(0).getString("src");
+                        System.out.println("✅ Found logo for " + sanitizedDomain + ": " + logoUrl);
+                        return logoUrl;
+                    }
                 }
-                return null;
             }
 
-            java.io.InputStream inputStream = con1.getInputStream();
-            if (inputStream == null) {
-                System.err.println("⚠️ Google V1 API returned null input stream");
-                return null;
-            }
-
-            BufferedReader in1 = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder response1 = new StringBuilder();
-            String inputLine1;
-            while ((inputLine1 = in1.readLine()) != null)
-                response1.append(inputLine1);
-            in1.close();
-
-            JSONObject json1 = new JSONObject(response1.toString());
-
-            if (!json1.has("places") || json1.getJSONArray("places").length() == 0) {
-                System.out.println(
-                        "ℹ️ No exact matches found on Google V1 for " + businessName + ". Falling back to stock.");
-                return null;
-            }
-
-            JSONObject firstPlace = json1.getJSONArray("places").getJSONObject(0);
-            if (!firstPlace.has("photos") || firstPlace.getJSONArray("photos").length() == 0) {
-                System.out.println("ℹ️ Found place but no photos for " + businessName + ". Falling back to stock.");
-                return null;
-            }
-
-            String photoName = firstPlace.getJSONArray("photos").getJSONObject(0).getString("name");
-            System.out.println("✅ Found V1 photo reference for " + businessName + ": " + photoName);
-
-            // 3. Construct the actual image URL using the new media REST endpoint
-            return "https://places.googleapis.com/v1/" + photoName + "/media?maxHeightPx=400&maxWidthPx=400&key="
-                    + GOOGLE_PLACES_API_KEY;
+            System.out.println("ℹ️ No 'logo' type found for " + sanitizedDomain);
+            return null;
 
         } catch (Exception e) {
-            System.err.println("Failed to fetch Google photo (V1) for " + businessName + ": " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Failed to fetch Brandfetch logo for " + domain + ": " + e.getMessage());
             return null;
         }
     }
