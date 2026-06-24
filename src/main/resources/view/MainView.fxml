@@ -32,7 +32,22 @@
                     <Button fx:id="themeToggleButton" text="Theme: Dark" onAction="#handleThemeToggle" 
                             styleClass="theme-toggle-button"
                             accessibleText="Toggle dark mode"/>
-
+                    <MenuButton text="Accessibility" styleClass="theme-toggle-button" accessibleText="Accessibility Options">
+                        <items>
+                            <MenuItem text="Toggle High Contrast" onAction="#handleHighContrastToggle"/>
+                            <MenuItem text="Toggle Dyslexia Font" onAction="#handleDyslexiaFontToggle"/>
+                            <MenuItem text="Increase Text Size" onAction="#handleIncreaseTextSize"/>
+                            <MenuItem text="Decrease Text Size" onAction="#handleDecreaseTextSize"/>
+                        </items>
+                    </MenuButton>
+                    <MenuButton text="Demo Tools" styleClass="theme-toggle-button" accessibleText="Demo presentation tools">
+                        <items>
+                            <MenuItem text="Load Demo Data" onAction="#handleLoadDemoData"/>
+                            <MenuItem text="Reset Demo Data" onAction="#handleResetDemo"/>
+                            <MenuItem text="Toggle Live Stats Overlay" onAction="#handleToggleStatsOverlay"/>
+                            <MenuItem text="Run Guided Tour" onAction="#handleGuidedTour"/>
+                        </items>
+                    </MenuButton>
                     <Button text="Logout" onAction="#handleLogout" styleClass="theme-toggle-button"
                             accessibleText="Log out of Trove"/>
                 </HBox>

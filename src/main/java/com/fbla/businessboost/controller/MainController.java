@@ -671,6 +671,7 @@ public class MainController {
         for (com.fbla.businessboost.util.SmartCouponEngine.Coupon c : coupons) {
             HBox box = new HBox(10);
             box.setAlignment(Pos.CENTER_LEFT);
+            box.getStyleClass().add("coupon-box");
             VBox textCol = new VBox(2);
             Label couponDesc = new Label(c.description);
             couponDesc.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
@@ -1516,6 +1517,23 @@ public class MainController {
                 rawData.add(new LeaderboardRaw("morgan.b@example.com", 60, 20, "Retail", 0, "Rising Star"));
             }
             
+            // Check for massive demo data load
+            boolean demoLoaded = java.util.prefs.Preferences.userNodeForPackage(com.fbla.businessboost.util.SupabaseClient.class).getBoolean("demo_data_loaded", false);
+            if (demoLoaded) {
+                rawData.add(new LeaderboardRaw("taylor.smith@example.com", 450, 210, "Food", 8, "Trove Legend"));
+                rawData.add(new LeaderboardRaw("chris.d@example.com", 410, 190, "Retail", 7, "Trove Legend"));
+                rawData.add(new LeaderboardRaw("pat.w@example.com", 380, 160, "Services", 6, "Trove Legend"));
+                rawData.add(new LeaderboardRaw("blake.j@example.com", 340, 140, "Food", 5, "Community Hero"));
+                rawData.add(new LeaderboardRaw("drew.c@example.com", 310, 120, "Entertainment", 4, "Community Hero"));
+                rawData.add(new LeaderboardRaw("riley.h@example.com", 250, 100, "Retail", 3, "Community Hero"));
+                rawData.add(new LeaderboardRaw("cam.r@example.com", 220, 90, "Food", 3, "Community Hero"));
+                rawData.add(new LeaderboardRaw("skyler.m@example.com", 180, 75, "Services", 2, "Local Advocate"));
+                rawData.add(new LeaderboardRaw("quinn.s@example.com", 140, 60, "Retail", 2, "Local Advocate"));
+                rawData.add(new LeaderboardRaw("avery.b@example.com", 90, 40, "Food", 1, "Local Advocate"));
+                rawData.add(new LeaderboardRaw("parker.f@example.com", 45, 15, "Services", 0, "Rising Star"));
+                rawData.add(new LeaderboardRaw("logan.p@example.com", 20, 5, "Retail", 0, "Rising Star"));
+            }
+            
             if ("Monthly".equals(mode)) {
                 rawData.sort((a, b) -> Integer.compare(b.monthlyScore, a.monthlyScore));
             } else if ("Streak".equals(mode)) {
@@ -1686,6 +1704,35 @@ public class MainController {
         alert.setHeaderText("Demo State Purged");
         alert.setContentText("All local preferences and caches have been cleared. Restart the app for a fresh demo state.");
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleLoadDemoData() {
+        try {
+            // Force save some local reviews by reflecting the private saveReviewLocally method or just calling SupabaseClient.saveReview which falls back offline
+            com.fbla.businessboost.util.SupabaseClient.saveReview("The Daily Grind", 5.0, "Absolute best coffee in town. A bit crowded on weekends but worth it.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("The Daily Grind", 4.0, "Great espresso, but the wifi is a bit spotty.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("Tech Haven", 5.0, "Fixed my laptop screen in under an hour. Lifesavers!");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("Tech Haven", 4.5, "Friendly staff and fair prices.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("Green Thumb Nursery", 5.0, "Huge selection of indoor plants. The staff is incredibly knowledgeable.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("Book Nook", 5.0, "A hidden gem! Smells like old paper and coffee. Perfect reading spots.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("Book Nook", 3.5, "Good selection but a bit disorganized.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("FitZone Gym", 4.0, "Clean equipment and 24/7 access. Can get busy at 5 PM.");
+            com.fbla.businessboost.util.SupabaseClient.saveReview("FitZone Gym", 5.0, "The personal trainers here are top notch.");
+            
+            // Set flag
+            java.util.prefs.Preferences.userNodeForPackage(com.fbla.businessboost.util.SupabaseClient.class).putBoolean("demo_data_loaded", true);
+            
+            refreshLeaderboard();
+            
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Demo Data Loaded");
+            alert.setHeaderText("Rich Demo State Activated");
+            alert.setContentText("Pre-loaded community members, scores, and realistic local reviews have been seeded.");
+            alert.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
