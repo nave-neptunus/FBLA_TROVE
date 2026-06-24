@@ -32,22 +32,6 @@
                     <Button fx:id="themeToggleButton" text="Theme: Dark" onAction="#handleThemeToggle" 
                             styleClass="theme-toggle-button"
                             accessibleText="Toggle dark mode"/>
-                    <MenuButton text="Accessibility" styleClass="theme-toggle-button" accessibleText="Accessibility Options">
-                        <items>
-                            <MenuItem text="Toggle High Contrast" onAction="#handleHighContrastToggle"/>
-                            <MenuItem text="Toggle Dyslexia Font" onAction="#handleDyslexiaFontToggle"/>
-                            <MenuItem text="Increase Text Size" onAction="#handleIncreaseTextSize"/>
-                            <MenuItem text="Decrease Text Size" onAction="#handleDecreaseTextSize"/>
-                        </items>
-                    </MenuButton>
-                    <MenuButton text="Demo Tools" styleClass="theme-toggle-button" accessibleText="Demo presentation tools">
-                        <items>
-                            <MenuItem text="Load Demo Data" onAction="#handleLoadDemoData"/>
-                            <MenuItem text="Reset Demo Data" onAction="#handleResetDemo"/>
-                            <MenuItem text="Toggle Live Stats Overlay" onAction="#handleToggleStatsOverlay"/>
-                            <MenuItem text="Run Guided Tour" onAction="#handleGuidedTour"/>
-                        </items>
-                    </MenuButton>
                     <Button text="Logout" onAction="#handleLogout" styleClass="theme-toggle-button"
                             accessibleText="Log out of Trove"/>
                 </HBox>
@@ -148,26 +132,35 @@
                     <right>
                         <ScrollPane fitToWidth="true" styleClass="detail-scroll-pane" prefWidth="320">
                             <VBox styleClass="detail-pane" spacing="10">
-                                <!-- Business image -->
-                                <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="160"
-                                           preserveRatio="false" styleClass="detail-image"/>
-                                <!-- Static map thumbnail -->
-                                <ImageView fx:id="mapImageView" fitWidth="290" fitHeight="110"
-                                           preserveRatio="false" styleClass="detail-map-image"
-                                           managed="false" visible="false"/>
-                                <!-- Business name -->
-                                <Label fx:id="selectedBusinessLabel" text="Select a business" 
-                                       styleClass="detail-title" wrapText="true">
-                                    <font>
-                                        <Font name="System Bold" size="16"/>
-                                    </font>
-                                </Label>
-                                <!-- Description -->
-                                <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
-                                    <font>
-                                        <Font size="12"/>
-                                    </font>
-                                </Label>
+                                <!-- Empty State -->
+                                <VBox fx:id="emptyStatePane" alignment="CENTER" spacing="15" VBox.vgrow="ALWAYS">
+                                    <Label text="Select a business" styleClass="detail-title" wrapText="true">
+                                        <font><Font name="System Bold" size="16"/></font>
+                                    </Label>
+                                    <Label text="Click on a business card to view details, deals, and reviews." wrapText="true" style="-fx-text-fill: -color-text-secondary;"/>
+                                </VBox>
+                                <!-- Business Details -->
+                                <VBox fx:id="businessDetailPane" spacing="10" managed="false" visible="false">
+                                    <!-- Business image -->
+                                    <ImageView fx:id="detailImageView" fitWidth="290" fitHeight="160"
+                                               preserveRatio="false" styleClass="detail-image"/>
+                                    <!-- Static map thumbnail -->
+                                    <ImageView fx:id="mapImageView" fitWidth="290" fitHeight="110"
+                                               preserveRatio="false" styleClass="detail-map-image"
+                                               managed="false" visible="false"/>
+                                    <!-- Business name -->
+                                    <Label fx:id="selectedBusinessLabel" text="Business Name" 
+                                           styleClass="detail-title" wrapText="true">
+                                        <font>
+                                            <Font name="System Bold" size="16"/>
+                                        </font>
+                                    </Label>
+                                    <!-- Description -->
+                                    <Label fx:id="businessDescriptionLabel" wrapText="true" styleClass="detail-description">
+                                        <font>
+                                            <Font size="12"/>
+                                        </font>
+                                    </Label>
                                 <!-- Contact info -->
                                 <VBox spacing="4" styleClass="contact-info-box">
                                     <Label fx:id="businessPhoneLabel" text="Phone: Not available"
@@ -214,9 +207,10 @@
                                         </font>
                                     </Button>
                                 </HBox>
-                                <padding>
-                                    <Insets top="15" right="15" bottom="15" left="15"/>
-                                </padding>
+                                    <padding>
+                                        <Insets top="15" right="15" bottom="15" left="15"/>
+                                    </padding>
+                                </VBox>
                             </VBox>
                         </ScrollPane>
                     </right>

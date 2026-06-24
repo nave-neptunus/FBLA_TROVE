@@ -75,6 +75,8 @@ public class MainController {
     @FXML private Slider distanceSlider;
     @FXML private Label distanceLabel;
     @FXML private ListView<Business> favoritesList;
+    @FXML private VBox emptyStatePane;
+    @FXML private VBox businessDetailPane;
     @FXML private VBox dealsContainer;
     @FXML private Label selectedBusinessLabel;
     @FXML private Label businessDescriptionLabel;
@@ -144,7 +146,7 @@ public class MainController {
      * Radius values in miles corresponding to distanceSlider positions 0-3.
      * Labels: "0.5 miles", "1 mile", "2 miles", "5 miles"
      */
-    private static final int[] RADIUS_VALUES = {500, 1000, 2000, 5000};
+    private static final int[] RADIUS_VALUES = {804, 1609, 3218, 8046};
     private static final String[] RADIUS_LABELS = {"0.5 miles", "1 mile", "2 miles", "5 miles"};
 
     // ==================== Initialization ====================
@@ -592,6 +594,11 @@ public class MainController {
      */
     private void selectBusiness(Business business) {
         this.selectedBusiness = business;
+        emptyStatePane.setVisible(false);
+        emptyStatePane.setManaged(false);
+        businessDetailPane.setVisible(true);
+        businessDetailPane.setManaged(true);
+
         selectedBusinessLabel.setText(business.getName());
 
         String desc = business.getDescription();
@@ -832,18 +839,10 @@ public class MainController {
      * Clears the detail pane to its placeholder state.
      */
     private void clearDetailPane() {
-        selectedBusinessLabel.setText("Select a business");
-        businessDescriptionLabel.setText("Click on a business card to view details, deals, and reviews.");
-        detailImageView.setImage(null);
-        mapImageView.setImage(null);
-        mapImageView.setVisible(false);
-        mapImageView.setManaged(false);
-        dealsContainer.getChildren().clear();
-        reviewsContainer.getChildren().clear();
-        aspectScoresContainer.getChildren().clear();
-        aspectScoresContainer.setVisible(false);
-        aspectScoresContainer.setManaged(false);
-        reviewCountLabel.setText("");
+        emptyStatePane.setVisible(true);
+        emptyStatePane.setManaged(true);
+        businessDetailPane.setVisible(false);
+        businessDetailPane.setManaged(false);
     }
 
     // ==================== Filters & Sort ====================
@@ -882,7 +881,18 @@ public class MainController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    setText(business.getName() + " " + buildStarString(business.getRating()) + " " + String.format("%.1f", business.getRating()));
+                    setText(null);
+                    javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(2);
+                    javafx.scene.control.Label nameLabel = new javafx.scene.control.Label(business.getName());
+                    nameLabel.setStyle("-fx-font-weight: bold;");
+                    nameLabel.setMaxWidth(Double.MAX_VALUE);
+                    nameLabel.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
+                    
+                    javafx.scene.control.Label ratingLabel = new javafx.scene.control.Label(buildStarString(business.getRating()) + " " + String.format("%.1f", business.getRating()));
+                    ratingLabel.setStyle("-fx-text-fill: -color-text-secondary; -fx-font-size: 11px;");
+                    
+                    box.getChildren().addAll(nameLabel, ratingLabel);
+                    setGraphic(box);
                 }
             }
         });
