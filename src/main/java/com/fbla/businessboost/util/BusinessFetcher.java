@@ -59,7 +59,9 @@ public class BusinessFetcher {
             "rite aid", "7-eleven", "seven eleven", "denny", "ihop", "applebee", "olive garden",
             "outback", "red lobster", "in-n-out", "jack in the box", "sonic drive-in", "arby",
             "dairy queen", "jimmy john", "jersey mike", "five guys", "carl's jr", "hardee",
-            "peet's coffee", "krispy kreme", "baskin robbins", "jamba"
+            "peet's coffee", "krispy kreme", "baskin robbins", "jamba", "bibibop", "cava", 
+            "sweetgreen", "shake shack", "popeyes", "qdoba", "mod pizza", "blaze pizza",
+            "noodles & company", "smashburger", "firehouse subs", "potbelly"
     };
 
     private static boolean isBigBrand(String name) {
@@ -181,9 +183,10 @@ public class BusinessFetcher {
                 JSONObject tags = node.getJSONObject("tags");
                 if (tags.has("name")) {
                     String name = tags.getString("name");
+                    String brandTag = tags.optString("brand", "");
 
                     // Skip big corporate brands to exclusively highlight local small businesses
-                    if (isBigBrand(name)) {
+                    if (isBigBrand(name) || isBigBrand(brandTag)) {
                         System.out.println("🛡️ Filtered out big brand: " + name);
                         continue;
                     }
