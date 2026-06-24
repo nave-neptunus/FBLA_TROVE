@@ -792,20 +792,20 @@
 
 /* ==================== Jobs Impact Banner ==================== */
 .jobs-impact-banner {
-    -fx-background-color: linear-gradient(to right, #10B981, #059669);
+    -fx-background-color: linear-gradient(to right, -color-accent, -color-accent-hover);
     -fx-background-radius: 12;
     -fx-padding: 16 24;
     -fx-spacing: 16;
     -fx-alignment: center-left;
 }
 .jobs-impact-number {
-    -fx-text-fill: #09090B;
+    -fx-text-fill: #FFFFFF;
     -fx-font-size: 38px;
     -fx-font-weight: 700;
     -fx-letter-spacing: -1px;
 }
 .jobs-impact-label {
-    -fx-text-fill: rgba(9, 9, 11, 0.95);
+    -fx-text-fill: rgba(255, 255, 255, 0.95);
     -fx-font-size: 14px;
     -fx-font-weight: 600;
     -fx-wrap-text: true;
@@ -814,7 +814,7 @@
     -fx-font-size: 32px;
 }
 .jobs-impact-caption {
-    -fx-text-fill: rgba(9, 9, 11, 0.65);
+    -fx-text-fill: rgba(255, 255, 255, 0.75);
     -fx-font-size: 11px;
 }
 
