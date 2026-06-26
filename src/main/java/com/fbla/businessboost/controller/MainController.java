@@ -726,20 +726,24 @@ public class MainController {
             Platform.runLater(() -> {
                 if (selectedBusiness == business) {
                     reviewsContainer.getChildren().clear();
-                    if (reviews == null || reviews.isEmpty()) {
+                    List<Review> displayReviews = (reviews == null || reviews.isEmpty())
+                            ? ReviewGenerator.generateReviews(business.getName(), business.getCategory(), business.getRating())
+                            : reviews;
+                    if (displayReviews.isEmpty()) {
                         Label noReview = new Label("No reviews yet — be the first!");
                         noReview.getStyleClass().add("detail-caption");
                         reviewsContainer.getChildren().add(noReview);
                         reviewCountLabel.setText("");
+
                     } else {
-                        reviewCountLabel.setText("(" + reviews.size() + ")");
-                        for (Review r : reviews) {
+                        reviewCountLabel.setText("(" + displayReviews.size() + ")");
+                        for (Review r : displayReviews) {
                             reviewsContainer.getChildren().add(buildReviewCard(r));
                         }
                         
                         // Aspect Sentiment Parsing
                         com.fbla.businessboost.util.AspectSentimentParser.AspectScores scores = 
-                                com.fbla.businessboost.util.AspectSentimentParser.calculateAspectScores(reviews);
+                                com.fbla.businessboost.util.AspectSentimentParser.calculateAspectScores(displayReviews);
                                 
                         aspectScoresContainer.getChildren().clear();
                         aspectScoresContainer.getChildren().add(new Label("Community Vibe Matrix:"));

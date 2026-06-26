@@ -1399,6 +1399,28 @@
     -fx-background-color: -color-bg-muted;
 }
 
+/* Primary Google Sign-In button (full-width, prominent) — dark theme */
+.oauth-google-primary {
+    -fx-background-color: #303134;
+    -fx-text-fill: #e8eaed;
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-border-color: #5f6368;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 10;
+}
+.oauth-google-primary:hover {
+    -fx-background-color: #3c4043;
+    -fx-border-color: #8ab4f8;
+    -fx-effect: dropshadow(gaussian, rgba(138,180,248,0.3), 8, 0, 0, 2);
+}
+.oauth-google-primary:armed {
+    -fx-background-color: #494c50;
+}
+
 /* ==================== Skip Captcha / Special Buttons ==================== */
 .skip-captcha-btn {
     -fx-background-color: transparent;

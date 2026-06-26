@@ -102,12 +102,6 @@
                 <Font name="System Bold" size="13"/>
             </font>
         </Button>
-        <Button text="Skip" onAction="#handleSkipCaptcha" 
-                styleClass="skip-captcha-btn" prefWidth="90">
-            <font>
-                <Font name="System Bold" size="13"/>
-            </font>
-        </Button>
         <Button text="Cancel" onAction="#handleCancel" 
                 styleClass="secondary-button" prefWidth="130">
             <font>

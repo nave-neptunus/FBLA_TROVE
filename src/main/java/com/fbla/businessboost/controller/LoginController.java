@@ -164,7 +164,7 @@ public class LoginController {
             termsContainer.setManaged(true);
             
             actionButton.setText("Create account");
-            dividerLabel.setText("Or register with");
+            dividerLabel.setText("or continue with email");
         } else {
             titleLabel.setText("Log in to your account");
             subtitleText.setText("Don't have an account?");
@@ -176,7 +176,7 @@ public class LoginController {
             termsContainer.setManaged(false);
             
             actionButton.setText("Log In");
-            dividerLabel.setText("Or log in with");
+            dividerLabel.setText("or continue with email");
         }
     }
 
@@ -419,22 +419,11 @@ public class LoginController {
     }
 
     private void handleBiometricLogin(String provider, String email) {
-        String username = email;
-        String password = generateDeterministicPassword(username);
-        
         statusLabel.setText("Biometric login successful. Loading...");
-
-        new Thread(() -> {
-            // Identity is already verified by TouchID/FaceID.
-            // Try to register them in case they are a new user. Ignore failure if they already exist.
-            SupabaseClient.registerUser(username, password);
-            
-            Platform.runLater(() -> {
-                SessionManager.setCurrentUser(username);
-                stopCarouselTimeline();
-                loadMainApp();
-            });
-        }).start();
+        // Identity is already verified by TouchID/FaceID — no Supabase needed.
+        SessionManager.setCurrentUser(email);
+        stopCarouselTimeline();
+        loadMainApp();
     }
 
     private void handleOAuthSuccess(String provider, String email, String name) {
@@ -450,22 +439,11 @@ public class LoginController {
             }
         }
 
-        statusLabel.setText("OAuth successful. Loading...");
-
-        new Thread(() -> {
-            String username = email;
-            String password = generateDeterministicPassword(username);
-            
-            // Identity is already verified via OAuth provider.
-            // Try to register them in case they are a new user. Ignore failure if they already exist.
-            SupabaseClient.registerUser(username, password);
-            
-            Platform.runLater(() -> {
-                SessionManager.setCurrentUser(username);
-                stopCarouselTimeline();
-                loadMainApp();
-            });
-        }).start();
+        // Identity is already verified via OAuth provider — no Supabase needed.
+        statusLabel.setText("Sign-in successful. Loading...");
+        SessionManager.setCurrentUser(email);
+        stopCarouselTimeline();
+        loadMainApp();
     }
 
     private void openOAuthWebView(String url, String title, int width, int height, String provider) {

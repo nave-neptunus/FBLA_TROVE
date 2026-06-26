@@ -51,7 +51,7 @@
     </StackPane>
 
     <!-- Right Pane (Forms Panel) -->
-    <VBox alignment="CENTER_LEFT" spacing="24.0" HBox.hgrow="ALWAYS" styleClass="login-right-pane">
+    <VBox alignment="CENTER_LEFT" spacing="20.0" HBox.hgrow="ALWAYS" styleClass="login-right-pane">
         <padding>
             <Insets bottom="40.0" left="45.0" right="45.0" top="40.0"/>
         </padding>
@@ -64,6 +64,19 @@
                 <Button fx:id="subtitleLink" text="Log in" onAction="#handleToggleMode" styleClass="login-subtitle-link"/>
             </HBox>
         </VBox>
+
+        <!-- Primary: Google Sign-In Button (full width, prominent) -->
+        <Button fx:id="googleBtn" text="Sign in with Google" onAction="#handleGoogleLogin" 
+                styleClass="oauth-btn, oauth-google-primary" 
+                prefWidth="999.0" prefHeight="46.0"
+                accessibleText="Sign in with your Google account"/>
+
+        <!-- Divider -->
+        <HBox alignment="CENTER" spacing="12.0">
+            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
+            <Label fx:id="dividerLabel" text="or continue with email" styleClass="login-or-label"/>
+            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
+        </HBox>
 
         <!-- Input Fields -->
         <VBox spacing="14.0">
@@ -97,17 +110,9 @@
         <!-- Action Button -->
         <Button fx:id="actionButton" text="Create account" onAction="#handleMainAction" prefWidth="999.0" prefHeight="44.0" styleClass="login-btn-primary"/>
 
-        <!-- Separator -->
-        <HBox alignment="CENTER" spacing="12.0">
-            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
-            <Label fx:id="dividerLabel" text="Or register with" styleClass="login-or-label"/>
-            <Separator HBox.hgrow="ALWAYS" styleClass="login-separator"/>
-        </HBox>
-
-        <!-- Social login buttons (Google / Apple) -->
+        <!-- Secondary: Apple Sign-In -->
         <HBox spacing="14.0" alignment="CENTER">
-            <Button fx:id="googleBtn" text="Google" onAction="#handleGoogleLogin" styleClass="oauth-btn, oauth-google" HBox.hgrow="ALWAYS" prefWidth="180.0" prefHeight="38.0"/>
-            <Button fx:id="appleBtn" text="Apple" onAction="#handleAppleLogin" styleClass="oauth-btn, oauth-apple" HBox.hgrow="ALWAYS" prefWidth="180.0" prefHeight="38.0"/>
+            <Button fx:id="appleBtn" text="Sign in with Apple" onAction="#handleAppleLogin" styleClass="oauth-btn, oauth-apple" HBox.hgrow="ALWAYS" prefWidth="999.0" prefHeight="38.0"/>
         </HBox>
 
         <!-- Error/Status Info -->
