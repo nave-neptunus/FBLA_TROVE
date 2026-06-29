@@ -1585,3 +1585,34 @@
     -fx-letter-spacing: 1px;
     -fx-line-spacing: 4px;
 }
+
+/* ==================== Graph Visualizer ==================== */
+.graph-pane {
+    -fx-background-color: -color-bg-canvas;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+.graph-node {
+    -fx-fill: -color-primary;
+    -fx-opacity: 0.8;
+    -fx-stroke: -color-primary-variant;
+    -fx-stroke-width: 2;
+}
+.graph-node-center {
+    -fx-fill: #10B981;
+    -fx-opacity: 0.9;
+    -fx-stroke: #059669;
+    -fx-stroke-width: 3;
+}
+.graph-node-text {
+    -fx-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+.graph-edge {
+    -fx-stroke: -color-border-strong;
+    -fx-stroke-width: 1.5;
+    -fx-opacity: 0.5;
+}

@@ -344,15 +344,12 @@
                         </padding>
                     </FlowPane>
                     
-                    <!-- Search Results -->
-                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="card-scroll-pane">
-                        <FlowPane fx:id="smartSearchResults" hgap="20" vgap="20"
-                                  alignment="CENTER" styleClass="card-grid">
-                            <padding>
-                                <Insets top="15" right="15" bottom="15" left="15"/>
-                            </padding>
-                        </FlowPane>
-                    </ScrollPane>
+                    <!-- Search Results Graph -->
+                    <Pane fx:id="graphPane" VBox.vgrow="ALWAYS" styleClass="graph-pane">
+                        <padding>
+                            <Insets top="15" right="15" bottom="15" left="15"/>
+                        </padding>
+                    </Pane>
                 </VBox>
             </Tab>
             

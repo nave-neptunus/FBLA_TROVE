@@ -105,7 +105,7 @@ public class MainController {
 
     // --- Smart Search Tab ---
     @FXML private TextField smartSearchField;
-    @FXML private FlowPane smartSearchResults;
+    @FXML private javafx.scene.layout.Pane graphPane;
     @FXML private FlowPane tagCloudPane;
 
     // --- Leaderboard Tab ---
@@ -209,6 +209,12 @@ public class MainController {
         clearDetailPane();
         buildTagCloud();
         setupLeaderboard();
+
+        graphVisualizer = new GraphVisualizer(graphPane);
+        graphVisualizer.setOnBusinessClicked(b -> {
+            mainTabPane.getSelectionModel().select(0);
+            selectBusiness(b);
+        });
 
         // Refresh charts/leaderboard when tabs are selected
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
@@ -1119,50 +1125,27 @@ public class MainController {
     @FXML
     private void handleSmartSearch() {
         String query = smartSearchField.getText().trim();
-        smartSearchResults.getChildren().clear();
+        graphPane.getChildren().clear();
 
         if (query.isEmpty() || aiConcierge == null) {
+            if (graphVisualizer != null) graphVisualizer.stop();
             return;
         }
 
         List<com.fbla.businessboost.util.LocalAIConcierge.SearchResult> aiResults = aiConcierge.search(query);
 
         if (aiResults.isEmpty()) {
+            if (graphVisualizer != null) graphVisualizer.stop();
             Label noMatch = new Label("No matching businesses found.");
             noMatch.getStyleClass().add("card-subtitle");
-            smartSearchResults.getChildren().add(noMatch);
+            graphPane.getChildren().add(noMatch);
             return;
         }
 
-        // Display up to 5 best matches
-        for (int i = 0; i < Math.min(5, aiResults.size()); i++) {
-            com.fbla.businessboost.util.LocalAIConcierge.SearchResult res = aiResults.get(i);
-            Business b = res.business;
-            
-            VBox card = new VBox(5);
-            card.getStyleClass().add("business-card");
-            card.setPadding(new Insets(10));
-            card.setCursor(Cursor.HAND);
-
-            Label name = new Label(b.getName());
-            name.getStyleClass().add("card-title");
-
-            Label cat = new Label(b.getCategory() + " • " + b.getRating() + " ⭐");
-            cat.getStyleClass().add("card-subtitle");
-
-            Label reason = new Label("🤖 " + res.explanation);
-            reason.getStyleClass().add("help-text");
-            reason.setStyle("-fx-text-fill: #10B981; -fx-font-style: italic;");
-
-            card.getChildren().addAll(name, cat, reason);
-
-            card.setOnMouseClicked(e -> {
-                mainTabPane.getSelectionModel().select(0);
-                selectBusiness(b);
-            });
-
-            smartSearchResults.getChildren().add(card);
-        }
+        // Limit to 10 best matches for a manageable graph
+        List<com.fbla.businessboost.util.LocalAIConcierge.SearchResult> topResults = aiResults.subList(0, Math.min(10, aiResults.size()));
+        
+        graphVisualizer.renderGraph(query, topResults);
     }
 
     private void buildTagCloud() {

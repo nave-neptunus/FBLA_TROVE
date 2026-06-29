@@ -15,38 +15,38 @@ import java.net.URLEncoder;
 
 public class BusinessFetcher {
 
-    // Curated stock images by category (Unsplash permanent URLs)
+    // Curated stock images by category (Picsum deterministic URLs to avoid 403 blocks)
     private static final String[] FOOD_IMAGES = {
-            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400&h=300&fit=crop"
+            "https://picsum.photos/seed/food1/400/300",
+            "https://picsum.photos/seed/food2/400/300",
+            "https://picsum.photos/seed/food3/400/300",
+            "https://picsum.photos/seed/food4/400/300",
+            "https://picsum.photos/seed/food5/400/300",
+            "https://picsum.photos/seed/food6/400/300",
+            "https://picsum.photos/seed/food7/400/300",
+            "https://picsum.photos/seed/food8/400/300"
     };
 
     private static final String[] RETAIL_IMAGES = {
-            "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1528698827591-e19cef791f48?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1555529771-7888783a18d3?w=400&h=300&fit=crop"
+            "https://picsum.photos/seed/retail1/400/300",
+            "https://picsum.photos/seed/retail2/400/300",
+            "https://picsum.photos/seed/retail3/400/300",
+            "https://picsum.photos/seed/retail4/400/300",
+            "https://picsum.photos/seed/retail5/400/300",
+            "https://picsum.photos/seed/retail6/400/300",
+            "https://picsum.photos/seed/retail7/400/300",
+            "https://picsum.photos/seed/retail8/400/300"
     };
 
     private static final String[] SERVICE_IMAGES = {
-            "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1521590832167-7228fcb04b0e?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop",
-            "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop"
+            "https://picsum.photos/seed/serv1/400/300",
+            "https://picsum.photos/seed/serv2/400/300",
+            "https://picsum.photos/seed/serv3/400/300",
+            "https://picsum.photos/seed/serv4/400/300",
+            "https://picsum.photos/seed/serv5/400/300",
+            "https://picsum.photos/seed/serv6/400/300",
+            "https://picsum.photos/seed/serv7/400/300",
+            "https://picsum.photos/seed/serv8/400/300"
     };
 
     private static int foodIdx = 0, retailIdx = 0, serviceIdx = 0;
