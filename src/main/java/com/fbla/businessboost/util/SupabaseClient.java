@@ -26,8 +26,8 @@ import java.util.prefs.Preferences;
  */
 public class SupabaseClient {
 
-    private static final String SUPABASE_URL = "https://your-project.supabase.co";
-    private static final String SUPABASE_KEY = "REDACTED_SUPABASE_KEY";
+    private static final String SUPABASE_URL = AppConfig.get("TROVE_SUPABASE_URL", "https://supabase.invalid");
+    private static final String SUPABASE_KEY = AppConfig.get("TROVE_SUPABASE_KEY", "");
 
     // Local preferences database fallback nodes
     private static final Preferences localPrefs = Preferences.userNodeForPackage(SupabaseClient.class);

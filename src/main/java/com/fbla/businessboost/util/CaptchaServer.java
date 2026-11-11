@@ -30,7 +30,7 @@ public class CaptchaServer {
     private int port;
 
     /** Google reCAPTCHA v2 site key */
-    private static final String RECAPTCHA_SITE_KEY = "REDACTED_RECAPTCHA_SITE_KEY";
+    private static final String RECAPTCHA_SITE_KEY = AppConfig.get("TROVE_RECAPTCHA_SITE_KEY", "");
 
     /**
      * Google OAuth 2.0 Client ID — create at:
@@ -38,7 +38,7 @@ public class CaptchaServer {
      * Type: Web application
      * Authorized redirect URI: http://localhost:8765/oauth/callback
      */
-    private static final String GOOGLE_CLIENT_ID = "REDACTED_GOOGLE_CLIENT_ID";
+    private static final String GOOGLE_CLIENT_ID = AppConfig.get("TROVE_GOOGLE_CLIENT_ID", "");
 
     /** Fixed port for OAuth redirect URI consistency */
     private static final int FIXED_PORT = 8765;

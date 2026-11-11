@@ -1,156 +1,81 @@
-# 🚀 Trove
+# Trove
 
-A professional JavaFX desktop application for discovering local businesses, submitting reviews, managing favorites, and generating impact reports.
+**A desktop app that helps people find, review, and support small businesses near them.**
 
-## 🎯 Project Overview
+Trove takes a ZIP code, pulls real nearby businesses from OpenStreetMap, filters out big chains, and recommends places based on what you already like. It is written in Java 21 and JavaFX, and it keeps working when the network goes down.
 
-Built for the FBLA "Byte-Sized Business Boost" competition, Trove demonstrates:
-- **MVC Architecture** with clear separation of concerns
-- **Modern Tabbed Interface** (Discover, My Impact, Smart Search)
-- **Intelligent Recommendation Engine** ("The Local Matchmaker")
-- **Data Analysis** with live charts and HTML report export
-- **Visual Bot Verification** (icon-grid challenge)
-- **Semantic Validation** for review sentiment
-- **Accessibility** with Dark Mode / High Contrast theme toggle
+Built by a two-person team ([@arv20](https://github.com/arv20) and [@nave-neptunus](https://github.com/nave-neptunus)) for the FBLA *Byte-Sized Business Boost* Coding & Programming event, 2026.
 
-## ✨ Features
+| | |
+|---|---|
+| **Language and UI** | Java 21, JavaFX 21, FXML, CSS |
+| **Backend** | Supabase (Postgres over REST) with a local fallback |
+| **External data** | OpenStreetMap Overpass API, Zippopotam geocoding, Brandfetch logos |
+| **Security** | bcrypt password hashing, Google OAuth, macOS Touch ID, reCAPTCHA v2 |
+| **Size** | 24 Java classes, about 6,800 lines, 5 FXML views, MVC structure |
 
-### 🏪 Discover Tab
-- **Business Discovery**: Browse local businesses across Food, Retail, and Services
-- **DoorDash-Style Cards**: Image, name, category badge, price, rating stars, and address
-- **Quick Favorite**: Heart icon overlay on each card for instant favoriting
-- **Live Search**: Search by zip code with real-time API results (Overpass API)
-- **Category Filter & Rating Sort**: Narrow results by category or highest rating
-- **Recommendations**: "You might also like..." section powered by tag matching
+## What's worth looking at
 
-### 📊 My Impact Tab
-- **Live Dashboard**: Stats cards showing total favorites, average rating, and top category
-- **Bar Chart**: Visualizes how many favorites you have in each category
-- **Pie Chart**: Shows the rating distribution of your favorites
-- **HTML Report Export**: Generates a styled HTML report that opens in your browser
+If you have two minutes, these are the most interesting parts of the code.
 
-### 🔍 Smart Search Tab
-- **Fuzzy Search**: Find businesses by name, category, description, or tags
-- **Tag Cloud**: Clickable tags like `#budget`, `#date-night`, `#outdoor` for instant filtering
-- **Visual Results**: Search results displayed as the same beautiful business cards
+| Problem | Approach | Code |
+|---|---|---|
+| Answer natural-language questions with no paid AI API | TF-IDF vectors and cosine similarity, written from scratch and run on the device | [`LocalAIConcierge`](src/main/java/com/fbla/businessboost/util/LocalAIConcierge.java) |
+| Show how search results relate to each other | Force-directed graph with custom repulsion and damping physics, animated with an `AnimationTimer` | [`GraphVisualizer`](src/main/java/com/fbla/businessboost/util/GraphVisualizer.java) |
+| Keep the app usable when the network fails | 1-second network timeouts, then automatic fallback to local storage and a JSON cache | [`SupabaseClient`](src/main/java/com/fbla/businessboost/util/SupabaseClient.java), [`OfflineCache`](src/main/java/com/fbla/businessboost/util/OfflineCache.java) |
+| Turn raw map data into useful listings | Geocode the ZIP, query Overpass, then infer tags, price level, and descriptions from OSM metadata | [`BusinessFetcher`](src/main/java/com/fbla/businessboost/util/BusinessFetcher.java) |
+| Limit fake reviews | Rate limiting, a proof-of-work challenge, and trust scores that weight each rating | [`ReviewTrustEngine`](src/main/java/com/fbla/businessboost/util/ReviewTrustEngine.java) |
+| Recommend without other users' data | Content-based scoring against the tags of a user's favorites | [`RecommendationEngine`](src/main/java/com/fbla/businessboost/util/RecommendationEngine.java) |
+| Run web-only sign-in flows in a desktop app | Embedded local HTTP server that hosts reCAPTCHA and receives the OAuth redirect | [`CaptchaServer`](src/main/java/com/fbla/businessboost/util/CaptchaServer.java) |
 
-### Review System
-- **Visual Bot Verification**: 3×3 emoji icon grid — identify food icons to prove you're human
-- **Sentiment Validation**: Real-time warning if your rating contradicts your review text
-- **Star Rating**: Slider with instant visual feedback (★★★★☆)
-- **Weighted Average**: New ratings are blended using `(old × 5 + new) / 6` for stability
+## How it fits together
 
-### 🌙 Accessibility
-- **Dark Mode Toggle**: One-click switch between light and dark themes
-- **High Contrast**: Dark theme uses deep navy (#1a1a2e) with bright accents
-- **CSS Swapping**: Instant theme change via `Scene.getStylesheets()`
-
----
-
-## 🧠 Logic & Algorithms
-
-### Collaborative Filtering Lite (Recommendation Engine)
-The "Local Matchmaker" uses a simplified version of collaborative filtering. Instead of tracking multiple users' preferences, it builds a tag frequency profile from the current user's favorites, then scores every non-favorited business by counting tag overlaps. The top 3 scoring businesses are returned as recommendations.
-
-```
-Algorithm:
-1. Collect all tags from favorited businesses
-2. Build frequency map: { #budget: 3, #cozy: 2, ... }
-3. Score each non-favorited business by sum of matching tag frequencies
-4. Return top 3 by score
+```mermaid
+flowchart LR
+    UI["JavaFX views<br/>FXML and CSS"] --> C["Controllers"]
+    C --> S["Services<br/>search, recommendations,<br/>trust, sentiment, reports"]
+    S --> F["BusinessFetcher"]
+    S --> DB["SupabaseClient"]
+    F --> API["Zippopotam, Overpass,<br/>Brandfetch"]
+    F -. "network failure" .-> Cache["OfflineCache<br/>local JSON"]
+    DB --> Cloud["Supabase"]
+    DB -. "network failure" .-> Local["Java Preferences"]
 ```
 
-### Asynchronous File I/O
-Report generation uses `BufferedWriter` for efficient file writing. After generating the HTML report, the app uses `Desktop.browse()` to open the report in the user's default browser, all from a background-safe context.
+Network calls fail in a predictable way: each service catches connection errors and switches to local data, so a lost connection never freezes the interface.
 
-### Observable Pattern
-JavaFX properties (`SimpleStringProperty`, `SimpleBooleanProperty`, etc.) and `ObservableList` enable automatic UI updates throughout the app:
-- Toggling a favorite instantly updates the sidebar, recommendation section, and impact charts
-- Rating slider changes instantly update the star display label
-- Review text changes trigger real-time sentiment validation
+## Features
 
-### Semantic Validation (Sentiment Analysis)
-The review dialog performs lightweight sentiment detection by checking review text against positive ("great", "amazing", "love") and negative ("terrible", "awful", "hate") word lists. If a low rating (≤2) contains positive words, or a high rating (≥4) contains negative words, a non-blocking warning banner appears.
+- **Discover:** search by ZIP code, filter by category, sort by rating, and save favorites.
+- **My Impact:** live charts of your activity, with PDF and HTML report export.
+- **Smart Search:** concierge Q&A, tag filters, and an interactive relationship graph.
+- **Leaderboard:** ranks community members by impact score, streak, and category.
+- **Reviews:** keyword-based sentiment scoring across service, price, vibe, and quality, plus a warning when a star rating contradicts the written review.
+- **Coupons:** single-use redemption codes with expiration countdowns.
+- **Accessibility:** one-click dark and high-contrast theme.
 
-### Weighted Rating Formula
-```
-updatedRating = (currentRating × 5 + newRating × 1) / 6.0
-```
-This prevents a single review from causing dramatic rating swings while still reflecting new feedback.
+## Known limitations
 
----
+- Login compares bcrypt hashes in the client. A production version should move authentication to a server or to Supabase Auth, with row-level security on every table.
+- The walking route planner creates a sample itinerary and does not compute an optimal route.
+- Some leaderboard and review content is seeded sample data for demonstrations.
+- There is no automated test suite yet.
 
-## �️ Technical Stack
+## Run it
 
-- **Language**: Java 21
-- **Framework**: JavaFX 21.0.1 (Controls, FXML, Charts)
-- **Build Tool**: Maven 3.x
-- **Architecture**: Model-View-Controller (MVC)
-- **Data**: Supabase (auth, reviews, favorites) + Overpass API (business discovery)
-- **Reports**: HTML generation with `StringBuilder`
-
-## 📁 Project Structure
-
-```
-trove/
-├── pom.xml
-├── src/
-│   └── main/
-│       ├── java/com/fbla/businessboost/
-│       │   ├── Main.java
-│       │   ├── model/
-│       │   │   ├── Business.java            # Business entity with tags + properties
-│       │   │   └── Review.java              # Review POJO
-│       │   ├── controller/
-│       │   │   ├── LoginController.java     # Auth + math bot verification
-│       │   │   ├── MainController.java      # Tabbed dashboard controller
-│       │   │   └── ReviewDialogController.java  # Icon-grid verification + sentiment
-│       │   └── util/
-│       │       ├── BusinessFetcher.java     # Overpass API + auto-tagging
-│       │       ├── DataManager.java         # Mock data with tags
-│       │       ├── RecommendationEngine.java # Tag-based recommendation engine
-│       │       ├── ReportGenerator.java     # HTML report generation
-│       │       ├── SessionManager.java      # Current user session
-│       │       └── SupabaseClient.java      # Supabase REST client
-│       └── resources/
-│           ├── styles.css                   # Light theme
-│           ├── styles-dark.css              # Dark theme
-│           └── view/
-│               ├── LoginView.fxml           # Login/register screen
-│               ├── MainView.fxml            # 3-tab dashboard
-│               └── ReviewDialog.fxml        # Review dialog with icon grid
-└── README.md
-```
-
-## 🚀 Running the Application
+Requires Java 21 or newer on macOS or Linux.
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/fbla-buisness-boost2.git
-cd fbla-buisness-boost2
-
-# Compile
-mvn clean compile
-
-# Run
-mvn javafx:run
+git clone https://github.com/nave-neptunus/FBLA_TROVE.git
+cd FBLA_TROVE
+bash setup-and-run.sh
 ```
 
-## 📊 FBLA Rubric Alignment
+No API keys are stored in this repository. Without them, the app uses local storage and the online features that need those services are unavailable, including new account sign-up, which requires reCAPTCHA. To connect your own services, copy `.env.example` to `.env`, fill it in, and load it before launching:
 
-| Category | Points | Evidence |
-|---|---|---|
-| **User Experience** | 15 | Modern tabbed interface, DoorDash-style cards, dark mode, micro-animations |
-| **Functionality** | 15 | 3-tab navigation, zip search, favorites, reviews, recommendations |
-| **Logic & Algorithms** | 15 | Collaborative filtering, sentiment analysis, weighted rating, fuzzy search |
-| **Data Analysis** | 15 | Live BarChart + PieChart, HTML report with stat cards and category bars |
-| **Code Quality** | 15 | Comprehensive Javadoc, MVC architecture, clean separation of concerns |
-| **Accessibility** | 10 | Dark mode toggle, icon-grid verification, keyboard navigation, high contrast |
+```bash
+set -a; source .env; set +a
+bash setup-and-run.sh
+```
 
-## 👥 Author
-
-FBLA Development Team — 2026
-
-## 📄 License
-
-Created for educational purposes as part of the FBLA competition.
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common setup problems.

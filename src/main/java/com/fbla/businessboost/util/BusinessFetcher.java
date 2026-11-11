@@ -77,7 +77,7 @@ public class BusinessFetcher {
     }
 
     // Load API Key securely from environment variable
-    private static final String BRANDFETCH_API_KEY = "REDACTED_BRANDFETCH_KEY";
+    private static final String BRANDFETCH_API_KEY = AppConfig.get("TROVE_BRANDFETCH_API_KEY", "");
 
     /**
      * Fetches businesses near the given ZIP code with a default 2km radius.

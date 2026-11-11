@@ -59,6 +59,8 @@ import java.util.stream.Collectors;
  */
 public class MainController {
 
+    private GraphVisualizer graphVisualizer;
+
     // ==================== FXML Injected Components ====================
 
     // --- Header ---
